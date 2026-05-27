@@ -24,10 +24,12 @@ organized_gpu_ac3d_reproduction_20260527/
     src/pore_scale_electrical/      # 核心求解器与极化模型
     scripts/                        # GPU运行、绘图和谱生成脚本
     tests/                          # 单元测试
+    vendor/pnextract/               # pnextract 原始参考代码副本
     pytest.ini
   docs/
     plans/                          # 两份主计划文档
     notes/                          # 关键复现说明和结果讨论
+    references/                     # 论文、补充材料、NISTIR 和孔隙网络提取参考资料
   environment/                      # Python/CuPy/GPU环境快照
   figures/                          # 最新整理图件
   paper_data/                       # Figure 5-8 的论文表格数据
@@ -50,6 +52,10 @@ organized_gpu_ac3d_reproduction_20260527/
   - `code/scripts/run_ac3d_matrix_free_gpu_single.py`
   - `code/scripts/run_ac3d_matrix_free_gpu_sweep.py`
   - `code/scripts/make_polarization_component_spectra.py`
+- 参考资料与外部代码：
+  - `docs/references/NISTIR 6269.pdf`
+  - `docs/references/Pore-network extraction from micro-computerized-tomography images.pdf`
+  - `code/vendor/pnextract/`
 - 最新 Figure 8 机制拆分图：
   - `figures/figure8_paper_consistent_components_plus_all_vs_experiment_nature.svg`
   - `figures/figure8_paper_consistent_components_plus_all_vs_experiment_nature.png`

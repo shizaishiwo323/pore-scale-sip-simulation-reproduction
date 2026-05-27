@@ -7,8 +7,10 @@
 - `docs/references/JGR Solid Earth - 2020 - Niu - A Framework for Pore-Scale Simulation of Effective Electrical Conductivity and Permittivity.pdf`
 - `docs/references/jgrb54470-sup-0001-2020jb020515-si.docx`
 - `docs/references/Pore-network extraction from micro-computerized-tomography images.pdf`
+- `docs/references/NISTIR 6269.pdf`
+- `code/vendor/pnextract/`
 
-其中，Niu et al. (2020) 主论文和补充材料是当前复现的核心依据；`Pore-network extraction from micro-computerized-tomography images.pdf` 是孔隙网络/微 CT 图像处理流程的重要辅助参考，应在涉及孔隙结构提取、分割假设、网络表征或几何连通性解释时一并查阅。
+其中，Niu et al. (2020) 主论文和补充材料是当前复现的核心依据；`NISTIR 6269.pdf` 是 AC3D 数值框架和参考程序的基础资料；`Pore-network extraction from micro-computerized-tomography images.pdf` 与 `code/vendor/pnextract/` 是孔隙网络/微 CT 图像处理流程的重要辅助参考，应在涉及孔隙结构提取、分割假设、网络表征或几何连通性解释时一并查阅。
 
 当前本地仓库根目录：
 
@@ -28,10 +30,12 @@
 
 | 路径 | 类型 | 大小 | 已知信息 | 使用注意 |
 | --- | --- | ---: | --- | --- |
-| `AGENTS.md` | Markdown 文档 | 11,376 bytes | 项目协作与复现说明 | 可按项目进展持续补充；文件大小会随内容更新变化 |
+| `AGENTS.md` | Markdown 文档 | 12,887 bytes | 项目协作与复现说明 | 可按项目进展持续补充；文件大小会随内容更新变化 |
 | `docs/references/JGR Solid Earth - 2020 - Niu - A Framework for Pore-Scale Simulation of Effective Electrical Conductivity and Permittivity.pdf` | PDF | 2,070,094 bytes | 当前项目内保存的 Niu et al. (2020) 主论文副本；题名为 *A Framework for Pore-Scale Simulation of Effective Electrical Conductivity and Permittivity of Porous Media in the Frequency Range From 1 mHz to 1 GHz* | 当前核心论文，优先阅读和引用；作为项目内只读参考资料，不要覆盖 |
 | `docs/references/jgrb54470-sup-0001-2020jb020515-si.docx` | Word 文档 | 184,716 bytes | 当前项目内保存的 Niu et al. (2020) 补充材料副本 | 用于确认数据尺寸、参数、补充公式和额外实验细节；作为项目内只读参考资料，不要覆盖 |
 | `docs/references/Pore-network extraction from micro-computerized-tomography images.pdf` | PDF | 950,843 bytes | 孔隙网络提取与 micro-CT 图像处理相关参考论文 | 用于辅助理解孔隙网络提取、图像分割、连通性与几何表征；不要把其中方法直接等同于 Niu et al. (2020) 的模拟设置，除非有明确对应证据 |
+| `docs/references/NISTIR 6269.pdf` | PDF | 818,955 bytes | 当前项目内保存的 NISTIR 6269 副本；AC3D 参考程序和数值框架相关资料 | 用于追踪论文所用 AC3D 思路、参考代码背景和数值实现细节；作为项目内只读参考资料，不要覆盖 |
+| `code/vendor/pnextract/` | 外部参考代码目录 | 5,731,780 bytes | 当前项目内保存的 pnextract 原始代码副本；包含源码、文档、第三方库和 `bin.7z` | 作为外部上游/参考代码保留原貌；不要在未记录来源和修改原因的情况下直接改写，项目自有包装或解析脚本应优先放在 `code/scripts/` 或 `code/src/` |
 | `../论文资料/JGR Solid Earth - 2020 - Niu - A Framework for Pore‐Scale Simulation of Effective Electrical Conductivity and Permittivity (1).pdf` | PDF | 2,070,106 bytes | 18 页；题名为 *A Framework for Pore-Scale Simulation of Effective Electrical Conductivity and Permittivity of Porous Media in the Frequency Range From 1 mHz to 1 GHz*；作者 Qifei Niu, Chi Zhang, Manika Prasad；JGR Solid Earth 2020；DOI 相关标识 `10.1029/2020JB020515` | 当前核心论文，优先阅读和引用 |
 | `../论文资料/jgrb54470-sup-0001-2020jb020515-si.docx` | Word 文档 | 184,716 bytes | 补充材料；内部包含 `word/document.xml`、页眉页脚、脚注/尾注、图片资源等 22 个 docx 组件 | 用于确认数据尺寸、参数、补充公式和额外实验细节 |
 | `../论文资料/NISTIR 6269.pdf` | PDF | 818,955 bytes | 210 页；PDF 元数据标题为 `ir_cover.dvi` | 论文里面使用的模拟框架的AC3D参考代码来源 |
@@ -47,6 +51,7 @@
 - Excel 的 row 标签数量只表示当前 sheet XML 中检测到的行节点数量，不等同于已经完成的数据语义审计。
 - `microCT_Berea.raw` 的文件大小可能与多种数据类型和网格形状组合匹配；在论文或补充材料未确认前，不要把任何维度推断写死到代码中。
 - `docs/references/` 保存当前项目内可直接引用的文献副本；这些副本便于迁移和复现记录，但仍应作为只读参考资料处理。
+- `code/vendor/pnextract/` 保存外部 pnextract 参考实现；如果需要修改，应优先复制或包装到项目自有代码中，并记录与原始版本的差异。
 
 ## 项目目标
 
@@ -63,6 +68,7 @@
 - 所有生成代码、笔记、转换数据、图表和中间结果应放在新建的清晰目录中，例如 `notes/`、`src/`、`scripts/`、`outputs/`、`figures/` 或 `experiments/`。
 - 涉及数值计算时，应保存关键参数、随机种子、输入文件路径、输出文件路径和运行命令。
 - 处理 `.raw`、`.xlsx`、`.pdf`、`.docx` 等文件时，优先使用可靠的解析库或标准工具，避免手写脆弱的二进制或表格解析逻辑。
+- 第三方或上游参考代码放在 `code/vendor/` 下，默认视为可读参考而非项目自有实现；对其进行修改前应说明目的，并尽量保持改动最小、可追踪。
 
 ## 建议目录结构
 
@@ -72,6 +78,7 @@
 notes/          论文阅读笔记、公式推导、方法拆解
 src/            可复用的模拟框架代码
 scripts/        一次性数据检查、转换、绘图和实验脚本
+code/vendor/    第三方或上游参考代码副本，例如 pnextract
 experiments/    复现实验配置、运行记录和参数文件
 outputs/        模拟输出、中间数组、日志
 figures/        复现图表和对比图
@@ -84,11 +91,12 @@ tests/          单元测试、数值回归测试和数据完整性检查
 
 1. 建立论文阅读笔记，至少覆盖：研究目标、输入数据、物理量定义、控制方程、边界条件、数值方法、主要参数、论文图表含义。
 2. 检查补充材料，提取 microCT 数据尺寸、体素尺度、相分割方式、材料参数和图表数据来源。
-3. 阅读 `Pore-network extraction from micro-computerized-tomography images.pdf`，将其作为 micro-CT 孔隙网络提取和几何表征的背景参考；若其流程与 Niu et al. (2020) 不一致，应明确区分“背景参考”和“本论文复现依据”。
-4. 对 `Figure5.xlsx` 至 `Figure8.xlsx` 做数据审计，记录每个工作表、列名、单位和对应论文图号。
-5. 对 `microCT_Berea.raw` 做只读检查，确认形状、数据类型、取值范围和相标签含义；若论文未明确说明，不要擅自假定，需在笔记中标为待确认。
-6. 先实现最小可验证模块，例如数据读取、相标签统计、简单体素可视化、边界条件构造，再逐步实现完整模拟。
-7. 每完成一个复现步骤，应生成与论文结果的对比记录，包括图表、误差指标或解释性说明。
+3. 阅读 `NISTIR 6269.pdf`，将其作为 AC3D 参考程序和数值框架的背景资料；实现求解器时应区分 NISTIR 原始算法、Niu et al. (2020) 的改造使用方式和本项目的 GPU/FFT 实现。
+4. 阅读 `Pore-network extraction from micro-computerized-tomography images.pdf`，并检查 `code/vendor/pnextract/`，将二者作为 micro-CT 孔隙网络提取和几何表征的背景参考；若其流程与 Niu et al. (2020) 不一致，应明确区分“背景参考”和“本论文复现依据”。
+5. 对 `Figure5.xlsx` 至 `Figure8.xlsx` 做数据审计，记录每个工作表、列名、单位和对应论文图号。
+6. 对 `microCT_Berea.raw` 做只读检查，确认形状、数据类型、取值范围和相标签含义；若论文未明确说明，不要擅自假定，需在笔记中标为待确认。
+7. 先实现最小可验证模块，例如数据读取、相标签统计、简单体素可视化、边界条件构造，再逐步实现完整模拟。
+8. 每完成一个复现步骤，应生成与论文结果的对比记录，包括图表、误差指标或解释性说明。
 
 ## 代码与实验要求
 
