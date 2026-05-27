@@ -1,0 +1,15 @@
+# Python/cache artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local environments and notebooks
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Large or local-only raw inputs
+*.raw
+*.bin

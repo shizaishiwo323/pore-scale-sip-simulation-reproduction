@@ -1,0 +1,30 @@
+raw: C:\Users\imgw\Documents\Codex\论文复现\pore-scale-simulation-reproduction\论文数据\microCT_Berea.raw
+shape:
+  - 350
+  - 350
+  - 350
+crop_start: None
+crop_size: None
+frequencies_requested_hz:
+  - 0.001
+  - 0.01
+  - 0.1
+  - 1.0
+  - 10.0
+  - 100.0
+  - 1000.0
+  - 10000.0
+  - 100000.0
+  - 1000000.0
+  - 100000000.0
+  - 1000000000.0
+direction: x
+rtol: 1e-05
+atol: 0.0
+maxiter: 260
+dtype: complex64
+preconditioner: fft
+fft_reference: mean-face
+residual_every: 20
+save_solutions: False
+gpu_memory_at_start: {'cuda_free_bytes': 15821963264, 'cuda_total_bytes': 17170956288, 'cupy_pool_used_bytes': 0, 'cupy_pool_total_bytes': 0, 'cupy_pinned_pool_free_blocks': 0}
