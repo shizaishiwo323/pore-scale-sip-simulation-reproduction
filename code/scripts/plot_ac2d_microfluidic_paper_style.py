@@ -19,11 +19,11 @@ sys.path.insert(0, str(ROOT / "src"))
 from pore_scale_electrical.microfluidic_2d import MicrofluidicCalibration, segment_microfluidic_image  # noqa: E402
 
 
-DEFAULT_RESULTS = PROJECT_ROOT / "results" / "ac2d_microfluidic" / "interface_images_v1" / "ac2d_sweep_results.csv"
-DEFAULT_GEOMETRY = PROJECT_ROOT / "results" / "ac2d_microfluidic" / "interface_images_v1" / "geometry_metrics.csv"
+DEFAULT_RESULTS = PROJECT_ROOT / "results" / "ac2d_microfluidic" / "interface_images_si03_mechanistic_v1" / "ac2d_sweep_results.csv"
+DEFAULT_GEOMETRY = PROJECT_ROOT / "results" / "ac2d_microfluidic" / "interface_images_si03_mechanistic_v1" / "geometry_metrics.csv"
 DEFAULT_IMAGE_DIR = PROJECT_ROOT / "data" / "dissolution_results-Da_40.4424_Pe_4.1640_L_0.1200_square" / "interface_images"
-DEFAULT_OUT = PROJECT_ROOT / "figures" / "ac2d_microfluidic" / "ac2d_microfluidic_paper_style_all_time.png"
-DEFAULT_OUT_RESULTS = PROJECT_ROOT / "results" / "ac2d_microfluidic" / "interface_images_v1" / "ac2d_microfluidic_paper_style_all_time.png"
+DEFAULT_OUT = PROJECT_ROOT / "figures" / "ac2d_microfluidic" / "ac2d_microfluidic_paper_style_si03_mechanistic.png"
+DEFAULT_OUT_RESULTS = PROJECT_ROOT / "results" / "ac2d_microfluidic" / "interface_images_si03_mechanistic_v1" / "ac2d_microfluidic_paper_style_si03_mechanistic.png"
 
 ROW_TARGETS_H = [
     (0.0, 0.22),
@@ -173,7 +173,7 @@ def main() -> None:
         figsize=(13.0, 14.5),
         gridspec_kw={"width_ratios": [1.05, 1.05, 1.0, 1.0], "wspace": 0.26, "hspace": 0.26},
     )
-    fig.suptitle("AC2D microfluidic SIP simulation and pore-structure evolution", fontsize=16, weight="bold", y=0.992)
+    fig.suptitle("AC2D mechanistic SIP: SI03 sigma_w(t) + MW + Schwarz", fontsize=16, weight="bold", y=0.992)
     fig.text(0.255, 0.968, "Simulated SIP spectra", ha="center", va="center", fontsize=11, weight="bold")
     fig.text(0.745, 0.968, "Interface-image structure panels", ha="center", va="center", fontsize=11, weight="bold")
 

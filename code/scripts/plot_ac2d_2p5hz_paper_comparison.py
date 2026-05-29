@@ -14,9 +14,10 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_PAPER = PROJECT_ROOT / "docs" / "validation" / "2024gl111271-sup-0003-data set si-s02.csv"
-DEFAULT_OURS = PROJECT_ROOT / "results" / "ac2d_microfluidic" / "interface_images_maxwell_grain_v1" / "ac2d_sweep_results.csv"
-DEFAULT_OUT = PROJECT_ROOT / "figures" / "ac2d_microfluidic" / "ac2d_2p5hz_real_imag_paper_comparison.png"
-DEFAULT_SOURCE = PROJECT_ROOT / "results" / "ac2d_microfluidic" / "interface_images_maxwell_grain_v1" / "ac2d_2p5hz_paper_comparison_source_data.csv"
+DEFAULT_OURS = PROJECT_ROOT / "results" / "ac2d_microfluidic" / "interface_images_si03_mechanistic_v1" / "ac2d_sweep_results.csv"
+DEFAULT_OUT = PROJECT_ROOT / "figures" / "ac2d_microfluidic" / "ac2d_2p5hz_si03_mechanistic_vs_paper.png"
+DEFAULT_SOURCE = PROJECT_ROOT / "results" / "ac2d_microfluidic" / "interface_images_si03_mechanistic_v1" / "ac2d_2p5hz_paper_comparison_source_data.csv"
+DEFAULT_LABEL = "AC2D mechanistic: SI03 sigma_w(t) + MW + Schwarz"
 
 
 def load_paper_series(path: Path) -> pd.DataFrame:
@@ -61,7 +62,7 @@ def add_zoom_inset(ax: plt.Axes, ours: pd.DataFrame, y_column: str, title: str) 
     inset.grid(True, alpha=0.25, linewidth=0.5)
 
 
-def plot_comparison(paper: pd.DataFrame, ours: pd.DataFrame, out: Path, mechanism: str) -> None:
+def plot_comparison(paper: pd.DataFrame, ours: pd.DataFrame, out: Path, mechanism: str, model_label: str) -> None:
     real_mae = interpolation_mae(paper, ours, "paper_sigma_real_s_m", "our_sigma_real_s_m")
     imag_mae = interpolation_mae(paper, ours, "paper_sigma_imag_s_m", "our_sigma_imag_s_m")
 
@@ -74,7 +75,7 @@ def plot_comparison(paper: pd.DataFrame, ours: pd.DataFrame, out: Path, mechanis
         color="black",
         marker="s",
         s=22,
-        label="Paper SI-S02",
+        label="Paper SI-S02 measurement",
         zorder=3,
     )
     axes[0].plot(
@@ -84,7 +85,7 @@ def plot_comparison(paper: pd.DataFrame, ours: pd.DataFrame, out: Path, mechanis
         linewidth=1.8,
         marker="o",
         markersize=3.2,
-        label=f"AC2D {mechanism}",
+        label=model_label,
     )
     axes[0].set_ylabel("Real, sigma' (S/m)")
     axes[0].set_ylim(0.0, max(0.65, paper["paper_sigma_real_s_m"].max() * 1.08))
@@ -97,7 +98,7 @@ def plot_comparison(paper: pd.DataFrame, ours: pd.DataFrame, out: Path, mechanis
         color="black",
         marker="s",
         s=22,
-        label="Paper SI-S02",
+        label="Paper SI-S02 measurement",
         zorder=3,
     )
     axes[1].plot(
@@ -107,7 +108,7 @@ def plot_comparison(paper: pd.DataFrame, ours: pd.DataFrame, out: Path, mechanis
         linewidth=1.8,
         marker="o",
         markersize=3.2,
-        label=f"AC2D {mechanism}",
+        label=model_label,
     )
     y_min = min(-0.01, paper["paper_sigma_imag_s_m"].min() * 1.2)
     y_max = max(0.075, paper["paper_sigma_imag_s_m"].max() * 1.08)
@@ -129,11 +130,11 @@ def plot_comparison(paper: pd.DataFrame, ours: pd.DataFrame, out: Path, mechanis
     plt.close(fig)
 
 
-def write_source_data(paper: pd.DataFrame, ours: pd.DataFrame, source_path: Path) -> None:
+def write_source_data(paper: pd.DataFrame, ours: pd.DataFrame, source_path: Path, mechanism: str) -> None:
     paper_out = paper[["time_h", "paper_sigma_real_s_m", "paper_sigma_imag_s_m", "paper_cec_meq_g"]].copy()
     paper_out["series"] = "paper_si_s02"
     ours_out = ours[["time_h", "our_sigma_real_s_m", "our_sigma_imag_s_m", "frame"]].copy()
-    ours_out["series"] = "ac2d_maxwell_grain_all"
+    ours_out["series"] = f"ac2d_{mechanism}"
     source_path.parent.mkdir(parents=True, exist_ok=True)
     pd.concat([paper_out, ours_out], ignore_index=True, sort=False).to_csv(source_path, index=False)
 
@@ -144,14 +145,15 @@ def main() -> None:
     parser.add_argument("--ours", default=str(DEFAULT_OURS))
     parser.add_argument("--mechanism", default="all")
     parser.add_argument("--frequency-hz", type=float, default=2.5)
+    parser.add_argument("--label", default=DEFAULT_LABEL)
     parser.add_argument("--out", default=str(DEFAULT_OUT))
     parser.add_argument("--source-data", default=str(DEFAULT_SOURCE))
     args = parser.parse_args()
 
     paper = load_paper_series(Path(args.paper))
     ours = load_our_series(Path(args.ours), args.mechanism, args.frequency_hz)
-    plot_comparison(paper, ours, Path(args.out), args.mechanism)
-    write_source_data(paper, ours, Path(args.source_data))
+    plot_comparison(paper, ours, Path(args.out), args.mechanism, args.label)
+    write_source_data(paper, ours, Path(args.source_data), args.mechanism)
     print(f"wrote {args.out}")
     print(f"wrote {Path(args.out).with_suffix('.pdf')}")
     print(f"wrote {args.source_data}")

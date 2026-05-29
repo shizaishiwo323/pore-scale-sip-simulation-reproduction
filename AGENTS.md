@@ -84,16 +84,17 @@
 ### 当前机制边界
 
 - Maxwell-Wagner 极化：已通过水相和方解石相的复电导率、介电常数差异进入 AC2D 场求解。这是相对比导致的界面极化。
-- Schwarz/Debye 颗粒极化：已按论文参数化方式加入当前 AC2D 颗粒参数版本，使用 `Sigma_s = 1.3e-9 S`、`D = 1.3e-9 m^2/s`，弛豫时间采用 `tau_p = r^2 / (2D)`，其中 `r` 来自二维黄色方解石等效半径。
-- CEC/Waxman-Smits 界面电荷极化：尚未作为 AC2D 局部界面源项正式并入场求解。当前已有的 Waxman-Smits 计算脚本只用于复核论文补充材料公式和量纲，不应被标记为 AC2D 模拟结果。
-- 孔极化和膜极化：来自三维/Niu 框架的探索性机制不宜直接用于二维微流控芯片论文对比。早期膜极化尝试导致 2.5 Hz 虚部异常放大，当前 Lab on a Chip 验证应优先使用 Maxwell-Wagner + Schwarz/Debye 颗粒极化，并在后续单独推导 CEC/EDL 界面项。
+- Schwarz/Debye 界面/颗粒极化：当前主线使用本项目自己的机理模型，形式为 `C_p* = i omega tau / (1 + i omega tau) * Sigma_s`、`tau = r^2 / (2D)`，再乘以二维方解石-水界面长度密度映射到体积复电导率。主线默认不再使用整个方解石投影等效半径作为 `r`，而使用可标定的局部特征长度 `r_char`，默认量级约 `10-20 um`。
+- CEC/Waxman-Smits 界面电荷极化：仅作为论文经验/等效电路模型诊断路径保留，用于复核补充材料公式和量纲；不属于当前 AC2D 机理主模型，不应被标记为 AC2D 机制模拟结果。
+- 孔极化和膜极化：来自三维/Niu 框架的探索性机制不宜直接用于二维微流控芯片论文对比。早期膜极化尝试导致 2.5 Hz 虚部异常放大，当前 Lab on a Chip 验证应优先使用 SI-S03 驱动的 `sigma_w(t)`、Maxwell-Wagner 相对比和 Schwarz/Debye 界面/颗粒极化。
 - 术语上必须区分 Maxwell-Wagner 相对比界面极化、Schwarz 颗粒极化、CEC/EDL 界面电荷极化。三者都可能表现为界面相关响应，但参数来源、控制方程和物理含义不同。
 
 ### 当前代码入口
 
 - `code/src/pore_scale_electrical/ac2d_solver.py`：二维复电导率场求解器。
 - `code/src/pore_scale_electrical/microfluidic_2d.py`：微流控图像裁剪、相标签、几何统计和 AC2D 参数组装。
-- `code/scripts/run_ac2d_microfluidic_sweep.py`：批量运行二维微流控 AC2D 频谱和时间序列；历史机制包括 `maxwell`、`grain`、`pore`、`membrane`、`all`。
+- `code/scripts/run_ac2d_microfluidic_sweep.py`：批量运行二维微流控 AC2D 频谱和时间序列。当前默认 `driver_mode=si03`，只用 SI-S03 提供 `sigma_w(t)`，主机制为 `maxwell`、`interface`、`all`；旧 CEC/Waxman-Smits 路线应作为显式 `paper-cec` 诊断模式。
+- `code/scripts/calibrate_ac2d_mechanistic_params.py`：扫描 `Sigma_s` 和 Schwarz 特征长度 `r_char`，对机理型 AC2D 的 2.5 Hz 虚部量级做参数标定。
 - `code/scripts/plot_ac2d_microfluidic_paper_style.py`：生成类似论文多面板结构图的频谱与界面图像组合图。
 - `code/scripts/plot_ac2d_2p5hz_paper_comparison.py`：生成 2.5 Hz 实部/虚部随时间变化的论文数据对比图。
 - `code/scripts/compute_paper_consistent_2p5hz_waxman_smits.py`：用补充材料中的 `phi(t)`、`Sw(t)`、`sigma_w(t)`、`CEC(t)` 复核论文 Waxman-Smits 公式；这是论文公式诊断，不是 AC2D 场求解。
@@ -103,14 +104,16 @@
 - `results/ac2d_microfluidic/interface_images_v1/`：早期全机制结果，包含孔/膜探索项；膜极化虚部过大，不作为当前论文对比主结果。
 - `results/ac2d_microfluidic/interface_images_maxwell_grain_v1/`：Maxwell-Wagner + 颗粒极化早期版本。
 - `results/ac2d_microfluidic/interface_images_paper_particle_params_v1/`：采用论文颗粒参数 `Sigma_s` 和 `D` 的 Maxwell-Wagner + Schwarz/Debye 颗粒极化版本，是当前 AC2D 颗粒参数对比的主要结果。
+- `results/ac2d_microfluidic/interface_images_si03_mechanistic_v1/`：当前推荐的机理型 AC2D 主结果目录；使用 SI-S03 的 `sigma_w(t)`，不使用 CEC/Waxman-Smits 作为源项。
+- `results/ac2d_microfluidic/mechanistic_calibration_v1/`：机理参数扫描结果目录，用于记录 `Sigma_s`、`r_char`、`tau` 和 2.5 Hz 误差。
 - `results/ac2d_microfluidic/paper_consistent_2p5hz_waxman_smits.csv`：论文公式复核输出，不代表本项目二维场求解。
 - `figures/ac2d_microfluidic/`：二维微流控 SIP 的结构图、频谱图和论文对比图应按用途集中保存在此目录下。
 
 ### 当前判断
 
-- 只使用 Maxwell-Wagner + Schwarz/Debye 颗粒极化时，AC2D 模拟得到的 2.5 Hz 实部和虚部明显低于 Lab on a Chip/GRL 论文数据。
-- 该差异不应简单归因于绘图错误；更可能来自模型机制差异，包括 CEC/EDL 界面电荷项尚未并入 AC2D、论文实验采用四电极几何与几何因子、论文模型使用随时间变化的 `sigma_w(t)`、`CEC(t)` 和饱和度/比表面积信息。
-- `figures/ac2d_microfluidic/ac2d_2p5hz_paper_particle_params_vs_paper.png` 目前包含 Maxwell-Wagner + Schwarz/Debye 颗粒极化，不包含 CEC/Waxman-Smits 界面电荷极化。后续如果加入 CEC/EDL 界面项，应使用新的结果目录和图名，避免覆盖或混淆旧图。
+- 当前推荐对比应使用 `AC2D SI03 机理模型`：SI-S03 只提供 `sigma_w(t)`，虚部来自 Maxwell-Wagner 和 Schwarz/Debye 机制；不要用 CEC/Waxman-Smits 等效电路作为 AC2D 主模型源项。
+- 论文 CEC/Waxman-Smits 路径仍可用于验证论文经验模型是否能复算 SI-S02，但这只是诊断参考，不是本项目机制模型。
+- 2.5 Hz 虚部量级对 `r_char` 很敏感。若 `D = 1.3e-9 m^2/s` 且希望 2.5 Hz 接近弛豫峰，`r_char` 应约为 `13 um`；使用整个方解石等效半径会让弛豫时间过长，导致虚部被压低。
 
 ## 工作原则
 
