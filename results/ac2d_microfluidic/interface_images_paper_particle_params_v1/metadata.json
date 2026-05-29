@@ -1,0 +1,68 @@
+{
+  "calibration": {
+    "width_m": 0.004,
+    "height_m": 0.0015
+  },
+  "reference_bbox_xyxy": [
+    193,
+    217,
+    1344,
+    646
+  ],
+  "frames": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28
+  ],
+  "frequencies_hz": [
+    1.0,
+    2.5,
+    10.0,
+    100.0,
+    1000.0,
+    10000.0
+  ],
+  "mechanisms": [
+    "maxwell",
+    "grain",
+    "all"
+  ],
+  "all_components": [
+    "maxwell",
+    "grain"
+  ],
+  "downsample": 8,
+  "grain_surface_conductance_s": 1.3e-09,
+  "grain_diffusion_coefficient_m2_s": 1.3e-09,
+  "labels": {
+    "water": 1,
+    "calcite": 2
+  },
+  "gas_phase": "not modeled in v1",
+  "white_canvas": "excluded by red-or-yellow active bbox"
+}

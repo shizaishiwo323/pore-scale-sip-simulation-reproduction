@@ -57,10 +57,10 @@ organized_gpu_ac3d_reproduction_20260527/
   - `docs/references/Pore-network extraction from micro-computerized-tomography images.pdf`
   - `code/vendor/pnextract/`
 - 最新 Figure 8 机制拆分图：
-  - `figures/figure8_paper_consistent_components_plus_all_vs_experiment_nature.svg`
-  - `figures/figure8_paper_consistent_components_plus_all_vs_experiment_nature.png`
-  - `figures/figure8_paper_consistent_components_plus_all_vs_experiment_nature.pdf`
-  - `figures/figure8_paper_consistent_components_plus_all_vs_experiment_nature.tiff`
+  - `figures/paper_comparisons/figure8/figure8_paper_consistent_components_plus_all_vs_experiment_nature.svg`
+  - `figures/paper_comparisons/figure8/figure8_paper_consistent_components_plus_all_vs_experiment_nature.png`
+  - `figures/paper_comparisons/figure8/figure8_paper_consistent_components_plus_all_vs_experiment_nature.pdf`
+  - `figures/paper_comparisons/figure8/figure8_paper_consistent_components_plus_all_vs_experiment_nature.tiff`
 - 最新 Figure 8 source data：
   - `results/source_data/figure8_paper_consistent_components_plus_all_vs_experiment_source_data.csv`
 - 最新 Figure 8 讨论：
