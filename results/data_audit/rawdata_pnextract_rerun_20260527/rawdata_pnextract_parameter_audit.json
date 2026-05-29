@@ -1,0 +1,44 @@
+{
+  "raw_path": "C:\\Users\\imgw\\Documents\\Codex\\论文复现\\pore-scale-simulation-reproduction\\organized_gpu_ac3d_reproduction_20260527\\data\\microCT_Berea.raw",
+  "raw_size_bytes": 85750000,
+  "shape_source": "inferred exactly from raw byte count as little-endian uint16 cube",
+  "shape_zyx_or_xyz_used_by_numpy_c_order": [
+    350,
+    350,
+    350
+  ],
+  "dtype_used": "<u2",
+  "candidate_interpretations": [
+    {
+      "dtype": "uint8",
+      "n_values": 85750000,
+      "exact_cube_shape": null
+    },
+    {
+      "dtype": "uint16_le",
+      "n_values": 42875000,
+      "exact_cube_shape": [
+        350,
+        350,
+        350
+      ]
+    },
+    {
+      "dtype": "float32_le",
+      "n_values": 21437500,
+      "exact_cube_shape": null
+    }
+  ],
+  "label_policy_source": "data majority/minority check: minority label treated as pore/water, majority label as solid",
+  "pore_label": 1,
+  "solid_label": 2,
+  "porosity_from_raw_label_fraction": 0.23146971428571428,
+  "pnextract_header_path": "C:\\Users\\imgw\\Documents\\Codex\\论文复现\\pore-scale-simulation-reproduction\\experiments\\berea_pnextract\\full_350\\Berea350_full.mhd",
+  "voxel_size_source": "pnextract .mhd ElementSize, not paper text; raw itself has no embedded voxel-size metadata",
+  "voxel_size_um_from_pnextract_mhd": [
+    2.8,
+    2.8,
+    2.8
+  ],
+  "voxel_size_m_used_for_ac3d": 2.8e-06
+}

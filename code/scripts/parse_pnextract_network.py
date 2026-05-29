@@ -11,6 +11,30 @@ import numpy as np
 import pandas as pd
 
 
+def read_node1(path: Path) -> pd.DataFrame:
+    rows = []
+    with path.open("r", encoding="utf-8") as f:
+        first = True
+        for line in f:
+            if not line.strip():
+                continue
+            parts = line.split()
+            if first:
+                first = False
+                continue
+            if len(parts) < 4:
+                continue
+            rows.append(
+                {
+                    "pore_id": int(parts[0]),
+                    "pore_center_x_m": float(parts[1]),
+                    "pore_center_y_m": float(parts[2]),
+                    "pore_center_z_m": float(parts[3]),
+                }
+            )
+    return pd.DataFrame(rows)
+
+
 def read_node2(path: Path) -> pd.DataFrame:
     rows = []
     with path.open("r", encoding="utf-8") as f:
@@ -93,6 +117,10 @@ def main() -> None:
     outdir.mkdir(parents=True, exist_ok=True)
 
     pores = read_node2(prefix.with_name(prefix.name + "_node2.dat"))
+    node1_path = prefix.with_name(prefix.name + "_node1.dat")
+    if node1_path.exists():
+        centers = read_node1(node1_path)
+        pores = pores.merge(centers, on="pore_id", how="left")
     link1 = read_link1(prefix.with_name(prefix.name + "_link1.dat"))
     link2 = read_link2(prefix.with_name(prefix.name + "_link2.dat"))
     throats = link1.merge(link2, on="throat_id", how="inner")

@@ -1,0 +1,29 @@
+{
+  "input_pores_csv": "C:\\Users\\imgw\\Documents\\Codex\\论文复现\\pore-scale-simulation-reproduction\\organized_gpu_ac3d_reproduction_20260527\\results\\pnextract\\rawdata_pnextract_rerun_20260527\\network_parsed\\pores.csv",
+  "input_throats_csv": "C:\\Users\\imgw\\Documents\\Codex\\论文复现\\pore-scale-simulation-reproduction\\organized_gpu_ac3d_reproduction_20260527\\results\\pnextract\\rawdata_pnextract_rerun_20260527\\network_parsed\\throats.csv",
+  "output_png": "figures\\berea_pore_network_specular_closeup.png",
+  "renderer": "pyvista/vtk",
+  "material_parameters": {
+    "sphere": {
+      "specular": 0.88,
+      "specular_power": 58,
+      "smooth_shading": true
+    },
+    "tube": {
+      "specular": 0.62,
+      "specular_power": 38,
+      "smooth_shading": true
+    }
+  },
+  "zoom": 1.95,
+  "hide_bounds": true,
+  "n_pores_rendered": 2124,
+  "n_throats_total": 3849,
+  "n_internal_throats_rendered": 3662,
+  "coordinate_units": "voxel",
+  "voxel_size_m": 2.8e-06,
+  "pore_radius_min_vox": 1.2170817857142857,
+  "pore_radius_max_vox": 16.162667857142857,
+  "throat_radius_min_vox": 0.4857085714285715,
+  "throat_radius_max_vox": 14.114025
+}

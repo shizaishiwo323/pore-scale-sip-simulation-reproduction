@@ -1,0 +1,23 @@
+{
+  "source_raw": "data\\microCT_Berea.raw",
+  "shape": [
+    350,
+    350,
+    350
+  ],
+  "source_dtype": "<u2",
+  "pore_label_source": 1,
+  "solid_label_source": 2,
+  "pnextract_mapping": {
+    "0": "pore/water",
+    "1": "solid"
+  },
+  "voxel_size_um_in_mhd": 2.8,
+  "out_raw": "results\\pnextract_inputs\\berea_from_raw\\Berea350_from_raw_pore0_solid1.raw",
+  "out_mhd": "results\\pnextract_inputs\\berea_from_raw\\Berea350_from_raw.mhd",
+  "out_raw_size_bytes": 42875000,
+  "mapped_counts": {
+    "0": 9924264,
+    "1": 32950736
+  }
+}

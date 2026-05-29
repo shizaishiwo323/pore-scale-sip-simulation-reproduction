@@ -1,0 +1,6811 @@
+GEOPHYSICS
+
+Simulating complex conductivity in carbonate rocks: using
+digital carbonate rocks and comparison to laboratory
+measurements
+Journal: Geophysics
+Manuscript ID GEO-2018-0783
+Manuscript Type: Technical Paper
+
+Fo
+
+Keywords: induced polarization (IP), carbonate, electrical/resistivity
+
+Area of Expertise: Electrical and Electromagnetic Methods, Rock Physics
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+Page 1 of 50
+
+1
+
+ABSTRACT
+
+2
+
+Digital rock physics involves the modern microscopic imaging of geomaterials,
+
+3
+
+digitalization of the microstructure, and numerical simulation of physical properties of rocks.
+
+4
+
+This physics-based approach can give important insight into understanding properties of
+
+5
+
+reservoir rocks, and help reveal the link between intrinsic rock properties and macroscopic
+
+6
+
+geophysical responses. The complex conductivity of carbonate reservoir rocks was simulated
+
+7
+
+using reconstructed 3D rock structures from high-resolution X-ray micro computed tomography
+
+8
+
+(micro-CT). Carbonate core samples with varying lithofacies and pore structures from the
+
+9
+
+Cambro-Ordovician Arbuckle Group and the Upper Pennsylvanian Lansing-Kansas City Group
+
+10
+
+in Kansas were used in this study. The wide variations in pore geometry and connectivity of
+
+11
+
+these samples were imaged using micro-CT. A two-phase segmentation method was used to
+
+12
+
+reconstruct a digital rock of solid particles and pores. The effective electrical conductivity of the
+
+13
+
+digital rock volume was then calculated using a pore-scale numerical approach. The complex
+
+14
+
+conductivity of geomaterials is influenced by the electrical properties and geometry of each
+
+15
+
+phase, i.e., the solid and fluid phases. In addition, the electrical double layer that forms between
+
+16
+
+the solid and fluid phases can also affect the effective conductivity of the material. The influence
+
+17
+
+of the electrical double layer is quantified by a complex surface conductance and converted to an
+
+18
+
+apparent volumetric complex conductivity of either solid particles or pore fluid. The effective
+
+19
+
+complex conductivity resulting from numerical simulations were compared to results from
+
+20
+
+$
+laboratory experiments on equivalent rock samples. In general, simulated 𝜎"##
+values were
+
+21
+
+$$
+below laboratory measurements, while numerical 𝜎"##
+values were within reasonable range. The
+
+22
+
+imaging and digital segmentation technique, fundamental rock characteristics, and model
+
+23
+
+assumptions all play an important role in the simulation process.
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+1
+
+GEOPHYSICS
+
+24
+
+INTRODUCTION
+
+25
+
+Macroscopic geophysical measurements are governed by pore-scale rock properties.
+
+26
+
+Understanding pore-scale structures and processes of rocks is necessary to fully interpret
+
+27
+
+laboratory and field geophysical observations. Current geophysical interpretations rely on
+
+28
+
+models that attempt to connect geophysical observables with geological properties of interest.
+
+29
+
+These models assume a simplified microstructure; however, real rocks are intrinsically
+
+30
+
+heterogeneous and complex, especially for difficult formations like shales and carbonates.
+
+31
+
+Carbonate rocks contain a significant amount of hydrocarbon resources and form many
+
+32
+
+important water-bearing zones. Our goal is to explore how pore-scale geometry of these
+
+33
+
+complicated rocks control the complex electrical conductivity, which can be used to reveal pore
+
+34
+
+structure as well as fluid-rock interactions in carbonate rocks in order to help us better
+
+35
+
+understand various geological processes. We achieve this goal by using emerging digital rock
+
+36
+
+physics techniques and previously defined electrochemical models that explain complex
+
+37
+
+conductivity in porous media.
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 2 of 50
+
+38
+
+Digital rock physics involves high-resolution 3D imaging of a real samples, digitization
+
+39
+
+of the microstructure, and computation of macroscopic properties (Andrä et al. 2013a, b). The
+
+40
+
+use of digital rock physics as a research tool has grown over the past few decades with the
+
+41
+
+increase in computing power. A wide range of studies exist for sandstones, shales, carbonates,
+
+42
+
+and unconsolidated material. Most of these studies focus on fluid transport and acoustic
+
+43
+
+attenuation (Knackstedt et al. 2009, Vanorio and Mavko 2011, Quintal et al. 2011) with a sizable
+
+44
+
+amount of studies on electrical conductivity (or resistivity) and formation factor (Yan et al. 2016,
+
+45
+
+Sengupta, Kittridge, and Blangy 2017) and even fewer incorporating the effects of the electrical
+
+2
+
+Page 3 of 50
+
+46
+
+double layer and surface conductance (Shabro et al. 2014). In the nomenclature of geophysics,
+
+47
+
+digital rock physics takes the forward modeling approach to understand scientifically and
+
+48
+
+societally important topics such as contaminant transport, CO2 sequestration, and reservoir
+
+49
+
+characterization.
+
+50
+
+Our study entails the computation of the effective (bulk) complex conductivity of digital
+
+51
+
+carbonate reservoir rock volumes and a comparison to laboratory measurements. The complex
+
+52
+
+electrical response of geomaterials can be measured by the induced polarization (IP) method in
+
+53
+
+the field and laboratory (Kemna et al. 2012) and is influenced by the electrical properties of the
+
+54
+
+solid and fluid phases, the geometry of the microstructure, and the electrical double layer that
+
+55
+
+forms at the solid-fluid interface (Revil, Florsch, and Camerlynck 2014). The IP method is
+
+56
+
+especially sensitive to internal surface area, connectivity, and fluid chemistry. The interpretation
+
+57
+
+of laboratory or field data can lead to the estimation of pore size distributions (Florsch, Revil,
+
+58
+
+and Camerlynck 2014), contaminant plume mapping (Sogade et al. 2006), and microbial activity
+
+59
+
+monitoring (Davis et al. 2006). Our study specifically explores how pore-scale rock parameters
+
+60
+
+(i.e., surface charge density 𝑄 and dynamic pore radius 𝛬), pore size distributions based on
+
+61
+
+extracted pore network models, and micro-CT imaging resolutions can affect the simulated bulk
+
+62
+
+conductivity response of our digital rocks. We then compare the simulated values to spectral
+
+63
+
+induced polarization (SIP) laboratory results measured on the same samples.
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+64
+
+METHODS
+
+65
+
+The workflow for this study is depicted in Figure 1. Our process involved micro-CT
+
+66
+
+scanning, processing and 3D reconstruction, solid and fluid phase segmentation, connectivity
+
+67
+
+analysis, pore network extraction, the application of induced polarization in the electrical double
+
+3
+
+GEOPHYSICS
+
+68
+
+layer to the digital microstructure, and finally the effective conductivity calculation of the bulk
+
+69
+
+volume. Twelve samples were scanned in this study. The core plugs were predominantly
+
+70
+
+carbonate in mineralogy and obtained from various formations in Kansas. Eight grainstones,
+
+71
+
+mostly oomoldic, were from the Lansing-Kansas City Group (Upper Pennsylvanian in age); two
+
+72
+
+packstones and two mudstones were from the Arbuckle Group (Cambro-Ordovician in age).
+
+73
+
+Helium porosities and Klinkenberg-corrected air permeabilities were previously measured
+
+74
+
+through routine core analysis by a commercial laboratory. Our samples were chosen over a wide
+
+75
+
+range of porosities (~ 3% – 33%) and permeabilities (~ 0.01 mD – 200 mD). Detailed sample
+
+76
+
+information is listed in Table 1.
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 4 of 50
+
+77
+
+4
+
+Page 5 of 50
+
+78
+
+Figure 1. The workflow begins with micro-CT imaging, includes the application of our
+
+79
+
+electrical double layer and induced polarization model, and ends with the bulk conductivity
+
+80
+
+calculations.
+
+81
+
+CT scanning and reconstruction
+
+82
+
+Our study used X-ray micro-computed tomography (micro-CT) scanning technology to
+
+83
+
+obtain three-dimensional digital rock volumes. X-rays travel through the sample and refract
+
+84
+
+according to Snell’s law. The resulting image intensity is high (bright) in areas where x-rays are
+
+85
+
+converging, and vice-versa for low intensity (darker) areas. The detector measures the phase
+
+86
+
+contrast. In effect, brighter regions indicate harder rock parts, and darker regions indicate softer
+
+87
+
+rock parts and pores. This brightness contrast is the basis for identifying solid versus pore
+
+88
+
+regions during the segmentation process. We cut the core plugs into thin sticks (roughly 1.5 mm
+
+89
+
+– 3.5 mm thick) to prepare for micro-CT scanning. We used microscope lenses with two
+
+90
+
+different optical magnifications, 10X and 4X, to explore different resolutions over the samples
+
+91
+
+using the phase contrast micro-CT Xradia MicroXCT-400 microscope. Magnification levels and
+
+92
+
+resolutions are included in Table 1. There is a trade-off between the magnification level and the
+
+93
+
+effective volume that can be scanned; higher resolution scans cover a smaller 3D sample volume.
+
+94
+
+The microscope software outputs the raw data images as a sequence of 2D slices in grayscale.
+
+95
+
+The intensity value of each pixel ranges from 0 (darkest) to 255 (lightest). Roughly 1000 image
+
+96
+
+slices with dimensions of 1000 × 1000 pixels were acquired for each sample. A 600 × 600 pixel
+
+97
+
+area, centered on the axis of the sample, was then cropped out of each slice, and the 600 middle
+
+98
+
+slices were then compiled together sequentially to form a 6003 digital array using MATLAB.
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+5
+
+GEOPHYSICS
+
+99
+
+The reconstructed digital volumes from micro-CT scanning revealed the varying levels of
+
+100
+
+diagenesis, different pore structures, and connectivity characteristics of our samples. Certain
+
+101
+
+cementation and harder material, most likely metallic minerals such as pyrite, were visible in
+
+102
+
+some of the samples. For example, sample G2 contained larger shell fragments and fossils.
+
+103
+
+Sample G6, a skeletal grainstone from Upper-Pennsylvania Lansing-Kansas, was characterized
+
+104
+
+by intergranular porosity and contained pellets, some of which were partly dissolved. There
+
+105
+
+appeared to be good connectivity surrounding the pellets and between some of the larger grains.
+
+106
+
+Most of our grainstones were oomoldic in nature and contained many large dissolved pores, but
+
+107
+
+some samples also contained a small amount of only partly dissolved ooids. The large spherical
+
+108
+
+pore spaces sometimes overlapped or connected via smaller cracks.
+
+109
+
+Phase segmentation
+
+rR
+
+ee
+
+rP
+
+110
+
+Fo
+
+A two-phase thresholding method was used to segment the image cubes into solid and
+
+ev
+
+111
+
+pore regions. To do this, a grayscale value was chosen for each sample that distinguished a solid
+
+112
+
+voxel from a pore voxel. Because each sample has different hardness, density, and cementation
+
+113
+
+characteristics, there are slight differences in the micro-CT scanning results and therefore the
+
+114
+
+threshold was tailored for each sample. To help choose the ideal threshold, an intensity
+
+115
+
+histogram was analyzed for each sample to identify the darker regions (pores) from brighter
+
+116
+
+regions (solid). The first and second peaks indicate clusters of pore and solid intensity values,
+
+117
+
+and a threshold value is chosen between these peaks to partition the two phases. For quality
+
+118
+
+control, a raw CT slice is compared to a segmented slice to visually check that the solid-pore
+
+119
+
+boundary is maintained with the chosen threshold value. This value ranged from 105 to 145 for
+
+120
+
+our samples.
+
+iew
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 6 of 50
+
+6
+
+Page 7 of 50
+
+121
+
+122
+
+Post-processing
+We then compressed, or re-gridded, each 6003 digital cube into a 2003 cube in order to
+
+123
+
+reduce computer demand and computation times but maintain the same effective sample volume.
+
+124
+
+To do this, each original cube was partitioned into smaller cubes of 27 voxels. Within each
+
+125
+
+smaller cube, we looked to see how many pore voxels were present out of 27. If this value was
+
+126
+
+above a user-given criterion number, then we defined a new single pore voxel. If there weren’t
+
+127
+
+enough pore voxels within the smaller cube, then we defined a new single solid voxel. In effect,
+
+128
+
+we decreased the total number of voxels to process for each image cube from 6003 voxels to 2003
+
+129
+
+voxels to expedite our later calculation for electric current flow. Ideally, the compression
+
+130
+
+criterion number is chosen so that the final porosity of the digital structure is comparable to the
+
+131
+
+helium porosity. A minimum compression criterion value of 3, which could be interpreted as a
+
+132
+
+straight path across each smaller partitioned cube, can be used to represent the most relaxed
+
+133
+
+option for this processing step. Higher numbers require more pores to be present within each
+
+134
+
+partitioned cube in order to re-grid to a single pore voxel. To investigate how our data
+
+135
+
+compression method affected sample porosity, connectivity, and electrical conductivity, we
+
+136
+
+generated multiple microstructures with different compression criterions for each sample ranging
+
+137
+
+from 10 to 3. A summary of the compression criterion numbers used for each trial in this study is
+
+138
+
+included in Table 2.
+
+139
+
+Connectivity analysis
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+140
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+We then tested if the fluid phase percolates through the microstructure of each image
+
+141
+
+cube. A digital sample is connected if a given phase percolates through microstructure, from one
+
+142
+
+cube face to the opposite face. A connected sample has at least one pathway that begins with a
+
+7
+
+GEOPHYSICS
+
+143
+
+cell on the cube edge and connects to the other edge through cells of the same phase. Because the
+
+144
+
+pore fluid and the pore-solid boundary are the conducting regions, we checked to see if the pore
+
+145
+
+phase was connected in our samples in all three directions. To do this, we used a burning
+
+146
+
+algorithm developed by the National Institute of Standards and Technology (Garboczi 1998)
+
+147
+
+(available at https://ciks.cbt.nist.gov/garbocz/manual/node59.html). For more information on the
+
+148
+
+algorithm, see Garboczi (1998). Only five out of the original twelve samples were tested as well
+
+149
+
+connected, having the pore phase percolating through the sample in at least two axis directions.
+
+150
+
+We continued our investigation of these five samples only. Their micro-CT reconstructions are
+
+151
+
+shown in Figures 2 – 6. These images show the original micro-CT reconstructions with 600
+
+152
+
+stacked images on each sample and a cube edge of ~ 2.6 mm.
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 8 of 50
+
+8
+
+Page 9 of 50
+
+rR
+
+ee
+
+rP
+
+Fo
+
+153
+
+ev
+
+154
+
+Figure 2. CT reconstruction of mudstone sample M2. 600 image stack with a cube edge of ~ 2.6
+
+155
+
+mm.
+
+iew
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+156
+
+9
+
+GEOPHYSICS
+
+rR
+
+ee
+
+rP
+
+Fo
+
+157
+
+ev
+
+158
+
+Figure 3. CT reconstruction of skeletal grainstone sample G6. 600 image stack with a cube edge
+
+159
+
+of ~ 2.6 mm.
+
+iew
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 10 of 50
+
+160
+
+10
+
+Page 11 of 50
+
+rR
+
+ee
+
+rP
+
+Fo
+
+161
+
+ev
+
+162
+
+Figure 4. CT reconstruction of oomoldic grainstone sample G4. 600 image stack with a cube
+
+163
+
+edge of ~ 2.6 mm.
+
+iew
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+164
+
+11
+
+GEOPHYSICS
+
+rR
+
+ee
+
+rP
+
+Fo
+
+165
+
+ev
+
+166
+
+Figure 5. CT reconstruction of oomoldic grainstone sample G2. 600 image stack with a cube
+
+167
+
+edge of ~ 2.6 mm.
+
+iew
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 12 of 50
+
+168
+
+12
+
+Page 13 of 50
+
+rR
+
+ee
+
+rP
+
+Fo
+
+169
+
+ev
+
+170
+
+Figure 6. CT reconstruction of oomoldic grainstone sample G1. 600 image stack with a cube
+
+171
+
+edge of ~ 2.6 mm.
+
+172
+
+Pore network extraction
+
+173
+
+iew
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+We generated pore network models using an algorithm developed by the Imperial
+
+174
+
+College London to extract information on the pore size distribution and obtain pore network
+
+175
+
+models of our microstructures. This maximal ball algorithm works by filling the pore space with
+
+176
+
+spheres inscribed within the solid-pore boundary. Large spheres near the center of pore regions
+
+177
+
+become nodes. Chains of smaller spheres that connect larger nodes become cylindrical tubes
+
+13
+
+GEOPHYSICS
+
+178
+
+(Dong and Blunt 2009). The extracted sphere and tube models were plotted to visualize the pore
+
+179
+
+space and connectivity of each sample. From this simplified pore network, we were able to
+
+180
+
+extract information on pore radii and pore throats and their volumes. Pore sizes were binned into
+
+181
+
+30 groups and pore size distributions were plotted alongside their pore network models for each
+
+182
+
+sample in Figures 7 – 11.
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 14 of 50
+
+14
+
+Page 15 of 50
+
+183
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+184
+185
+
+Figure 7. M2 pore network model (top) and pore size distribution (bottom). Data shown for trial
+
+186
+
+M2-B with 5825 tubes and 4271 nodes.
+
+15
+
+GEOPHYSICS
+
+187
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 16 of 50
+
+188
+189
+
+Figure 8. G6 pore network model (top) and pore size distribution (bottom). Data shown for trial
+
+190
+
+G6-A with 10265 tubes and 6052 nodes.
+
+16
+
+Page 17 of 50
+
+191
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+192
+193
+
+Figure 9. G4 pore network model (top) and pore size distribution (bottom). Data shown for trial
+
+194
+
+G4-A with 2242 tubes and 1364 nodes.
+
+17
+
+GEOPHYSICS
+
+195
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 18 of 50
+
+196
+197
+
+Figure 10. G2 pore network model (top) and pore size distribution (bottom). Data shown for trial
+
+198
+
+G2-A with 1176 tubes and 790 nodes.
+
+18
+
+Page 19 of 50
+
+199
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+200
+201
+
+Figure 11. G1 pore network model (top) and pore size distribution (bottom). Data shown for trial
+
+202
+
+G1-A with 1363 tubes and 803 nodes.
+
+19
+
+GEOPHYSICS
+
+203
+
+The heterogeneity and complexity of our samples became more apparent after generating
+
+204
+
+these models. As expected, sample M2, the mudstone had the smallest node and tube radii
+
+205
+
+compared to the other samples. Sample G6, the skeletal grainstone, exhibited slightly larger node
+
+206
+
+radii than the mudstone, but similar tube radii. It also consisted of the highest number of tubes
+
+207
+
+and therefore had the highest degree of connectivity of all the samples. Samples G4, G2, and G1,
+
+208
+
+the oomoldic grainstones, were comprised of mostly vary large node sizes and large to small
+
+209
+
+tubes. For all samples, there were entire regions where there were no nodes or tubes generated.
+
+210
+
+These are areas with high solid concentrations which hinder connectivity across the sample.
+
+211
+
+There were also regions where the algorithm generated very dense clusters of small nodes and
+
+212
+
+tubes compared to the rest of the sample. These clusters appear in areas with only partly
+
+213
+
+dissolved ooids or a high concentration of pellets.
+
+214
+
+Application of the electrical double layer model and induced polarization response
+
+ev
+
+rR
+
+ee
+
+rP
+
+Fo
+
+215
+
+After constructing our digital rock volumes and obtaining pore size information, we then
+
+216
+
+moved to the next step in the simulation workflow. The set-up to the numerical bulk conductivity
+
+217
+
+calculation first begins by assigning local conductivity values for the solid and fluid voxels. To
+
+218
+
+do this, we adopted a “pore upscaling” method (Niu and Zhang 2017) to account for electrical
+
+219
+
+conduction and polarization effects, which converts the complex surface conductance to an
+
+220
+
+apparent volumetric conductivity in the fluid phase.
+
+221
+222
+
+223
+
+iew
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 20 of 50
+
+Geomaterials exhibit a complex conductivity when subjected to an electric field in which
+the real part describes energy loss the imaginary part describes energy storage:
+𝜎 ∗ = 𝜎 $ + 𝑖𝜎 $$ = 𝜎 $ + 𝑖𝜀- 𝜀. 𝜔
+
+(1)
+
+20
+
+Page 21 of 50
+
+224
+
+where 𝜎 ∗ represents the complex conductivity of the material, 𝜎 $ and 𝜎 $$ are the real and
+
+225
+
+imaginary components, 𝑖 is the imaginary unit, 𝜀- is the relative permittivity of the medium, 𝜀. is
+
+226
+
+the permittivity of free space, and 𝜔 = 2𝜋𝑓 is the angular frequency. In addition to electrical
+
+227
+
+conduction in the bulk solution, geomaterials experience conduction and polarization in the
+
+228
+
+electrical double layer at the solid-fluid interface. To account for these effects, conductivity
+
+229
+
+values are assigned to the two phases in the following manner:
+
+230
+
+𝜎7∗ = 𝜎7$ + 𝑖𝜀7 𝜀. 𝜔 + 𝛥𝜎7∗
+
+Fo
+
+231
+
+𝜎9∗ = 𝜎9$ + 𝑖𝜀9 𝜀. 𝜔
+
+(2)
+(3)
+
+rP
+
+232
+
+where 𝜎7∗ and 𝜎9∗ are the apparent complex conductivity of the fluid and solid phase, and 𝛥𝜎7∗ is
+
+233
+
+the additional complex conductivity gained to the fluid phase due to the effects of the electrical
+
+234
+
+double layer. This value is defined as:
+
+ev
+
+𝛥𝜎7∗ =
+
+235
+
+rR
+
+ee
+
+2 ∗ 2
+∙ 𝐶 = ∙ (𝐶=. + 𝐶=9 )
+𝛬 = 𝛬
+
+(4)
+
+iew
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+236
+
+where 𝐶=∗ is the electrical double layer-induced complex surface conductance, and 𝛬 is the
+
+237
+
+dynamic pore radius (Johnson, Koplik, and Schwartz 1986). 𝐶=∗ is the combined influence from
+
+238
+
+the diffuse layer 𝐶=. and Stern layer 𝐶=9 . For the diffuse layer:
+
+239
+
+𝐶=. = 𝛽 ∙ 𝑄
+
+240
+
+where 𝛽 and 𝑄 are the ion mobility and surface charge density related to the diffuse layer. The
+
+241
+
+Stern layer exhibits simple Debye relaxation, a special case of Cole-Cole relaxation (Schwarz
+
+242
+
+1962):
+
+(5)
+
+21
+
+GEOPHYSICS
+
+C
+
+𝐶=9 = A
+
+243
+
+BDE
+
+𝑓B
+
+𝑖𝜔𝜏B
+𝛽∙𝑄
+1 + 𝑖𝜔𝜏B
+
+(6)
+
+244
+
+where 𝛽 and 𝑄 are the ion mobility and surface charge density related to the Stern layer, 𝑓B is a
+
+245
+
+weighting function, 𝜏B is the relaxation time. For geomaterials comprised of different pore sizes,
+
+246
+
+each pore size has a contribution to the complex conductivity response (Leroy et al. 2008). The
+
+247
+
+weighting function and relaxation time are a function of pore size 𝑟B obtained from the binned
+
+248
+
+pore size distribution data. Each pore size has a volume 𝑣B that is weighted from the total pore
+
+249
+
+space volume, and each weight sums to 1:
+
+Fo
+
+C
+
+rP
+
+𝑇𝑜𝑡𝑎𝑙 𝑃𝑜𝑟𝑒 𝑉𝑜𝑙𝑢𝑚𝑒 = A
+
+250
+
+𝑣B
+
+C
+𝑣B
+= A 𝑓B = 1
+BDE 𝑇𝑜𝑡𝑎𝑙 𝑃𝑜𝑟𝑒 𝑉𝑜𝑙𝑢𝑚𝑒
+BDE
+C
+
+(8)
+
+where 𝑛 is the number of pore sizes. The relaxation time 𝜏B is related to the curvature of the
+
+253
+
+electrical double layer:
+
+𝜏B =
+
+𝑟B W
+2𝐷
+
+iew
+
+ev
+
+252
+
+254
+
+(7)
+
+rR
+
+A
+
+251
+
+BDE
+
+ee
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 22 of 50
+
+(9)
+
+255
+
+where 𝐷 is the diffusion coefficient in the Stern layer. The radius of the electrical double layer is
+
+256
+
+equivalent to the pore radius (Schwarz 1962). Note that it was assumed that the surface charge
+
+257
+
+densities 𝑄 associated with the diffuse and Stern layer are equal (Niu and Zhang 2017).
+
+258
+
+For inputs to our numerical simulations, we chose 𝜎7$ = 0.12 S/m to match our laboratory
+
+259
+
+fluid conductivity. Other parameters followed previously reported values (Niu, Revil, and
+
+260
+
+Saidian 2016, Niu et al. 2016): fluid permittivity 𝜀7 = 80; 𝜎9$ = 0 (no conduction in the solid
+22
+
+Page 23 of 50
+
+261
+
+phase); permittivity of calcite 𝜀9 = 8; permittivity of free space 𝜀. = 8.854 × 10-12 F/m; ion
+
+262
+
+mobility of Na+ in the diffuse and Stern layers 𝛽 = 5.2 × 10-12 m2/V/s; diffusion coefficient 𝐷 =
+
+263
+
+𝑘[ 𝑇𝛽 9 /𝑒 with Boltzmann constant 𝑘[ = 1.3806 × 10-23 J/K, room temperature 𝑇 = 293.15 K,
+
+264
+
+and elementary charge 𝑒 = 1.602 × 10-19 C. For simulation purposes, the 𝛬 parameter was
+
+265
+
+altered from 20 – 100 nm (Oyewole, Saneifar, and Heidari 2016, Duan et al. 2018) and the 𝑄
+
+266
+
+parameter was altered from 3 × 10-4 – 8 × 10-4 C/m2 (Niu, Revil, and Saidian 2016) which are
+
+267
+
+acceptable ranges for carbonate rocks. We performed the simulation over the 1 mHz – 1 kHz
+
+268
+
+range.
+
+rP
+
+269
+
+Fo
+Our definitions above allowed us to account for the complex conductivity of the solid and
+
+270
+
+fluid phases and the additional complex surface conductance due to the effects of the electrical
+
+271
+
+double layer, are based on pore sizes obtained from digital reconstructions of real carbonate
+
+272
+
+rocks, and are frequency-dependent. Table 2 provides a summary of the simulation trials in this
+
+273
+
+study and the specific values chosen for the 𝛬 and 𝑄 parameters during the set-up to the effective
+
+274
+
+conductivity calculation.
+
+275
+
+Numerical calculation of 𝝈∗𝒆𝒇𝒇
+
+iew
+
+ev
+
+rR
+
+276
+
+ee
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+Each voxel at position 𝒙 = (𝑥, 𝑦, 𝑧) where 𝑥, 𝑦, and 𝑧 are the coordinates is defined by its
+
+277
+
+phase state (solid or fluid) and its local complex conductivity 𝜎 ∗ (𝒙) according to the above
+
+278
+
+section’s definitions. We then simulated current flow 𝐼 through the digital sample resulting in
+
+279
+
+potential difference ∆𝑃 across it. We calculated the average electric field 〈𝑬〉 and current density
+
+280
+
+∗
+〈𝑱〉 to determine the effective complex conductivity of the bulk sample 𝜎"##
+:
+
+23
+
+GEOPHYSICS
+
+∗
+𝜎"##
+=
+
+281
+
+〈𝑬〉
+.
+〈𝑱〉
+
+(10)
+
+282
+
+〈𝑬〉 and 〈𝑱〉 are functions of position 𝒙 and are defined by (Mendelson 1975, Cheng and Torquato
+
+283
+
+1997):
+
+284
+
+285
+
+1
+〈𝑬〉 = − n ∇𝛹(𝒙) 𝑑𝑉
+𝑉 q
+
+〈𝑱〉 =
+
+1
+n 𝑱(𝒙) 𝑑𝑉
+𝑉 q
+
+(11)
+
+(12)
+
+rP
+
+Fo
+
+286
+
+where 𝑉 is the sample volume, 𝑱(𝒙) is the local current density, and 𝛹(𝒙) is potential. Local
+
+287
+
+current density and potential were solved by the Laplace equation:
+
+288
+
+rR
+
+ee
+
+(13)
+
+289
+
+−∇[𝜎 ∗ (𝒙)∇𝛹(𝒙)] = 0.
+
+(14)
+
+290
+
+These calculations were performed numerically using code developed by the National Institute of
+
+291
+
+Standards and Technology (available at https://ciks.cbt.nist.gov/garbocz/manual/node57.html).
+
+292
+
+For more information on the algorithm, see Garboczi (1998). The code solves the finite
+
+293
+
+difference representation of the Laplace equation with the conjugate gradient method.
+
+∇𝑱(𝒙) = 0
+
+iew
+
+ev
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 24 of 50
+
+294
+
+RESULTS AND DISCUSSION
+
+295
+
+An analysis of our simulation results and a discussion on the methods follows. After
+
+296
+
+performing the effective conductivity simulations, results were compared to laboratory SIP
+
+297
+
+measurements previously made on the original core plugs. We demonstrate several key factors
+
+24
+
+Page 25 of 50
+
+298
+
+that impact the complex conductivity simulation in carbonate rocks. We will discuss the
+
+299
+
+limitations of micro-CT scanning, which is a common issue with image-based analysis methods;
+
+300
+
+the impact of using the maximal ball pore network models and the parameters derived from
+
+301
+
+them, such as the curvature of the electrical double layer 𝑟B , relaxation time 𝜏B , and the complex
+
+302
+
+conductance of the Stern layer 𝐶=9 ; and the user-chosen inputs for other pore-scale parameters –
+
+303
+
+the dynamic pore radius 𝛬 and surface charge density 𝑄.
+
+304
+
+$
+$$
+The simulated 𝜎"##
+and 𝜎"##
+values for each trial, along with laboratory data, is included
+
+305
+
+$
+Figures 12 – 16. In general, the simulated 𝜎"##
+underestimated laboratory measurements, but the
+
+306
+
+$$
+simulated 𝜎"##
+were a decent match in the lower- to mid-frequencies. In addition, formation
+
+307
+
+factor 𝐹 and cementation exponent 𝑚 values derived from the simulation results were
+
+308
+
+overestimated when compared to the SIP laboratory-derived values. The effects of the pore-scale
+
+309
+
+parameters 𝛬 and 𝑄, and our compression criterion used during the image processing, can be
+
+310
+
+$
+$$
+seen in the shifts to the simulated 𝜎"##
+and 𝜎"##
+curves between trails. A more detailed analysis
+
+311
+
+of these parameters follows in their respective sections.
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+25
+
+GEOPHYSICS
+
+iew
+
+ev
+
+rR
+
+ee
+
+312
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 26 of 50
+
+313
+314
+
+Figure 12. M2 real (top) and imaginary (bottom) conductivity curves.
+
+26
+
+Page 27 of 50
+
+iew
+
+ev
+
+rR
+
+ee
+
+315
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+316
+317
+
+Figure 13. G6 real (top) and imaginary (bottom) conductivity curves.
+
+27
+
+GEOPHYSICS
+
+iew
+
+ev
+
+rR
+
+ee
+
+318
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 28 of 50
+
+319
+320
+
+Figure 14. G4 real (top) and imaginary (bottom) conductivity curves.
+
+28
+
+Page 29 of 50
+
+iew
+
+ev
+
+rR
+
+ee
+
+321
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+322
+323
+
+Figure 15. G2 real (top) and imaginary (bottom) conductivity curves.
+
+29
+
+GEOPHYSICS
+
+iew
+
+ev
+
+rR
+
+ee
+
+324
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 30 of 50
+
+325
+326
+
+Figure 16. G1 real (top) and imaginary (bottom) conductivity curves.
+
+30
+
+Page 31 of 50
+
+327
+
+328
+
+$$
+A notable difference between the 𝜎"##
+simulation versus measured curves is the overall
+
+329
+
+shape of the spectra. In general, the laboratory measurements exhibit a flat curve without a
+
+330
+
+characteristic frequency, whereas the simulation results have peaks in the lower frequencies.
+
+331
+
+Previous studies have argued that a flat spectrum could be due to a rough grain surface (Leroy et
+
+332
+
+al. 2008). Therefore, it is possible due to the limitations in scanning resolution and post-
+
+333
+
+processing re-gridding that the rough quality of the grain surface was smoothed out on the digital
+
+334
+
+structures. The peak in our simulation results is due to the electrical double layer polarization
+
+335
+
+mechanism that we assumed in our model. However, there may be other polarization models or
+
+336
+
+physical explanations reflected in the laboratory measurements that we did not address in our
+
+337
+
+simulation. For example, membrane polarization is another polarization mechanism that explains
+
+338
+
+polarization effects due to variable pore throat sizes (Marshall and Madden 1959, Bücker and
+
+339
+
+Hördt 2013). Maxwell-Wagner effect (dielectric polarization) could exist in porous media at
+
+340
+
+higher frequencies (Leroy et al. 2008, Chen and Or 2006). It is possible that a model
+
+341
+
+incorporating membrane polarization effects combined with electrical double layer polarization
+
+342
+
+at the grain-fluid boundary may better predict the IP response in complicated rocks like
+
+343
+
+carbonates.
+
+344
+
+Effects of image resolution and processing
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+345
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+Digital rock physics entails a collection of various methods and issues arising from the
+
+346
+
+chosen techniques. Choosing a simple intensity threshold may not be the best method, as
+
+347
+
+variations in mineral density and scanning resolution complicate intensity histograms. A kriging
+
+348
+
+segmentation method has been shown to be superior to simple thresholding (Sakellariou et al.
+
+31
+
+GEOPHYSICS
+
+349
+
+2003, Lindquist et al. 2000). A watershed segmentation method may also be used on high-
+
+350
+
+resolution images to better discern the solid-pore boundary (Saenger and Madonna 2011).
+
+351
+
+Simple intensity thresholding tends to cause separate grains to appear as one connected mass;
+
+352
+
+this could explain why more than half of the digital microstructures from our initial sample
+
+353
+
+group were not connected in any direction. Maintaining pore space between grains from imaging
+
+354
+
+techniques has clear implications on discerning pore throats and electrical conductivity
+
+355
+
+simulations. Alternative methods in machine learning and statistical reconstructions from 2D
+
+356
+
+images have also been employed in the realm of digital rock physics (Tang and Spikes 2017, Al-
+
+357
+
+Kharusi and Blunt 2008, Karimpouli and Tahmasebi 2016).
+
+rP
+
+358
+
+Fo
+
+In addition to segmentation considerations, the scanning resolution and grid spacing must
+
+ee
+
+359
+
+correctly represent the properties of the real rock microstructure (Keehm and Mukerji 2004,
+
+360
+
+Bazaikin et al. 2017). This is known as the representative elementary volume (REV) concept –
+
+361
+
+that a digital or simulated rock property must be statistically representative of the bulk sample.
+
+362
+
+Simulations are affected by variables like scanning resolution and grid spacing, and it is possible
+
+363
+
+that a model based on digital microstructures over- or under-estimates a physical process or pore-
+
+364
+
+scale geometry. Although there is a trade-off between resolution and effective volume scanned,
+
+365
+
+higher resolution images are preferred but difficult to obtain in practice. This is especially true
+
+366
+
+for carbonates in particular because these rocks exhibit a wide variation in pore networks and
+
+367
+
+pore types at different scales. Studies show that more pore space is resolved at higher
+
+368
+
+resolutions, but porosities based on imaging methods will fall short of measured helium
+
+369
+
+porosities (Sakellariou et al. 2003). Our results indicated this as well, and overall, our
+
+370
+
+$
+$$
+numerically calculated 𝜎"##
+and 𝜎"##
+values under-estimated laboratory measurements, with the
+
+371
+
+greatest discrepancy arising from the mudstone. We can assume that the fine-grained nature and
+
+iew
+
+ev
+
+rR
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 32 of 50
+
+32
+
+Page 33 of 50
+
+372
+
+pore space of this rock type was more difficult to capture than the grainstones at our resolution
+
+373
+
+(4.30 µm). Any nanoporosity in the mudstone sample was missed by the micro-CT scanning, as
+
+374
+
+these pore sizes were outsize of the detection range. It may not be possible for micro-CT imaging
+
+375
+
+to resolve the porosity of some fine-grained carbonate rocks, but approximation methods can be
+
+376
+
+devised that are calibrated with micro-CT measurements that utilize more than two phases during
+
+377
+
+segmentation, for example, an intermediate phase (Saenger et al. 2014). Injection of a high-
+
+378
+
+salinity brine before micro-CT scanning can also detect sub-resolution porosity in carbonate
+
+379
+
+cores (Lin et al. 2016). Furthermore, there are higher resolution imaging techniques such as
+
+380
+
+SEM, FIB-SEM, and BIB-SEM that can identify nanoscale pores. However, the issue of whether
+
+381
+
+or not these higher resolution techniques can produce a proper REV for fine-grained rocks still
+
+382
+
+remains (Kelly et al. 2016).
+
+rR
+
+ee
+
+rP
+
+383
+
+Fo
+
+In our workflow, we re-gridded the digital samples from 6003 voxels to 2003 voxels.
+
+384
+
+Decreasing the number of voxels to process from 6003 to 2003 exponentially cut down on
+
+385
+
+processing times. The compression criterion number, which controls how strict the algorithm is
+
+386
+
+when re-gridding the solid and pore regions, can be tailored to produce a final digital
+
+387
+
+microstructure with a porosity that is agreeable to laboratory helium porosities. In a way, this
+
+388
+
+enables us to “make up” for lost porosity due to micro-CT and segmentation limitations.
+
+389
+
+However, there are some concerns if this step maintains an REV or not. Again, under-estimation
+
+390
+
+of porosity due to micro-CT methods is a common problem (Sakellariou et al. 2003), but our
+
+391
+
+approach is one attempt at circumventing the issue.
+
+393
+
+iew
+
+392
+
+ev
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+The compression criterion number for samples M2, G6, and G4 were altered in our study.
+Results for trial M2-A and M2-B illustrate how changing only this value can impact porosity,
+
+33
+
+GEOPHYSICS
+
+394
+
+$
+$$
+𝜎"##
+, and 𝜎"##
+. A strict compression criterion number of 10 for M2-A generated a microstructure
+
+395
+
+with a lower porosity (11.7%) than a more lenient compression criterion number of 3 for M2-B
+
+396
+
+(15.6%). More pore space, a higher total surface area, and a higher number of pathways are
+
+397
+
+maintained within the final processed microstructure by lowering this criterion number.
+
+398
+
+$
+$$
+Therefore, 𝜎"##
+and 𝜎"##
+are higher at all frequencies. Similar results can be seen when
+
+399
+
+comparing trials G6-B to G6-A. However, in trial G6-C, increasing 𝑄 had a more influential
+
+400
+
+$$
+$
+impact than the compression criterion number on 𝜎"##
+and did not considerably affect 𝜎"##
+.
+
+401
+
+Similarly, results for trials G4-A and G4-B showed that increasing 𝛬 had a greater impact on
+
+402
+
+$$
+$
+𝜎"##
+(and did not affect 𝜎"##
+).
+
+403
+
+Effects of pore-scale simulation parameters
+
+ee
+
+rP
+
+In the simulation, a number of variables are used as inputs to model pore-scale rock
+
+rR
+
+404
+
+Fo
+
+405
+
+properties and the effects of the electrical double layer at fluid-rock interfaces. Some of these
+
+406
+
+parameters are difficult to measure experimentally and can only be perceived conceptually.
+
+407
+
+Determining these parameters is important because it helps us understand the macro-scale
+
+408
+
+electrical behavior of rocks and the issues with upscaling. In our study, we explored determining
+
+409
+
+pore size distributions using pore network models. We focused on the effects of the dynamic
+
+410
+
+pore radius 𝛬 and surface charge density 𝑄. The value of these parameters can significantly
+
+411
+
+impact simulation results.
+
+412
+
+Pore network modeling
+
+414
+
+iew
+
+413
+
+ev
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 34 of 50
+
+The pore network models in our study were generated using the maximal ball algorithm
+discussed in the “pore network extraction” section (Dong and Blunt 2009). This algorithm
+
+34
+
+Page 35 of 50
+
+415
+
+generated the sizes and locations of pore nodes (spheres) and pore throats (tubes) encompassed
+
+416
+
+within the pore phase of the digital microstructure. The extracted network represents a simplified
+
+417
+
+model of the imaged pore space. Pore-scale flow simulations based on these maximal ball
+
+418
+
+models (Mahabadi et al. 2016) are typically performed instead of direct calculations on the
+
+419
+
+digital pore space as they are computationally faster. These simulations are able to predict
+
+420
+
+permeability and capillary pressure well, but can underestimate other features that were directly
+
+421
+
+calculated on the pore space (Dong and Blunt 2009). There is also some concern of whether or
+
+422
+
+not these maximal ball networks oversimplify the real structure by losing some details,
+
+423
+
+particularly the smaller-sized connectivity compared to the rest of the network (Blunt et al.
+
+424
+
+2013), which is particularly present in more complex samples such as carbonates.
+
+ee
+
+rP
+
+425
+
+Fo
+
+In our study, the pore networks generated from the maximal ball approach helped to
+
+rR
+
+426
+
+quantify a pore size distribution for our samples. Pore size distributions are important to pore-
+
+427
+
+scale rock characterization and can be measured using laboratory methods such as mercury
+
+428
+
+injection capillary pressure (MICP) (Scott and Barker 2003, Niu and Revil 2015), SIP, and
+
+429
+
+nuclear magnetic resonance (NMR) (Niu and Zhang 2018). The pore size distribution data
+
+430
+
+extracted from our pore network models was used to mathematically define pore sizes 𝑟B and
+
+431
+
+their respective weights 𝑓B . This information was carried through in the electrical double layer
+
+432
+
+and induced polarization modeling by affecting values for the radius of the curvature of the
+
+433
+
+electrical double layer (equated to 𝑟B ), the relaxation time 𝜏B , and the influence of the complex
+
+434
+
+surface conductance induced in the Stern layer 𝐶=9 . It is important to note our separate use of the
+
+435
+
+pore size distribution 𝑟B and the dynamic pore radius 𝛬. There are studies that do in fact equate
+
+436
+
+these two values (Revil, Florsch, and Camerlynck 2014, Niu and Revil 2015) and others that use
+
+437
+
+a grain size parameter when defining relaxation times (Revil, Koch, and Holliger 2012). Many of
+
+iew
+
+ev
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+35
+
+GEOPHYSICS
+
+438
+
+these studies assume spherical grains, which may not be realistic for our more complex
+
+439
+
+carbonate samples. For our study, we wanted to obtain a representation of the pore size based on
+
+440
+
+image analysis, so we decided to extract this information from the maximal ball pore networks
+
+441
+
+and equate it to 𝑟B . This allowed us to characterize the general shape of the pore size distribution,
+
+442
+
+but as discussed earlier, much of the sub-resolution porosity is lost during the imaging process.
+
+443
+
+Therefore, we kept the 𝛬 parameter (discussed below) as a user-defined value in the simulation.
+
+444
+
+It could prove beneficial to supplement pore size estimates based on image analysis alone with
+
+445
+
+laboratory MICP measurements to more accurately represent the full distribution and hopefully
+
+446
+
+lead to a better prediction of the induced polarization effects. Pore network extractions on digital
+
+447
+
+carbonates rocks can be poorly connected due to the resolution issue (Dong and Blunt 2009), and
+
+448
+
+as discussed earlier, image-based methods will underestimate porosity (Sakellariou et al. 2003).
+
+449
+
+Therefore, we assume there is some degree of inaccuracy in representing these real values due to
+
+450
+
+resolution and processing limitations. This could explain why the simulated behavior of the
+
+451
+
+mudstone sample showed the greatest deviation from laboratory measurements, as there may be
+
+452
+
+considerable pore space below our resolution limits.
+
+453
+
+Dynamic pore radius 𝛬
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 36 of 50
+
+454
+
+The parameter 𝛬 is sometimes referred to as the “characteristic” pore size – it is linked to
+
+455
+
+the pore-scale geometry of the medium and to the conducting regions at the grain-fluid interface.
+
+456
+
+Studies on fluid flow in porous materials commonly make use of a hydraulic pore radius, defined
+
+457
+
+as 𝑉v ⁄𝑆 in Kozeny-Carmen equations, where 𝑉v is pore volume and 𝑆 is surface area. 𝛬 can be
+
+458
+
+defined as weighted version of the hydraulic pore radius, weighted by the norm of the electric
+
+459
+
+field in the pore space before the formation of the electrical double layer (Revil, Koch, and
+
+36
+
+Page 37 of 50
+
+460
+
+Holliger 2012). It represents the radius of interconnected pores that control fluid and electrical
+
+461
+
+transport phenomena in porous media. Transport is dominant in large, connected pore throats. 𝛬
+
+462
+
+is inversely related to the formation factor 𝐹 and surface area-to-pore volume ratio 𝑆⁄𝑉v
+
+463
+
+(Johnson, Koplik, and Schwartz 1986). In the modeling, 𝛬 is included in the denominator of our
+
+464
+
+definition of the complex conductivity of the pore fluid, 𝛥𝜎7∗ . Therefore, a smaller 𝛬 will
+
+465
+
+translate to a larger induced complex conductivity. This inverse relationship exists because
+
+466
+
+smaller pores represent samples with a rougher texture and a higher surface area (Revil, Florsch,
+
+467
+
+and Camerlynck 2014) leading to more surface sites where charge build up can occur. Therefore,
+
+468
+
+rocks comprised of smaller pores will exhibit more significant polarization than those with larger
+
+469
+
+pores and of the same lithology. This is especially helpful in characterizing the differences in
+
+470
+
+complex rocks such as carbonates.
+
+rR
+
+ee
+
+rP
+
+471
+
+Fo
+
+As mentioned earlier, the 𝛬 parameter can be obtained experimentally from MICP
+
+472
+
+measurements. We do not have MICP data, however for simulation purposes we substituted
+
+473
+
+values within a range previously measured for carbonate reservoir rocks (Oyewole, Saneifar, and
+
+474
+
+Heidari 2016, Duan et al. 2018). Only 𝛬 was altered for trials G2-A (𝛬 = 100 nm), G2-B (𝛬 =
+
+475
+
+$
+50 nm), and G2-C (𝛬 = 20 nm). Results showed that 𝜎"##
+was not significantly affected by this
+
+476
+
+$$
+value, but 𝜎"##
+increased as 𝛬 decreased. Similar results were shown when 𝛬 was altered for
+
+477
+
+trials G4-A (𝛬 = 20 nm) and G4-B (𝛬 = 100 nm). As expected, a smaller 𝛬 input in our
+
+478
+
+simulations led to a more significant polarization effect (Figure 14, Figure 15). As mentioned
+
+479
+
+earlier, it might be possible to append the image-generated pore size data with MICP
+
+480
+
+measurements in order to more accurately predict the induced polarization response.
+
+iew
+
+ev
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+37
+
+GEOPHYSICS
+
+481
+
+It is important to note that there is some disagreement on whether a pore size or grain size
+
+482
+
+parameter controls induced polarization behavior and relaxation times (Revil, Koch, and Holliger
+
+483
+
+2012, Revil 2013). Our study utilized pore size parameters in the simulations, but it is entirely
+
+484
+
+possible to devise a workflow based on image analysis and using grain size input variables.
+
+485
+
+Surface charge density 𝑄
+
+486
+
+The surface charge density 𝑄 is a physical concept that describes the amount of charge
+
+487
+
+buildup at the solid-fluid interface. It is affected by the mineralogy of the grain, the electrolyte
+
+488
+
+concentration, and the pH. It can be measured in the laboratory by potentiometric titrations and
+
+489
+
+confirmed by streaming zeta potential experiments (Revil and Glover 1997, Revil, Pezard, and
+
+490
+
+Glover 1999, Walker and Glover 2018). A higher 𝑄 implies a greater number of surface charge
+
+491
+
+sites, which enhances electrochemical interactions at the solid-fluid interface and strengthens the
+
+492
+
+polarization effect (Niu, Revil, and Saidian 2016, Niu and Revil 2015). In the modeling, a higher
+
+493
+
+𝑄 leads to an increased complex conductance in the diffuse layer 𝐶=. and Stern layer 𝐶=9 ,
+
+494
+
+ultimately producing a higher complex conductivity in the fluid phase voxels 𝛥𝜎7∗ . In our
+
+495
+
+modeling, we assumed that the charge densities associated with Stern and diffuse layers were
+
+496
+
+equivalent. To maintain electrical neutrality, the sum of 𝑄 from the Stern and diffuse layers
+
+497
+
+represents the total charge density on the mineral grain (Leroy et al. 2008). Details on the how 𝑄
+
+498
+
+relates to the sodium sorption can be found in the Appendix B of Niu, Revil, and Saidian 2016.
+
+499
+
+Only 𝑄 was altered between trials G1-A (𝑄 = 3 × 10-4 C/m2) and G1-B (𝑄 = 8 × 10-4
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 38 of 50
+
+500
+
+$
+$$
+C/m2). Increasing 𝑄 resulted in higher values for both 𝜎"##
+and 𝜎"##
+, but a greater impact is seen
+
+501
+
+$$
+to 𝜎"##
+(Figure 16). As expected, a higher 𝑄 represents more charge buildup and led to a more
+
+502
+
+significant polarization effect. Similar results can be seen when comparing trials G6-B (𝑄 = 3 ×
+38
+
+Page 39 of 50
+
+503
+
+10-4 C/m2) and G6-C (𝑄 = 6 × 10-4 C/m2) (Figure 13). The values chosen for 𝑄 in these trials
+
+504
+
+were within acceptable range for calcite, and it should be noted that 𝑄 values for clay and quartz
+
+505
+
+are much higher than calcite (Niu, Revil, and Saidian 2016). Therefore, it is possible that
+
+506
+
+samples G1 and G6 contained slightly more clay content than assumed, as simulation trials
+
+507
+
+performed using higher 𝑄 values (G1-B, G6-B) resulted in a better match to laboratory
+
+508
+
+measurements. Our numerical simulations indicated that an increase in 𝑄, albeit small, can have
+
+509
+
+$$
+a large impact on polarization behavior and predicted 𝜎"##
+values.
+
+510
+
+CONCLUSION
+
+rP
+
+Fo
+
+511
+
+Our study showed how bulk electrical conductivity simulations based on digital rock
+
+512
+
+imaging techniques and pore-scale complex conductivity modeling compared to laboratory
+
+513
+
+$
+measurements on carbonate reservoir rocks. For nearly all simulation trials, numerical 𝜎"##
+
+514
+
+$$
+values were below laboratory measurements, while numerical 𝜎"##
+values were a closer match.
+
+515
+
+$
+$$
+The mudstone showed the most disagreement in both 𝜎"##
+and 𝜎"##
+, while the skeletal
+
+516
+
+$
+grainstone, with the highest degree of connectivity, showed the best match to laboratory 𝜎"##
+. At
+
+517
+
+$$
+least one trial from all grainstone samples generated a numerical 𝜎"##
+within laboratory range. It
+
+518
+
+should be noted that modern electrochemical pore-scale models assume spherical grains or pores,
+
+519
+
+which might not be suitable for forward modeling on more complex, three-dimensional
+
+520
+
+structures. In addition, there could be other polarization effects, e.g., membrane polarization,
+
+521
+
+contributing to laboratory measurements that were not accounted for in this study. Nonetheless,
+
+522
+
+$
+$$
+some of the 𝜎"##
+and 𝜎"##
+values calculated in our study were a good match to laboratory results,
+
+523
+
+and our input parameters were realistic. From our simulations, we learned that 1) the imaging
+
+524
+
+and digital segmentation technique is important to consider, as it remains a challenge to capture
+
+iew
+
+ev
+
+rR
+
+ee
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+39
+
+GEOPHYSICS
+
+525
+
+interconnected microporosity due to the limits in micro-CT scanning resolutions and to build a
+
+526
+
+digital microstructure that is representative of the real rock volume; 2) fundamental rock
+
+527
+
+characteristics such as carbonate petrology, porosity, and most importantly connectivity play a
+
+528
+
+large role in the complex conductivity predictions; and 3) despite their heterogeneity, complex
+
+529
+
+conductivity predictions through numerical simulations are feasible using previously established
+
+530
+
+pore-scale electrical polarization models on digitally reconstructed carbonate rocks. Our results
+
+531
+
+led us to a better understanding of the link between pore-scale geometrical properties and the
+
+532
+
+complex conductivity response of carbonate rocks. The combined use of image-based simulation
+
+533
+
+methods and laboratory MICP, SIP, and NMR inversion can help devise a more holistic
+
+534
+
+approach to rock characterization. This approach is more comprehensive and is especially useful
+
+535
+
+in understanding more complex rocks such as carbonates. Ultimately, this can lead to improved
+
+536
+
+petrophysical characterization of carbonate rocks for any reservoir or aquifer characterization
+
+537
+
+project.
+
+ev
+
+rR
+
+ee
+
+rP
+
+Fo
+
+538
+
+REFERENCES
+
+539
+
+Al-Kharusi, A. S., and M. J. Blunt. 2008, Multiphase flow predictions from carbonate pore space
+
+540
+
+images using extracted network models. Water Resources Research, 44, no. 6. doi:
+
+541
+
+10.1029/2006WR005695.
+
+iew
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 40 of 50
+
+542
+
+Andrä, H., N. Combaret, J. Dvorkin, E. Glatt, J. Han, M. Kabel, Y. Keehm, F. Krzikalla, M. Lee,
+
+543
+
+C. Madonna, M. Marsh, T. Mukerji, E. H. Saenger, R. Sain, N. Saxena, S. Ricker, A.
+
+544
+
+Wiegmann, and X. Zhan. 2013a, Digital rock physics benchmarks—Part I: Imaging and
+
+545
+
+segmentation. Computers & Geosciences, 50,25-32. doi:
+
+546
+
+https://doi.org/10.1016/j.cageo.2012.09.005.
+
+40
+
+Page 41 of 50
+
+547
+
+Andrä, H., N. Combaret, J. Dvorkin, E. Glatt, J. Han, M. Kabel, Y. Keehm, F. Krzikalla, M. Lee,
+
+548
+
+C. Madonna, M. Marsh, T. Mukerji, E. H. Saenger, R. Sain, N. Saxena, S. Ricker, A.
+
+549
+
+Wiegmann, and X. Zhan. 2013b, Digital rock physics benchmarks—part II: Computing
+
+550
+
+effective properties. Computers & Geosciences, 50,33-43. doi:
+
+551
+
+https://doi.org/10.1016/j.cageo.2012.09.008.
+
+552
+
+Bazaikin, Y., B. Gurevich, S. Iglauer, T. Khachkova, D. Kolyukhin, M. Lebedev, V. Lisitsa, and
+
+553
+
+G. Reshetova. 2017, Effect of CT image size and resolution on the accuracy of rock
+
+554
+
+property estimates. Journal of Geophysical Research: Solid Earth, 122, no. 5,3635-3647.
+
+555
+
+doi: 10.1002/2016JB013575.
+
+rP
+
+Blunt, M. J., B. Bijeljic, H. Dong, O. Gharbi, S. Iglauer, P. Mostaghimi, A. Paluszny, and C.
+
+ee
+
+556
+
+Fo
+
+557
+
+Pentland. 2013, Pore-scale imaging and modelling. Advances in Water Resources,
+
+558
+
+51,197-216. doi: https://doi.org/10.1016/j.advwatres.2012.03.003.
+
+ev
+
+rR
+
+559
+
+Bücker, M., and A. Hördt. 2013, Analytical modelling of membrane polarization with explicit
+
+560
+
+parametrization of pore radii and the electrical double layer. Geophysical Journal
+
+561
+
+International, 194, no. 2,804-813. doi: 10.1093/gji/ggt136.
+
+562
+
+iew
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+Chen, Y., and D. Or. 2006, Effects of Maxwell-Wagner polarization on soil complex dielectric
+
+563
+
+permittivity under variable temperature and electrical conductivity. Water Resources
+
+564
+
+Research, 42, no. 6. doi: 10.1029/2005WR004590.
+
+565
+
+Cheng, H., and S. Torquato. 1997, Effective conductivity of periodic arrays of spheres with
+
+566
+
+interfacial resistance. Proceedings of the Royal Society of London. Series A:
+
+567
+
+Mathematical, Physical and Engineering Sciences, 453, no. 1956,145.
+
+41
+
+GEOPHYSICS
+
+568
+
+Davis, C. A., E. Atekwana, E. Atekwana, L. D. Slater, S. Rossbach, and M. R. Mormile. 2006,
+
+569
+
+Microbial growth and biofilm formation in geologic media is detected with complex
+
+570
+
+conductivity measurements. Geophysical Research Letters, 33, no. 18. doi:
+
+571
+
+10.1029/2006GL027312.
+
+572
+
+Dong, H., and M. J. Blunt. 2009, Pore-network extraction from micro-computerized-tomography
+
+573
+
+images. Physical Review E, 80, no. 3,036307. doi: 10.1103/PhysRevE.80.036307.
+
+574
+
+Duan, W., G. Zhiqian, F. Tailiang, M. Miaomiao, C. Yue, L. Yangbing, and Z. Chenjia. 2018,
+
+Fo
+
+575
+
+New Insight into the Characteristics of Tight Carbonate based on Nuclear Magnetic
+
+576
+
+Resonance. Energy & Fuels, 32, no. 3,2962-2972. doi: 10.1021/acs.energyfuels.7b03460.
+
+ee
+
+rP
+
+577
+
+Florsch, N., A. Revil, and C. Camerlynck. 2014, Inversion of generalized relaxation time
+
+578
+
+distributions with optimized damping parameter. Journal of Applied Geophysics,
+
+579
+
+109,119-132. doi: https://doi.org/10.1016/j.jappgeo.2014.07.013.
+Garboczi, E. J. 1998, Finite Element and Finite Difference Programs for Computing the Linear
+
+iew
+
+581
+
+ev
+
+580
+
+rR
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 42 of 50
+
+Electric and Elastic Properties of Digital Images of Random Materials.
+
+582
+
+Johnson, D. L., J. Koplik, and L. M. Schwartz. 1986, New Pore-Size Parameter Characterizing
+
+583
+
+Transport in Porous Media. Physical Review Letters, 57, no. 20,2564-2567. doi:
+
+584
+
+10.1103/PhysRevLett.57.2564.
+
+585
+
+Karimpouli, S., and P. Tahmasebi. 2016, Conditional reconstruction: An alternative strategy in
+
+586
+
+digital rock physics. GEOPHYSICS, 81, no. 4,D465-D477. doi: 10.1190/geo2015-
+
+587
+
+0260.1.
+
+42
+
+Page 43 of 50
+
+588
+
+Keehm, Y., and T. Mukerji. 2004, Permeability and relative permeability from digital rocks:
+
+589
+
+Issues on grid resolution and representative elementary volume, SEG Technical Program
+
+590
+
+Expanded Abstracts 2004: Society of Exploration Geophysicists. 1654-1657.
+
+591
+
+Kelly, S., H. El-Sobky, C. Torres-Verdín, and M. T. Balhoff. 2016, Assessing the utility of FIB-
+
+592
+
+SEM images for shale digital rock physics. Advances in Water Resources, 95,302-316.
+
+593
+
+doi: https://doi.org/10.1016/j.advwatres.2015.06.010.
+
+594
+
+Kemna, A., A. Binley, G. Cassiani, E. Niederleithinger, A. Revil, L. Slater, K. H. Williams, A. F.
+
+595
+
+Orozco, F. H. Haegel, and A. Hoerdt. 2012, An overview of the spectral induced
+
+596
+
+polarization method for near-surface applications. Near Surface Geophysics, 10, no.
+
+597
+
+6,453-468. doi: 10.3997/1873-0604.2012027.
+
+rR
+
+ee
+
+rP
+
+598
+
+Fo
+
+Knackstedt, M., S. Latham, M. Madadi, A. Sheppard, T. Varslot, and C. Arns. 2009, Digital rock
+
+599
+
+physics: 3D imaging of core material and correlations to acoustic and flow properties.
+
+600
+
+The Leading Edge, 28, no. 1,28-33. doi: 10.1190/1.3064143.
+
+iew
+
+ev
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+601
+
+Leroy, P., A. Revil, A. Kemna, P. Cosenza, and A. Ghorbani. 2008, Complex conductivity of
+
+602
+
+water-saturated packs of glass beads. Journal of Colloid and Interface Science, 321, no.
+
+603
+
+1,103-117. doi: https://doi.org/10.1016/j.jcis.2007.12.031.
+
+604
+
+Lin, Q., Y. Al-Khulaifi, M. J. Blunt, and B. Bijeljic. 2016, Quantification of sub-resolution
+
+605
+
+porosity in carbonate rocks by applying high-salinity contrast brine using X-ray
+
+606
+
+microtomography differential imaging. Advances in Water Resources, 96,306-322. doi:
+
+607
+
+https://doi.org/10.1016/j.advwatres.2016.08.002.
+
+43
+
+GEOPHYSICS
+
+608
+
+Lindquist, W. B., A. Venkatarangan, J. Dunsmuir, and T.-f. Wong. 2000, Pore and throat size
+
+609
+
+distributions measured from synchrotron X-ray tomographic images of Fontainebleau
+
+610
+
+sandstones. Journal of Geophysical Research: Solid Earth, 105, no. B9,21509-21527. doi:
+
+611
+
+10.1029/2000JB900208.
+
+612
+
+Mahabadi, N., S. Dai, Y. Seol, T. Sup Yun, and J. Jang. 2016, The water retention curve and
+
+613
+
+relative permeability for gas production from hydrate-bearing sediments: pore-network
+
+614
+
+model simulation. Geochemistry, Geophysics, Geosystems, 17, no. 8,3099-3110. doi:
+
+615
+
+10.1002/2016GC006372.
+
+Marshall, D., and T. Madden. 1959, Induced polarization, a study of its causes. GEOPHYSICS,
+24, no. 4,790-816. doi: 10.1190/1.1438659.
+
+rR
+
+ee
+
+617
+
+rP
+
+616
+
+Fo
+
+618
+
+Mendelson, K. S. 1975, A theorem on the effective conductivity of a two‐dimensional
+
+619
+
+heterogeneous medium. Journal of Applied Physics, 46, no. 11,4740-4741. doi:
+
+620
+
+10.1063/1.321549.
+
+iew
+
+ev
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 44 of 50
+
+621
+
+Niu, Q., M. Prasad, A. Revil, and M. Saidian. 2016, Textural control on the quadrature
+
+622
+
+conductivity of porous media. GEOPHYSICS, 81, no. 5,E297-E309. doi:
+
+623
+
+10.1190/geo2015-0715.1.
+
+624
+625
+
+Niu, Q., and A. Revil. 2015, Connecting complex conductivity spectra to mercury porosimetry of
+sedimentary rocks. GEOPHYSICS, 81, no. 1,E17-E32. doi: 10.1190/geo2015-0072.1.
+
+44
+
+Page 45 of 50
+
+626
+
+Niu, Q., A. Revil, and M. Saidian. 2016, Salinity dependence of the complex surface
+
+627
+
+conductivity of the Portland sandstone. GEOPHYSICS, 81, no. 2,D125-D140. doi:
+
+628
+
+10.1190/geo2015-0426.1.
+
+629
+
+Niu, Q., and C. Zhang. 2017, Pore-scale modelling of complex conductivity of saturated granular
+
+630
+
+materials. Near Surface Geophysics, 15, no. 6,593-602. doi: 10.3997/1873-
+
+631
+
+0604.2017055.
+
+632
+
+Niu, Q., and C. Zhang. 2018, Joint inversion of NMR and SIP data to estimate pore size
+
+Fo
+
+633
+
+distribution of geomaterials. Geophysical Journal International, 212, no. 3,1791-1805.
+
+634
+
+doi: 10.1093/gji/ggx501.
+
+ee
+
+rP
+
+635
+
+Oyewole, E., M. Saneifar, and Z. Heidari. 2016, Multiscale characterization of pore structure in
+
+636
+
+carbonate formations: Application to the Scurry Area Canyon Reef Operators Committee
+
+637
+
+Unit. Interpretation, 4, no. 2,SF165-SF177. doi: 10.1190/INT-2015-0123.1.
+
+638
+
+Quintal, B., M. Frehner, C. Madonna, N. Tisato, M. Kuteynikova, and E. Saenger. 2011,
+
+iew
+
+ev
+
+rR
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+639
+
+Integrated numerical and laboratory rock physics applied to seismic characterization of
+
+640
+
+reservoir rocks. The Leading Edge, 30, no. 12,1360-1367. doi: 10.1190/1.3672480.
+
+641
+
+Revil, A. 2013, Effective conductivity and permittivity of unsaturated porous materials in the
+
+642
+
+frequency range 1 mHz–1GHz. Water Resources Research, 49, no. 1,306-327. doi:
+
+643
+
+10.1029/2012WR012700.
+
+644
+
+Revil, A., N. Florsch, and C. Camerlynck. 2014, Spectral induced polarization porosimetry.
+
+645
+
+Geophysical Journal International, 198, no. 2,1016-1033. doi: 10.1093/gji/ggu180.
+
+45
+
+GEOPHYSICS
+
+646
+
+Revil, A., and P. W. J. Glover. 1997, Theory of ionic-surface electrical conduction in porous
+
+647
+
+media. Physical Review B, 55, no. 3,1757-1773. doi: 10.1103/PhysRevB.55.1757.
+
+648
+
+Revil, A., K. Koch, and K. Holliger. 2012, Is it the grain size or the characteristic pore size that
+
+649
+
+controls the induced polarization relaxation time of clean sands and sandstones? : Water
+
+650
+
+Resources Research, 48, no. 5. doi: 10.1029/2011WR011561.
+
+651
+
+Revil, A., P. A. Pezard, and P. W. J. Glover. 1999, Streaming potential in porous media: 1.
+
+652
+
+Theory of the zeta potential. Journal of Geophysical Research: Solid Earth, 104, no.
+
+653
+
+B9,20021-20031. doi: 10.1029/1999JB900089.
+
+rP
+
+654
+
+Fo
+
+Saenger, E., and C. Madonna. 2011, Digital rock physics: Numerical vs. laboratory
+
+ee
+
+655
+
+measurements, SEG Technical Program Expanded Abstracts 2011: Society of
+
+656
+
+Exploration Geophysicists. 3693-3697.
+
+ev
+
+rR
+
+657
+
+Saenger, E., C. Madonna, M. Osorno, D. Uribe, and H. Steeb. 2014, Digital carbonate rock
+
+658
+
+physics, SEG Technical Program Expanded Abstracts 2014: Society of Exploration
+
+659
+
+Geophysicists. 2915-2919.
+
+660
+
+iew
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 46 of 50
+
+Sakellariou, A., T. Sawkins, T. Senden, C. Arns, A. Limaye, A. Sheppard, R. Sok, M.
+
+661
+
+Knackstedt, W. Pinczewski, L. Berge, and P. ren. 2003, Micro-CT facility for imaging
+
+662
+
+reservoir rocks at pore scales, SEG Technical Program Expanded Abstracts 2003: Society
+
+663
+
+of Exploration Geophysicists. 1664-1667.
+
+46
+
+Page 47 of 50
+
+664
+
+Schwarz, G. 1962, A theory of the low-frequency dielectric dispersion of colloidal particles in
+
+665
+
+electrolyte solution. The Journal of Physical Chemistry, 66, no. 12,2636-2642. doi:
+
+666
+
+10.1021/j100818a067.
+
+667
+
+Scott, J. B. T., and R. D. Barker. 2003, Determining pore-throat size in Permo-Triassic
+
+668
+
+sandstones from low-frequency electrical spectroscopy. Geophysical Research Letters,
+
+669
+
+30, no. 9. doi: 10.1029/2003GL016951.
+
+670
+
+Sengupta, M., M. Kittridge, and J. Blangy. 2017, Using digital rocks and simulations of pore-
+
+671
+
+scale multiphysics to characterize a sandstone reservoir. Interpretation, 5, no. 1,SB33-
+
+672
+
+SB43. doi: 10.1190/INT-2016-0068.1.
+
+ee
+
+rP
+
+Fo
+
+673
+
+Shabro, V., S. Kelly, C. Torres-Verdín, K. Sepehrnoori, and A. Revil. 2014, Pore-scale modeling
+
+674
+
+of electrical resistivity and permeability in FIB-SEM images of organic mudrock.
+
+675
+
+GEOPHYSICS, 79, no. 5,D289-D299. doi: 10.1190/geo2014-0141.1.
+
+ev
+
+rR
+
+676
+
+Sogade, J., F. Scira-Scappuzzo, Y. Vichabian, W. Shi, W. Rodi, D. Lesmes, and F. Morgan.
+
+677
+
+2006, Induced-polarization detection and mapping of contaminant plumes.
+
+678
+
+GEOPHYSICS, 71, no. 3,B75-B84. doi: 10.1190/1.2196873.
+
+iew
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+679
+
+Tang, D., and K. Spikes. 2017, Segmentation of shale SEM images using machine learning, SEG
+
+680
+
+Technical Program Expanded Abstracts 2017: Society of Exploration Geophysicists.
+
+681
+
+3898-3902.
+
+47
+
+GEOPHYSICS
+
+682
+
+Vanorio, T., and G. Mavko. 2011, Laboratory measurements of the acoustic and transport
+
+683
+
+properties of carbonate rocks and their link with the amount of microcrystalline matrix.
+
+684
+
+GEOPHYSICS, 76, no. 4,E105-E115. doi: 10.1190/1.3580632.
+
+685
+
+Walker, E., and P. W. J. Glover. 2018, Measurements of the Relationship Between
+
+686
+
+Microstructure, pH, and the Streaming and Zeta Potentials of Sandstones. Transport in
+
+687
+
+Porous Media, 121, no. 1,183-206. doi: 10.1007/s11242-017-0954-5.
+
+688
+
+Yan, W., J. Sun, J. Zhang, N. Golsanami, and S. Hao. 2016, A novel method for estimation of
+
+Fo
+
+689
+
+remaining oil saturations in water-flooded layers. Interpretation, 5, no. 1,SB9-SB23. doi:
+
+690
+
+10.1190/INT-2016-0074.1.
+
+iew
+
+ev
+
+rR
+
+692
+
+ee
+
+691
+
+rP
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 48 of 50
+
+48
+
+Page 49 of 50
+
+693
+
+Table 1. Sample data and micro-CT scanning information.
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+GEOPHYSICS
+
+694
+
+49
+
+GEOPHYSICS
+
+695
+
+Table 2. Summary of simulation trials and the input parameters chosen for each trial.
+
+696
+
+These values were used in the set-up to the final effective conductivity calculation of each
+
+697
+
+sample.
+
+698
+
+iew
+
+ev
+
+rR
+
+ee
+
+rP
+
+Fo
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+
+Page 50 of 50
+
+50
+
+

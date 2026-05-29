@@ -1,0 +1,31 @@
+{
+  "raw": "data\\microCT_Berea.raw",
+  "shape": [
+    350,
+    350,
+    350
+  ],
+  "dtype": "<u2",
+  "phase": "pore",
+  "label": 1,
+  "crop_start": [
+    115,
+    115,
+    115
+  ],
+  "crop_size": [
+    120,
+    120,
+    120
+  ],
+  "downsample": 2,
+  "rendered_mask_shape": [
+    60,
+    60,
+    60
+  ],
+  "phase_fraction_in_crop": 0.20153356481481483,
+  "mesh_vertices": 44785,
+  "mesh_faces": 87665,
+  "output_png": "figures\\digital_rock_berea_3d_pore_crop.png"
+}

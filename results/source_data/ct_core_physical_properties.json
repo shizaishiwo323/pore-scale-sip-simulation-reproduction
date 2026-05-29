@@ -1,0 +1,41 @@
+{
+  "raw_volume": {
+    "shape_voxels": [
+      350,
+      350,
+      350
+    ],
+    "dtype": "<u2",
+    "pore_label": 1,
+    "solid_label": 2,
+    "porosity_from_voxel_count": 0.23146971428571428,
+    "voxel_size_m": 2.8e-06,
+    "physical_size_m": [
+      0.00098,
+      0.00098,
+      0.00098
+    ],
+    "bulk_volume_m3": 9.41192e-10,
+    "pore_volume_from_voxels_m3": 2.1785744332799998e-10
+  },
+  "pnextract_network": {
+    "prefix": "C:\\Users\\imgw\\Documents\\Codex\\论文复现\\pore-scale-simulation-reproduction\\experiments\\berea_pnextract\\full_350\\Berea350_full",
+    "n_pores": 2124,
+    "n_throats": 3849,
+    "pore_radius_volume_weighted_mean_m": 2.4849208099245557e-05,
+    "throat_length_volume_weighted_mean_m": 3.870017309758657e-05,
+    "pore_radius_min_m": 3.407829e-06,
+    "pore_radius_max_m": 4.525547e-05,
+    "throat_length_min_m": 9.24849e-07,
+    "throat_length_max_m": 0.0001027527,
+    "pore_radius_median_m": 6.9320645000000005e-06,
+    "throat_radius_median_m": 4.614262e-06,
+    "throat_length_median_m": 2.326777e-05
+  },
+  "algorithm_statement": {
+    "network_extractor": "pnextract",
+    "algorithm_family": "maximal-ball pore-network extraction",
+    "local_source": "C:\\Users\\imgw\\Documents\\Codex\\论文复现\\pore-scale-simulation-reproduction\\pnextract\\src\\pnm\\pnextract\\README.md",
+    "important_distinction": "pnextract creates a pore-throat ball-and-stick network for geometry and polarization statistics; the AC3D effective-property solve uses the original two-phase voxel grid."
+  }
+}

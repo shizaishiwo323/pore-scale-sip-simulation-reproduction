@@ -1,0 +1,16 @@
+{
+  "input_pores_csv": "C:\\Users\\imgw\\Documents\\Codex\\论文复现\\pore-scale-simulation-reproduction\\organized_gpu_ac3d_reproduction_20260527\\results\\pnextract\\rawdata_pnextract_rerun_20260527\\network_parsed\\pores.csv",
+  "input_throats_csv": "C:\\Users\\imgw\\Documents\\Codex\\论文复现\\pore-scale-simulation-reproduction\\organized_gpu_ac3d_reproduction_20260527\\results\\pnextract\\rawdata_pnextract_rerun_20260527\\network_parsed\\throats.csv",
+  "output_png": "figures\\berea_pore_network_75deg_glossy.png",
+  "view_elev_degrees": 18.0,
+  "view_azim_degrees": 75.0,
+  "style": "james_glossy",
+  "n_pores_rendered": 2124,
+  "n_throats_total": 3849,
+  "n_internal_throats_rendered": 3662,
+  "pore_radius_min_m": 3.407829e-06,
+  "pore_radius_max_m": 4.525547e-05,
+  "throat_radius_min_m": 1.360443e-06,
+  "throat_radius_max_m": 3.427707e-05,
+  "note": "Boundary throats with negative pore ids are omitted from the rendering."
+}
