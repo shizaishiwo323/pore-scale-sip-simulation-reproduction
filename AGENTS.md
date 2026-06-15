@@ -43,7 +43,7 @@
 | `docs/references/jgrb54470-sup-0001-2020jb020515-si.docx` | Word 文档 | 184,716 bytes | 当前项目内保存的 Niu et al. (2020) 补充材料副本 | 用于确认数据尺寸、参数、补充公式和额外实验细节；作为项目内只读参考资料，不要覆盖 |
 | `docs/references/Pore-network extraction from micro-computerized-tomography images.pdf` | PDF | 950,843 bytes | 孔隙网络提取与 micro-CT 图像处理相关参考论文 | 用于辅助理解孔隙网络提取、图像分割、连通性与几何表征；不要把其中方法直接等同于 Niu et al. (2020) 的模拟设置，除非有明确对应证据 |
 | `docs/references/NISTIR 6269.pdf` | PDF | 818,955 bytes | 当前项目内保存的 NISTIR 6269 副本；AC3D 参考程序和数值框架相关资料 | 用于追踪论文所用 AC3D 思路、参考代码背景和数值实现细节；作为项目内只读参考资料，不要覆盖 |
-| `code/vendor/pnextract/` | 外部参考代码目录 | 5,731,780 bytes | 当前项目内保存的 pnextract 原始代码副本；包含源码、文档、第三方库和 `bin.7z` | 作为外部上游/参考代码保留原貌；不要在未记录来源和修改原因的情况下直接改写，项目自有包装或解析脚本应优先放在 `code/scripts/` 或 `code/src/` |
+| `code/vendor/pnextract/` | 外部参考代码目录 | 5,731,780 bytes | 当前项目内保存的 pnextract 原始代码副本；包含源码、文档、第三方库和 `bin.7z` | 作为外部上游/参考代码保留原貌；不要在未记录来源和修改原因的情况下直接改写，项目自有包装或解析脚本应优先放在 `code/scripts/pore_network/`、`code/scripts/digital_rock_visualization/`、`code/scripts/sip_simulation/` 或 `code/src/` |
 | `../论文资料/JGR Solid Earth - 2020 - Niu - A Framework for Pore‐Scale Simulation of Effective Electrical Conductivity and Permittivity (1).pdf` | PDF | 2,070,106 bytes | 18 页；题名为 *A Framework for Pore-Scale Simulation of Effective Electrical Conductivity and Permittivity of Porous Media in the Frequency Range From 1 mHz to 1 GHz*；作者 Qifei Niu, Chi Zhang, Manika Prasad；JGR Solid Earth 2020；DOI 相关标识 `10.1029/2020JB020515` | 当前核心论文，优先阅读和引用 |
 | `../论文资料/jgrb54470-sup-0001-2020jb020515-si.docx` | Word 文档 | 184,716 bytes | 补充材料；内部包含 `word/document.xml`、页眉页脚、脚注/尾注、图片资源等 22 个 docx 组件 | 用于确认数据尺寸、参数、补充公式和额外实验细节 |
 | `../论文资料/NISTIR 6269.pdf` | PDF | 818,955 bytes | 210 页；PDF 元数据标题为 `ir_cover.dvi` | 论文里面使用的模拟框架的AC3D参考代码来源 |
@@ -67,6 +67,68 @@
 2. 从论文和补充材料中还原模拟框架的关键流程，包括微观结构输入、孔隙/矿物相处理、电导率与介电常数计算、边界条件和结果后处理。
 3. 使用仓库中的论文数据和 microCT 数据，逐步复现论文图表或核心数值结果。
 4. 记录每一步复现的假设、参数、差异来源和验证结果，保证后续可以追踪、修改和重复运行。
+
+## Niu 2020 三维 SIP 复现当前状态
+
+当前 Niu 2020 Berea 复现的正式路线使用 `data/Niu 2020data/` 中的数据，不直接绘制论文工作簿里的 simulation/机制曲线作为本项目模拟结果。`microCT_Berea.raw` 按 `350 x 350 x 350`、little-endian `uint16` 读取，`1=孔隙/水相`、`2=固相`，体素边长 `2.8 um`，正式 full-grid AC3D 不降采样。
+
+### 已确认的问题与修正
+
+- 早期 pnextract 自动网络路线把 `throat_length_m` 和由 `R^2/(4G)` 反算的 `Zdc` 直接作为 Niu 膜极化模型的 `L/Zdc` 输入，导致膜极化峰从论文 Figure 8 的约 `4.6e4 Hz` 偏到约 `10 Hz`，低频虚部高出约 `70-80x`。这不是孔极化高频持续的主问题；孔极化高频主要是数值底噪/绘图尺度问题。
+- 论文公式本身仍按 Titov 膜极化使用：`tau_m=L^2/(4D)`、`C_m*=1/Z_m*-1/Zdc`、`Delta sigma_w*=2C*/Lambda`。默认参数仍为 `D=1.3e-9 m^2/s`、`eta0=0.01`、`sigma_w=0.043 S/m`、`Lambda=2.7 um`、`Sigma_S=1.3e-9 S`。
+- 当前修正采用显式、可追踪的膜极化输入缩放：`membrane_length_scale=0.0446683592150963`、`membrane_zdc_scale=10.0`。这表示当前 pnextract 几何与论文作者内部孔喉几何/电阻定义不完全一致；该缩放是诊断性修正，不应被写成论文原始隐藏参数。
+- 旧 `results/niu2020_berea_full350_interfacial_fft_x/sweep_results.csv` 的低频 interfacial permittivity 趋势是数值残差被 `epsilon'=sigma''/(omega epsilon0)` 放大的结果，不是物理机制。正式 Figure 7 风格图应使用 `results/niu2020_berea_full350_interfacial_precision_merged/sweep_results.csv`：`f < 1 Hz` 使用由 complex128 probe 的可靠低频平台外推，`1-100 Hz` 使用 direct complex128 probe，`f > 100 Hz` 保留原 full350 AC3D sweep。该合并曲线只来自本项目求解结果和数值精度诊断，不使用论文 simulation/interfacial 列作为模拟输入。
+
+### Niu Figure 7 机制分离约定
+
+Niu et al. (2020) Figure 7 的 `Interfacial/Maxwell`、`Pore polarization`、`Membrane polarization` 和 `All` 不是用总曲线相减得到的增量分解，而是 Section 5.3 中“only consider one polarization at a time”的单机制材料赋值与场求解。后续画机制图、生成 component spectra、写 metadata 或解释 sample16/sample89 结果时必须按以下定义：
+
+- `Interfacial / Maxwell`：水相和固相只赋予 dc conductivity 与高频介电常数；不加入孔极化 `Delta sigma_pore*`，不加入膜极化 `Delta sigma_membrane*`。该机制必须通过异质 solid-water 场求解体现 Maxwell-Wagner / interfacial polarization；若使用 `pnm-formation-factor` 快速代理，必须标注为 proxy，不能等同于完整 AC3D interfacial 结果。
+- `Pore polarization`：水相赋值为 `sigma_w + Delta sigma_pore*`；固相赋值为 `0`；不加入 Maxwell 固相/水相高频介电背景，不加入膜极化。该曲线是“孔极化单机制模拟结果”，不是 `Pore - Maxwell`，也不是 `Maxwell + 孔极化扰动` 的普通叠加解释。
+- `Membrane polarization`：水相赋值为 `sigma_w + Delta sigma_membrane*`；固相赋值为 `0`；不加入 Maxwell 固相/水相高频介电背景，不加入孔极化。该曲线是“膜极化单机制模拟结果”，不是 `Membrane - Maxwell`。
+- `All`：水相赋值为 `sigma_w + 高频介电项 + Delta sigma_pore* + Delta sigma_membrane*`；固相赋值为高频介电项。该曲线用于与实验总响应对比，但不应被拆成简单线性相减的“贡献”。
+- 若需要额外画 `Pore increment = Pore - Maxwell`、`Membrane increment = Membrane - Maxwell` 或其他差分诊断，文件名、图例和 metadata 必须显式写明 `increment/difference diagnostic`，不得标成 Niu Figure 7 的 `Pore polarization` 或 `Membrane polarization`。
+
+### LKC 样品 SIP 绘图坐标规范
+
+对 sample16/sample89 等 LKC 样品绘制实部/虚部频谱对比图时，默认采用与 Zhang/Fan 附图一致的 log-log 坐标和固定范围，便于跨样品和跨机制直接比较：
+
+- 后续做 SIP 模拟时，`dynamic_pore_size_m` / `Lambda`、`sample length`、`sample diameter` 三个样品物性/几何参数应从 `data_inventory/ct_backed_samples_raw_copy_20260605/physical_properties/样品属性.xlsx` 查询；不要在脚本、metadata 或正文中沿用旧硬编码值，除非明确标注为 sensitivity/diagnostic。
+- 横轴 `Frequency (Hz)`：`1e-4` 到 `1e5`。
+- 实部纵轴 `sigma' (S/m)`：`1e-4` 到 `1e-1`。
+- 虚部纵轴 `sigma'' (S/m)`：`1e-7` 到 `1e-3`。
+- 纵轴应使用真正的对数坐标绘制原始正值 `sigma`，不要把数据先取 `log10(sigma)` 后再画成线性纵轴，除非图名和坐标轴明确标注为诊断图。
+- 实验虚部若存在非正异常点，log 图只绘制 `sigma'' > 0` 的点，并在 metadata 或图例中说明过滤规则。
+- sample16 的正式机制对比图必须使用 `LKC-16.csv` 的实验频率点本身，当前为 `0.1-20000 Hz`、`51` 个频点；不要把 `np.logspace(-3,4,80)` 之类扩展频率曲线直接标成正式实验同频对比。若为了显示孔极化峰形态需要扩展到实验外低频，图名、metadata 和正文必须标明为 `model diagnostic / extrapolated frequency extension`，并说明实验频带没有覆盖该部分。
+- sample16 正式 PNM/AC3D 机制图应优先直接使用 pnextract 提取出的孔半径和孔喉长度，即 `pore_radius_scale=1`、`membrane_length_scale=1`。不要为了让孔/膜极化峰位贴合参考图而把这两个几何量缩放到经验值；若使用 `pore_radius_scale` 或 `membrane_length_scale`，只能作为明确标注的 sensitivity/diagnostic，不得作为论文正式参数。
+
+### 正式代码入口
+
+- `code/scripts/sip_simulation/compute_polarization_spectra.py`：生成孔/膜极化谱，支持显式 `--pore-radius-scale`、`--membrane-length-scale` 和 `--membrane-zdc-scale`，metadata 必须保留实际使用的缩放、有效 pore radius、有效 `L` 和有效 `Zdc` 统计。
+- `code/scripts/sip_simulation/diagnose_niu2020_membrane_mismatch.py`：膜极化 mismatch 诊断与快速代理扫描，用于说明为什么需要 `L/Zdc` 修正；这不是最终 AC3D 场求解。
+- `code/scripts/sip_simulation/make_polarization_component_spectra.py`：把 corrected 基础谱拆成 `interfacial`、`pore`、`membrane`、`all` 组件谱。
+- `code/scripts/sip_simulation/run_ac3d_matrix_free_gpu_sweep.py`：正式 full-grid AC3D 求解入口，Niu 2020 常规 sweep 使用 `350^3` 全域、`direction=x`、`complex64`、`preconditioner=fft`、`rtol=1e-5`；低频 interfacial 需要单独使用 `complex128`、更严格 `rtol` 做精度诊断或使用已生成的 precision-merged 结果。
+- `code/scripts/sip_simulation/plot_niu2020_figure7_style_corrected.py`：当前唯一推荐的 Niu Figure 7 风格机制复现图入口。实验散点只读 `Figure8.xlsx` 前三列；四条模拟曲线必须来自本项目 full350 AC3D `sweep_results.csv`。
+- `code/scripts/sip_simulation/verify_niu2020_figure7_style_provenance.py`：验证 corrected Figure 7 风格图的数据来源，逐列确认 source data 与本项目 AC3D sweep 匹配，并记录论文 Figure8 simulation/机制列未作为绘图模拟源。
+
+### 当前关键结果与 provenance
+
+- Corrected Figure 7 风格图：`figures/niu2020/niu2020_figure7_style_corrected_reproduction.png`、`.svg`、`.pdf`。
+- 图源数据：`results/source_data/niu2020_figure7_style_corrected_reproduction_source_data.csv`。
+- 图源证明：`results/niu2020/niu2020_figure7_style_corrected_provenance.md` 和 `.json`。该证明应显示四条 `our_corrected_*` 曲线均 `matches_sweep_csv=true`，并显示 Figure8 中论文 simulation/pore/membrane/interfacial blocks 均 `used_as_plotted_simulation_source=false`。
+- Corrected all sweep：`results/niu2020_berea_full350_all_scaled_membrane_fft_x/sweep_results.csv`。
+- Corrected membrane sweep：`results/niu2020_berea_full350_membrane_scaled_fft_x/sweep_results.csv`。
+- Unmodified pore sweep：`results/niu2020_berea_full350_pore_fft_x/sweep_results.csv`。
+- Corrected interfacial sweep：`results/niu2020_berea_full350_interfacial_precision_merged/sweep_results.csv`。
+- Original interfacial complex64 sweep：`results/niu2020_berea_full350_interfacial_fft_x/sweep_results.csv`，仅作为精度诊断和高频保留来源，不应直接作为正式 Figure 7 风格图的低频 interfacial 曲线。
+- `results/niu2020_berea_full350_all_scaled_membrane_fft_x/ac3d_input_provenance.json` 和 `results/niu2020_berea_full350_membrane_scaled_fft_x/ac3d_input_provenance.json` 必须记录 `membrane_length_scale=0.0446683592150963`、`membrane_zdc_scale=10.0`、原始 `microCT_Berea.raw`、`350^3` shape、`2.8e-6 m` voxel size 和 full-resolution pnextract network。
+
+### 禁止恢复的旧错误路线
+
+- 不要恢复或新增以 `plot_niu2020_mechanism_components_vs_experiment.py`、`plot_niu2020_experiment_vs_ours.py` 为代表的旧 Niu 绘图入口；这些旧入口已删除，容易让未修正的 unscaled membrane 结果重新成为正式图。
+- 不要把 `results/niu2020_berea_full350_all_fft_x/` 或 `results/niu2020_berea_full350_membrane_fft_x/` 中的未修正 unscaled 结果作为正式 Niu 复现图的模拟曲线。它们只能作为 mismatch 诊断和修正前对照。
+- 不要把 `results/niu2020_berea_full350_interfacial_fft_x/` 的低频 interfacial 曲线直接绘入正式图；该旧曲线在低频受求解残差底噪影响，会产生错误的 `1/f` 型 permittivity 假象。
+- 不要把 `data/Niu 2020data/Figure8.xlsx` 中的 Simulation、Pore polarization、Membrane polarization、Interfacial polarization 列直接绘成“我们的模拟结果”。这些列只能用于误差审计或论文对照；正式图必须有 provenance 证明模拟曲线来自本项目 AC3D sweep。
 
 ## 二维微流控 SIP 迁移状态
 
@@ -93,11 +155,18 @@
 
 - `code/src/pore_scale_electrical/ac2d_solver.py`：二维复电导率场求解器。
 - `code/src/pore_scale_electrical/microfluidic_2d.py`：微流控图像裁剪、相标签、几何统计和 AC2D 参数组装。
-- `code/scripts/run_ac2d_microfluidic_sweep.py`：批量运行二维微流控 AC2D 频谱和时间序列。当前默认 `driver_mode=si03`，只用 SI-S03 提供 `sigma_w(t)`，主机制为 `maxwell`、`interface`、`all`；旧 CEC/Waxman-Smits 路线应作为显式 `paper-cec` 诊断模式。
-- `code/scripts/calibrate_ac2d_mechanistic_params.py`：扫描 `Sigma_s` 和 Schwarz 特征长度 `r_char`，对机理型 AC2D 的 2.5 Hz 虚部量级做参数标定。
-- `code/scripts/plot_ac2d_microfluidic_paper_style.py`：生成类似论文多面板结构图的频谱与界面图像组合图。
-- `code/scripts/plot_ac2d_2p5hz_paper_comparison.py`：生成 2.5 Hz 实部/虚部随时间变化的论文数据对比图。
-- `code/scripts/compute_paper_consistent_2p5hz_waxman_smits.py`：用补充材料中的 `phi(t)`、`Sw(t)`、`sigma_w(t)`、`CEC(t)` 复核论文 Waxman-Smits 公式；这是论文公式诊断，不是 AC2D 场求解。
+- `code/scripts/sip_simulation/run_ac2d_microfluidic_sweep.py`：批量运行二维微流控 AC2D 频谱和时间序列。当前默认 `driver_mode=si03`，只用 SI-S03 提供 `sigma_w(t)`，主机制为 `maxwell`、`interface`、`all`；旧 CEC/Waxman-Smits 路线应作为显式 `paper-cec` 诊断模式。
+- `code/scripts/sip_simulation/calibrate_ac2d_mechanistic_params.py`：扫描 `Sigma_s` 和 Schwarz 特征长度 `r_char`，对机理型 AC2D 的 2.5 Hz 虚部量级做参数标定。
+- `code/scripts/sip_simulation/plot_ac2d_microfluidic_paper_style.py`：生成类似论文多面板结构图的频谱与界面图像组合图。
+- `code/scripts/sip_simulation/plot_ac2d_2p5hz_paper_comparison.py`：生成 2.5 Hz 实部/虚部随时间变化的论文数据对比图。
+- `code/scripts/sip_simulation/compute_paper_consistent_2p5hz_waxman_smits.py`：用补充材料中的 `phi(t)`、`Sw(t)`、`sigma_w(t)`、`CEC(t)` 复核论文 Waxman-Smits 公式；这是论文公式诊断，不是 AC2D 场求解。
+- `code/scripts/digital_rock_visualization/render_segmented_core_html.py`：针对分割后三维数字岩心 TIFF 生成 PyVista/VTK 离线交互 HTML。当前默认输入为 `data_inventory/ct_backed_samples_raw_copy_20260605/sample_89_Grainstone/CT_slices/89seged.tiff`，约定 `0=孔隙`、`255=固体`，自动识别所有像素值组分；HTML 右侧提供 `Surface mesh` 与 `Voxel volume` 两列组分显隐 checkbox、颜色选择器和 `Apply` 按钮，右上角显示按原始体素计数得到的孔隙率。当前 `pixel_size_y_um=1.7`，脚本默认按各向同性 `voxel_spacing_um_xyz=[1.7,1.7,1.7]` 写入 mesh/volume 和 metadata；若后续确认 x/z 尺度不同，应扩展参数而不是静默沿用各向同性假设。若目标是接近 ImageJ 的原始体数据分布，应优先使用 `--surface-mode none --voxel-mode volume --voxel-initial-visible solid`，避免把全分辨率数据先转成粗糙 surface mesh；若目标是轻量快速预览，可再配合 `--downsample`。
+- `code/scripts/digital_rock_visualization/render_segmented_core_fiji3d_html.py`：参考 `C:\Users\imgw\Fiji.app\plugins\3D_Viewer-5.0.0.jar` 的 Fiji/ImageJ 3D Viewer 思路生成单 label-volume 离线交互 HTML。该脚本不覆盖 `render_segmented_core_html.py` 或 `run_segmented_core_pnextract_ballstick.py`，而是新增一条可视化路线：把原始 `0/255` 标签体作为一个 VTK volume actor 导出，通过网页端 LUT、Threshold、Transparency/Opacity 和 Color 控件模拟 Fiji 3D Viewer 的 `VOLUME` 模式与 `setThreshold`、`setTransparency`、`setColor` 行为。此路线用于避免全分辨率 surface mesh 的离散/块状感，默认 `--downsample 1 --initial-visible pore --interpolation linear`，因为样品 89 固体占比约 91.72%，默认显示孔隙相更利于观察内部结构。HTML 右上角还提供 `3D Clip` 面板，可选择 `X/Y/Z` 裁切平面、拖动 index slider/number input、选择保留 positive/negative 一侧，然后点击 `Apply` 才对 VTK volume mapper 应用 clipping plane，让三维体素本体像被切掉一半一样显示剩余部分；`Show full volume` 会清除 clipping plane。不要把它改成 2D canvas 预览切片，也不要改成拖动时实时裁切，因为全分辨率体数据会明显增加浏览器负担。
+- `code/scripts/digital_rock_visualization/visualize_digital_rock_3d.py`：针对 RAW 数字岩心裁剪子体生成 marching-cubes 三维预览。原有 `--out` 仍输出 PNG；现支持可选 `--html-out`，会用 PyVista/VTK 把同一 mesh 导出为可鼠标旋转缩放的离线交互 HTML。该脚本适合做轻量 mesh 预览，不替代 `render_segmented_core_fiji3d_html.py` 的全分辨率 label-volume 查看。
+- `3D Clip` 的 clipping plane 必须在视角拖动、缩放和后续 render 中保持稳定。网页端自定义 `vtkPlane` 的 `getOrigin()` 和 `getNormal()` 必须返回数组副本，而不是内部数组引用；否则 VTK.js 渲染时的坐标变换可能污染原始平面，导致 Apply 后一瞬间可见裁切、拖动视角后又看起来恢复完整体。当前脚本还通过 `window.segmentedCoreCurrentClipPlane` 和 render hook 持久化当前裁切状态，若 clipping plane 被清空或污染，会在下一次 render 前补回。
+- `code/scripts/pore_network/run_segmented_core_pnextract_ballstick.py`：针对分割数字岩心生成 pnextract 输入、运行 `../pnextract/bin.7z` 解压出的 `pnextract.exe`、解析 node/link 网络文件，并调用 PyVista/VTK 球棍网络 HTML 渲染器。当前默认同样使用 `89seged.tiff`，`0=孔隙`，非孔隙组分映射为 pnextract 的 solid；默认 `--downsample 4` 以保证网络提取和 HTML 交互可用，默认 `--voxel-size-um 1.7`，因此 pnextract 输出的有效体素尺度为 `6.8 um`。如需全分辨率网络，可显式设置 `--downsample 1`，但应预期运行时间和 HTML 体积显著增加。
+- `code/scripts/pore_network/render_berea_pore_network_html.py`：Berea/pnextract 球棍网络的 PyVista/VTK 离线 HTML 渲染器。除原有球体/管道材质渲染外，现支持 `--segmented-volume`、`--pore-value`、`--solid-value`，用于从原始分割体按像素计数计算孔隙率，并把孔隙率显示在 HTML 页面右上角。
+- 旧的 `code/scripts/*.py` 入口目前保留为兼容 wrapper，会转发到分类目录中的真实脚本；新增功能或后续维护应优先修改分类目录里的真实脚本，不要把新逻辑写回 wrapper。
 
 ### 当前结果目录
 
@@ -108,6 +177,21 @@
 - `results/ac2d_microfluidic/mechanistic_calibration_v1/`：机理参数扫描结果目录，用于记录 `Sigma_s`、`r_char`、`tau` 和 2.5 Hz 误差。
 - `results/ac2d_microfluidic/paper_consistent_2p5hz_waxman_smits.csv`：论文公式复核输出，不代表本项目二维场求解。
 - `figures/ac2d_microfluidic/`：二维微流控 SIP 的结构图、频谱图和论文对比图应按用途集中保存在此目录下。
+- `figures/segmented_cores/sample_89_Grainstone_89seged_solid255_pore0_interactive.html`：样品 89 分割数字岩心组分可视化 HTML。当前默认 `initial_visible=solid`，打开时只显示 `255` 固体的 surface mesh；voxel volume 默认不显示，可在右侧 `Voxel volume` 列分别勾选 `pore (0)` 或 `solid (255)`，再点击 `Apply` 观察体素/体绘制效果。
+- `figures/segmented_cores/sample_89_Grainstone_89seged_fullres_voxel_volume_interactive.html`：样品 89 原始分辨率体渲染 HTML，使用 `--downsample 1 --surface-mode none --voxel-mode volume --voxel-initial-visible solid`，用于查看更接近 ImageJ 的原始体素结构分布；metadata 位于 `results/source_data/sample_89_Grainstone_89seged_fullres_voxel_volume_interactive_metadata.json`。
+- `figures/segmented_cores/sample_89_Grainstone_89seged_downsample12_voxel_volume_interactive.html`：样品 89 推荐降采样体渲染 HTML，使用 `--downsample 12 --surface-mode none --voxel-mode volume --voxel-initial-visible solid`，用于在较小文件和更稳交互中查看同一组分分布；metadata 位于 `results/source_data/sample_89_Grainstone_89seged_downsample12_voxel_volume_interactive_metadata.json`。
+- `figures/segmented_cores/sample_89_Grainstone_89seged_downsample6_voxel_volume_interactive.html`：样品 89 较细降采样体渲染 HTML，使用 `--downsample 6 --surface-mode none --voxel-mode volume --voxel-initial-visible solid`；文件仍较轻，但内置浏览器自动化加载时曾出现 native pipe 断开，优先把 `downsample12` 作为稳定预览版。
+- `figures/segmented_cores/sample_89_Grainstone_89seged_fiji3d_viewer_style_volume_interactive.html`：样品 89 参考 Fiji 3D Viewer 的原始分辨率单 label-volume 交互 HTML，使用 `--downsample 1 --initial-visible pore --interpolation linear`，右侧面板提供相显隐、颜色、透明度控制，以及非实时 `3D Clip` 轴向体裁切 slider + `Apply` 控件；metadata 位于 `results/source_data/sample_89_Grainstone_89seged_fiji3d_viewer_style_volume_interactive_metadata.json`。
+- `figures/segmented_cores/sample_89_Grainstone_89seged_fiji3d_viewer_style_downsample12_volume_interactive.html`：同一路线的轻量预览版，使用 `--downsample 12`，也包含同样的切片控件；metadata 位于 `results/source_data/sample_89_Grainstone_89seged_fiji3d_viewer_style_downsample12_volume_interactive_metadata.json`。
+- `figures/segmented_cores/sample_89_Grainstone_89seged_pnextract_ballstick_interactive.html`：样品 89 基于 pnextract 的球棍孔隙网络交互 HTML。当前网络来自 `downsample=4` 的分割体，右上角孔隙率仍按原始全分辨率 TIFF 计算。
+- `notebooks/sample_89_6seged_digital_rock_and_pore_network_workflow.ipynb`：针对 `data_inventory/ct_backed_samples_raw_copy_20260605/sample_89_Grainstone/CT_slices/segv2/6-seged.tiff` 的完整可复跑流程。该 notebook 在 Conda `ml` 环境中把多数标签 `1` 映射为固体 `255`，把标签 `2` 映射为孔隙 `0`，输出二值 TIFF/RAW、Fiji 风格全分辨率 HTML、pnextract 球棍网络 HTML，以及 `visualize_digital_rock_3d.py` 的 PNG 和交互 HTML 预览。当前体素统计为 `471,815 pore px / 27,000,000 total px`，孔隙率 `1.747%`。
+- `figures/segmented_cores/sample_89_Grainstone_6seged_fiji3d_fullres_volume_interactive.html`：由上述 notebook 生成的 `6-seged` 全分辨率 Fiji/ImageJ 风格 label-volume 交互 HTML，输入二值体位于 `results/segmented_cores/sample_89_Grainstone_6seged_solid255_pore0.tiff`。
+- `figures/segmented_cores/sample_89_Grainstone_6seged_pnextract_ballstick_interactive.html`：由上述 notebook 生成的 `6-seged` pnextract 球棍孔隙网络 HTML。当前网络使用 `downsample=4`，解析结果位于 `results/pnextract/sample_89_Grainstone_6seged/network_parsed/`，本次结果为 `42 pores / 17 throats`。
+- `figures/segmented_cores/sample_89_Grainstone_6seged_visualize_digital_rock_pore_preview_interactive.html`：由 `visualize_digital_rock_3d.py --html-out` 生成的轻量 pore-phase mesh 交互 HTML；对应 PNG 预览为 `figures/segmented_cores/sample_89_Grainstone_6seged_visualize_digital_rock_pore_preview.png`。
+- `results/source_data/sample_89_Grainstone_89seged_solid255_pore0_interactive_metadata.json`：样品 89 分割体 HTML 的输入、体素统计、组分 mesh、默认显隐、`pixel_size_y_um=1.7` 和材质参数记录。
+- `results/source_data/sample_89_Grainstone_89seged_pnextract_ballstick_interactive_metadata.json`：样品 89 球棍网络 HTML 的输入 CSV、材质参数、孔隙率体素统计、pnextract 降采样和体素尺寸记录。
+- `results/pnextract_inputs/sample_89_Grainstone_89seged/`：由 `run_segmented_core_pnextract_ballstick.py` 生成的 pnextract RAW/MHD 输入及 pnextract 原始输出文件。该目录是可再生结果，不应混入原始数据目录。
+- `results/pnextract/sample_89_Grainstone_89seged/network_parsed/`：由 `parse_pnextract_network.py` 解析得到的 `pores.csv`、`throats.csv` 和 `network_summary.json`。
 
 ### 当前判断
 
@@ -171,6 +255,37 @@ conda activate C:\Users\imgw\.conda\envs\ml
 - 对重型计算或大文件处理，先在小切片、小网格或抽样数据上验证逻辑，再运行完整数据。
 - 不要把大型生成结果、缓存或临时文件无说明地堆在根目录。
 - 如引入新的依赖，应说明用途，并尽量记录在 `requirements.txt`、`pyproject.toml` 或环境说明中。
+
+## Berea 孔隙网络三维交互图规范
+
+- `figures/berea_pore_network/berea_pore_network_75deg_specular_vivid_full.png` 是 Berea 孔隙网络可视化的目标静态风格参考。
+- 若生成同类三维交互 HTML，应保留 PyVista/VTK 的真实三维 mesh 与材质光照路线，使用 `pyvista.Plotter.export_html` 导出 VTK.js offline HTML。
+- 球体和管道的自然光泽必须来自绘图库/渲染器的材质参数，而不是叠加白色 marker、贴图点或其他后处理假高光。
+- 当前推荐材质参数应与静态 PyVista 图一致：球体 `ambient=0.38`、`diffuse=0.76`、`specular=0.64`、`specular_power=46`、`smooth_shading=True`；管道 `ambient=0.42`、`diffuse=0.72`、`specular=0.42`、`specular_power=28`、`smooth_shading=True`。
+- 推荐颜色保持球体 `#ff0000`、管道 `#004cff`、白色背景和灰色坐标盒；默认视角保持 `elev=18`、`azim=75`，并保留浏览器中的鼠标旋转、缩放和自适应显示。
+- 不要为这类图退回 Plotly `scatter3d` marker 高光拼接方案，除非用户明确要求轻量文件优先并接受缺少真实球体材质高光。
+- 由于真实 sphere/tube mesh 会嵌入 HTML，单文件体积可能明显大于 Plotly 版本；这是保留真实材质高光的可接受代价，应在结果说明中注明。
+
+## 分割数字岩心三维可视化规范
+
+- 当前样品 89 输入文件为 `data_inventory/ct_backed_samples_raw_copy_20260605/sample_89_Grainstone/CT_slices/89seged.tiff`。该文件是三维分割 TIFF 栈，当前已确认 `0` 表示孔隙，`255` 表示固体；若后续出现其他像素值，应把它们作为独立组分记录，而不是强行并入孔隙或固体。
+- 分割体 HTML 可视化应使用 `code/scripts/digital_rock_visualization/render_segmented_core_html.py`，走 PyVista/VTK real mesh 与 volume actor 路线，导出离线单文件 HTML；不要改回 Plotly marker、二维切片拼接方案，或把体素显示伪装成另一套 surface mesh。
+- 分割体 HTML 的所有组分 actor 必须在 Python 导出阶段保持 `Visibility=True`，以确保 PyVista/VTK 会把每个组分序列化到离线 scene；初始显隐只在 HTML 侧根据 metadata 和 `Apply` 逻辑设置。不要在导出前用 `actor.SetVisibility(False)` 隐藏默认不显示的组分，否则该组分会从 HTML scene 中缺失，后续无法通过 checkbox 切换出来。
+- 分割体 HTML 控件依赖导出后注入的 VTK.js hook：`window.segmentedCoreRenderWindow`、`window.segmentedCoreActors` 和 `window.segmentedCoreVolumes`。`window.segmentedCoreActors` 应在 `o.synchronize(e.scene)` 完成后通过同步器上下文 `getInstance(id)` 从 `vtkOpenGLActor` scene id 注册；`window.segmentedCoreVolumes` 应从 `vtkVolume` scene id 注册。不要依赖 `renderer.getActors()` 这类在 PyVista 离线同步器里不稳定的路径。
+- 分割体页面必须明确标注两种渲染列：`Surface mesh` 表示相界面三角面；`Voxel volume` 表示基于原始组分 mask 的体素/体绘制 volume actor。两列都必须支持 `pore (0)` 和 `solid (255)` 分别勾选、分别可视化，并通过 `Apply` 生效。
+- 分割后数字岩心的默认颜色约定为孔隙 `#0077ff`、固相 `#ffff00`。普通分割体 HTML、Fiji/ImageJ 风格 volume HTML，以及 `visualize_digital_rock_3d.py --phase solid` 的 PNG/HTML 预览都应遵守该默认值；只有用户显式传入颜色参数或在网页控件中 Apply 新颜色时才覆盖。
+- 若用户抱怨画面像“一个个像素格子”或过度离散，应先判断是否由 `downsample` 和 `Surface mesh` 等值面提取导致。接近 ImageJ 三维查看的导出优先使用 voxel volume 路线，尤其是 `--downsample 1 --surface-mode none --voxel-mode volume`；不要为了全分辨率查看强行生成 surface mesh。
+- 若用户明确要求参考 Fiji/ImageJ 3D Viewer，应使用 `code/scripts/digital_rock_visualization/render_segmented_core_fiji3d_html.py` 新路线。该路线依据本机 Fiji `3D_Viewer-5.0.0.jar` 中的 `ContentConstants` 模式（`VOLUME`、`ORTHO`、`SURFACE`、`MULTIORTHO`）和 `Content`/`VoltexGroup` 的 `setThreshold`、`setTransparency`、`setColor`、`saturatedVolumeRendering` 行为，把分割体作为一个 label volume 并在 HTML 侧更新 LUT/opacity transfer function；不要删除或覆盖既有 `sample_89_Grainstone_89seged_solid255_pore0_interactive.html` 与 `sample_89_Grainstone_89seged_pnextract_ballstick_interactive.html` 对应脚本。3D 裁切查看通过同一个 VTK volume mapper 的 clipping plane 实现，不额外嵌入第二份 TIFF 数据；用户改变轴向或 index 后必须点击 `Apply` 才刷新三维裁切，拖动旋转视角后裁切面必须保持生效。
+- 分割体 HTML 必须保留右上角孔隙率面板，孔隙率按原始全分辨率体素计数计算：`count(volume == 0) / volume.size`。样品 89 当前孔隙率为 `0.08279859909405538`，显示为 `8.28%`，对应 `31,235,076 pore px / 377,241,600 total px`。
+- 组分显隐和颜色修改采用显式 `Apply` 按钮流程：用户先勾选/取消组分、选择颜色，再点击 `Apply`，脚本中的 `window.segmentedCoreApplyControls` 才把状态应用到 VTK actors。不要依赖实时 `input` 事件作为唯一触发方式，因为 VTK.js actor 初始化和浏览器原生颜色控件可能导致实时更新不稳定。
+- 当前样品 89 的体素尺寸只补充了 `pixel_size_y_um = 1.7`。在没有独立 x/z 标定前，脚本按各向同性 `voxel_spacing_um_xyz=[1.7,1.7,1.7]` 处理；任何论文级几何量或物理单位解释都必须说明这一假设。
+- 分割体到球棍网络应使用 `code/scripts/pore_network/run_segmented_core_pnextract_ballstick.py`，参考上游 `../pnextract` 的 maximal-ball 网络提取流程。脚本会把 `0` 映射为 pnextract pore/void，把非孔隙组分映射为 solid，写出 RAW/MHD，然后运行 pnextract、解析网络 CSV 并调用 `code/scripts/pore_network/render_berea_pore_network_html.py` 生成球棍 HTML。
+- 球棍网络当前默认 `downsample=4`，这是为了让样品 89 的 pnextract 和 HTML 交互在本机可用；metadata 必须保留 `downsample`、`source_voxel_size_um`、`effective_voxel_size_um` 和输入路径，避免把该网络误读成全分辨率网络。
+- 当前相关测试为 `tests/test_render_segmented_core_html.py`、`tests/test_render_berea_pore_network_html.py` 和 `tests/test_run_segmented_core_pnextract_ballstick.py`。修改这些可视化链路后，至少运行：
+
+```powershell
+C:\Users\imgw\.conda\envs\ml\python.exe -m pytest tests\test_render_berea_pore_network_html.py tests\test_render_segmented_core_html.py tests\test_render_segmented_core_fiji3d_html.py tests\test_run_segmented_core_pnextract_ballstick.py -q
+```
 
 ## 验证标准
 

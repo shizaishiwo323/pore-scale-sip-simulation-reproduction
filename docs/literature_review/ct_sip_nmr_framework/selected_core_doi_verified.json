@@ -1,0 +1,1092 @@
+[
+  {
+    "doi": "10.1029/2020JB020515",
+    "crossref_title": "A Framework for Pore‐Scale Simulation of Effective Electrical Conductivity and Permittivity of Porous Media in the Frequency Range From 1 mHz to 1 GHz",
+    "crossref_container": "Journal of Geophysical Research: Solid Earth",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2020,
+          10
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1029/2020jb020515",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Qifei Niu",
+      "Chi Zhang",
+      "Manika Prasad"
+    ],
+    "openalex_title": "A Framework for Pore‐Scale Simulation of Effective Electrical Conductivity and Permittivity of Porous Media in the Frequency Range From 1 mHz to 1 GHz",
+    "openalex_year": 2020,
+    "openalex_journal": "Journal of Geophysical Research Solid Earth",
+    "openalex_landing_page_url": "https://doi.org/10.1029/2020jb020515",
+    "openalex_pdf_url": null,
+    "is_oa": false,
+    "oa_url": null,
+    "cited_by_count": 27
+  },
+  {
+    "doi": "10.2172/1989486",
+    "crossref_title": "Pore-Scale Simulation of Spectral Induced Polarization",
+    "crossref_container": "",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2022,
+          12,
+          1
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.2172/1989486",
+    "crossref_type": "report",
+    "crossref_authors": [
+      "Frederick Day-Lewis",
+      "Timothy Johnson"
+    ],
+    "openalex_title": "Pore-Scale Simulation of Spectral Induced Polarization",
+    "openalex_year": 2022,
+    "openalex_journal": null,
+    "openalex_landing_page_url": "https://doi.org/10.2172/1989486",
+    "openalex_pdf_url": "https://doi.org/10.2172/1989486",
+    "is_oa": true,
+    "oa_url": "https://doi.org/10.2172/1989486",
+    "cited_by_count": 0
+  },
+  {
+    "doi": "10.1103/PhysRevE.80.036307",
+    "crossref_title": "Pore-network extraction from micro-computerized-tomography images",
+    "crossref_container": "Physical Review E",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2009,
+          9,
+          14
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1103/physreve.80.036307",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Hu Dong",
+      "Martin J. Blunt"
+    ],
+    "openalex_title": "Pore-network extraction from micro-computerized-tomography images",
+    "openalex_year": 2009,
+    "openalex_journal": "Physical Review E",
+    "openalex_landing_page_url": "https://doi.org/10.1103/physreve.80.036307",
+    "openalex_pdf_url": null,
+    "is_oa": false,
+    "oa_url": null,
+    "cited_by_count": 1240
+  },
+  {
+    "doi": "10.1093/gji/ggu180",
+    "crossref_title": "Spectral induced polarization porosimetry",
+    "crossref_container": "Geophysical Journal International",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2014,
+          8,
+          1
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1093/gji/ggu180",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "A. Revil",
+      "N. Florsch",
+      "C. Camerlynck"
+    ],
+    "openalex_title": "Spectral induced polarization porosimetry",
+    "openalex_year": 2014,
+    "openalex_journal": "Geophysical Journal International",
+    "openalex_landing_page_url": "https://doi.org/10.1093/gji/ggu180",
+    "openalex_pdf_url": "https://academic.oup.com/gji/article-pdf/198/2/1016/13269516/ggu180.pdf",
+    "is_oa": true,
+    "oa_url": "https://academic.oup.com/gji/article-pdf/198/2/1016/13269516/ggu180.pdf",
+    "cited_by_count": 114
+  },
+  {
+    "doi": "10.1021/j100818a067",
+    "crossref_title": "A THEORY OF THE LOW-FREQUENCY DIELECTRIC DISPERSION OF COLLOIDAL PARTICLES IN ELECTROLYTE SOLUTION<sup>1,2</sup>",
+    "crossref_container": "The Journal of Physical Chemistry",
+    "crossref_published": {
+      "date-parts": [
+        [
+          1962,
+          12
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1021/j100818a067",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Gerhard Schwarz"
+    ],
+    "openalex_title": "A THEORY OF THE LOW-FREQUENCY DIELECTRIC DISPERSION OF COLLOIDAL PARTICLES IN ELECTROLYTE SOLUTION<sup>1,2</sup>",
+    "openalex_year": 1962,
+    "openalex_journal": "The Journal of Physical Chemistry",
+    "openalex_landing_page_url": "https://doi.org/10.1021/j100818a067",
+    "openalex_pdf_url": null,
+    "is_oa": false,
+    "oa_url": null,
+    "cited_by_count": 852
+  },
+  {
+    "doi": "10.1103/PhysRevLett.57.2564",
+    "crossref_title": "New Pore-Size Parameter Characterizing Transport in Porous Media",
+    "crossref_container": "Physical Review Letters",
+    "crossref_published": {
+      "date-parts": [
+        [
+          1986,
+          11,
+          17
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1103/physrevlett.57.2564",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "David Linton Johnson",
+      "Joel Koplik",
+      "Lawrence M. Schwartz"
+    ],
+    "openalex_title": "New Pore-Size Parameter Characterizing Transport in Porous Media",
+    "openalex_year": 1986,
+    "openalex_journal": "Physical Review Letters",
+    "openalex_landing_page_url": "https://doi.org/10.1103/physrevlett.57.2564",
+    "openalex_pdf_url": null,
+    "is_oa": false,
+    "oa_url": null,
+    "cited_by_count": 489
+  },
+  {
+    "doi": "10.1093/gji/ggt136",
+    "crossref_title": "Analytical modelling of membrane polarization with explicit parametrization of pore radii and the electrical double layer",
+    "crossref_container": "Geophysical Journal International",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2013,
+          8,
+          1
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1093/gji/ggt136",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Matthias Bücker",
+      "Andreas Hördt"
+    ],
+    "openalex_title": "Analytical modelling of membrane polarization with explicit parametrization of pore radii and the electrical double layer",
+    "openalex_year": 2013,
+    "openalex_journal": "Geophysical Journal International",
+    "openalex_landing_page_url": "https://doi.org/10.1093/gji/ggt136",
+    "openalex_pdf_url": null,
+    "is_oa": false,
+    "oa_url": null,
+    "cited_by_count": 90
+  },
+  {
+    "doi": "10.1190/geo2012-0548.1",
+    "crossref_title": "Long and short narrow pore models for membrane polarization",
+    "crossref_container": "Geophysics",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2013,
+          11,
+          1
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1190/geo2012-0548.1",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Matthias Bücker",
+      "Andreas Hördt"
+    ],
+    "openalex_title": "Long and short narrow pore models for membrane polarization",
+    "openalex_year": 2013,
+    "openalex_journal": "Geophysics",
+    "openalex_landing_page_url": "https://doi.org/10.1190/geo2012-0548.1",
+    "openalex_pdf_url": null,
+    "is_oa": false,
+    "oa_url": null,
+    "cited_by_count": 47
+  },
+  {
+    "doi": "10.1029/2019JB017679",
+    "crossref_title": "On the Role of Stern‐ and Diffuse‐Layer Polarization Mechanisms in Porous Media",
+    "crossref_container": "Journal of Geophysical Research: Solid Earth",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2019,
+          6
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1029/2019jb017679",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Matthias Bücker",
+      "Adrián Flores Orozco",
+      "Sabine Undorf",
+      "Andreas Kemna"
+    ],
+    "openalex_title": "On the Role of Stern‐ and Diffuse‐Layer Polarization Mechanisms in Porous Media",
+    "openalex_year": 2019,
+    "openalex_journal": "Journal of Geophysical Research Solid Earth",
+    "openalex_landing_page_url": "https://doi.org/10.1029/2019jb017679",
+    "openalex_pdf_url": null,
+    "is_oa": true,
+    "oa_url": "https://www.research.ed.ac.uk/en/publications/6adc3dca-2605-4ca8-8e6b-7761689c0933",
+    "cited_by_count": 76
+  },
+  {
+    "doi": "10.1029/2022JB025548",
+    "crossref_title": "Influence of Inner Surface Roughness on the Spectral Induced Polarization Response—A Numerical Study",
+    "crossref_container": "Journal of Geophysical Research: Solid Earth",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2023,
+          6
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1029/2022jb025548",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "E. Zibulski",
+      "N. Klitzsch"
+    ],
+    "openalex_title": "Influence of Inner Surface Roughness on the Spectral Induced Polarization Response—A Numerical Study",
+    "openalex_year": 2023,
+    "openalex_journal": "Journal of Geophysical Research Solid Earth",
+    "openalex_landing_page_url": "https://doi.org/10.1029/2022jb025548",
+    "openalex_pdf_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1029/2022JB025548",
+    "is_oa": true,
+    "oa_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1029/2022JB025548",
+    "cited_by_count": 11
+  },
+  {
+    "doi": "10.3997/1873-0604.2012027",
+    "crossref_title": "An overview of the spectral induced polarization method for near‐surface applications",
+    "crossref_container": "Near Surface Geophysics",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2012,
+          12
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.3997/1873-0604.2012027",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Andreas Kemna",
+      "Andrew Binley",
+      "Giorgio Cassiani",
+      "Ernst Niederleithinger",
+      "André Revil",
+      "Lee Slater",
+      "Kenneth H. Williams",
+      "Adrián Flores Orozco"
+    ],
+    "openalex_title": "An overview of the spectral induced polarization method for near‐surface applications",
+    "openalex_year": 2012,
+    "openalex_journal": "Near Surface Geophysics",
+    "openalex_landing_page_url": "https://doi.org/10.3997/1873-0604.2012027",
+    "openalex_pdf_url": null,
+    "is_oa": true,
+    "oa_url": "https://www.osti.gov/biblio/1172258",
+    "cited_by_count": 360
+  },
+  {
+    "doi": "10.1002/2017WR020655",
+    "crossref_title": "Complex conductivity of soils",
+    "crossref_container": "Water Resources Research",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2017,
+          8
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1002/2017wr020655",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "A. Revil",
+      "A. Coperey",
+      "Z. Shao",
+      "N. Florsch",
+      "I. L. Fabricius",
+      "Y. Deng",
+      "J. R. Delsman",
+      "P. S. Pauw"
+    ],
+    "openalex_title": "Complex conductivity of soils",
+    "openalex_year": 2017,
+    "openalex_journal": "Water Resources Research",
+    "openalex_landing_page_url": "https://doi.org/10.1002/2017wr020655",
+    "openalex_pdf_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/2017WR020655",
+    "is_oa": true,
+    "oa_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/2017WR020655",
+    "cited_by_count": 205
+  },
+  {
+    "doi": "10.1111/j.1365-246X.2010.04573.x",
+    "crossref_title": "Determination of permeability from spectral induced polarization in granular media",
+    "crossref_container": "Geophysical Journal International",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2010,
+          3
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1111/j.1365-246x.2010.04573.x",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "A. Revil",
+      "N. Florsch"
+    ],
+    "openalex_title": "Determination of permeability from spectral induced polarization in granular media",
+    "openalex_year": 2010,
+    "openalex_journal": "Geophysical Journal International",
+    "openalex_landing_page_url": "https://doi.org/10.1111/j.1365-246x.2010.04573.x",
+    "openalex_pdf_url": "https://academic.oup.com/gji/article-pdf/181/3/1480/6064289/181-3-1480.pdf",
+    "is_oa": true,
+    "oa_url": "https://academic.oup.com/gji/article-pdf/181/3/1480/6064289/181-3-1480.pdf",
+    "cited_by_count": 417
+  },
+  {
+    "doi": "10.1002/2015WR017074",
+    "crossref_title": "Predicting permeability from the characteristic relaxation time and intrinsic formation factor of complex conductivity spectra",
+    "crossref_container": "Water Resources Research",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2015,
+          8
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1002/2015wr017074",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "A. Revil",
+      "A. Binley",
+      "L. Mejus",
+      "P. Kessouri"
+    ],
+    "openalex_title": "Predicting permeability from the characteristic relaxation time and intrinsic formation factor of complex conductivity spectra",
+    "openalex_year": 2015,
+    "openalex_journal": "Water Resources Research",
+    "openalex_landing_page_url": "https://doi.org/10.1002/2015wr017074",
+    "openalex_pdf_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/2015WR017074",
+    "is_oa": true,
+    "oa_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/2015WR017074",
+    "cited_by_count": 120
+  },
+  {
+    "doi": "10.1002/nsg.12071",
+    "crossref_title": "Permeability estimation from induced polarization: an evaluation of geophysical length scales using an effective hydraulic radius concept",
+    "crossref_container": "Near Surface Geophysics",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2019,
+          12
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1002/nsg.12071",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Andreas Weller",
+      "Lee Slater"
+    ],
+    "openalex_title": "Permeability estimation from induced polarization: an evaluation of geophysical length scales using an effective hydraulic radius concept",
+    "openalex_year": 2019,
+    "openalex_journal": "Near Surface Geophysics",
+    "openalex_landing_page_url": "https://doi.org/10.1002/nsg.12071",
+    "openalex_pdf_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/nsg.12071",
+    "is_oa": true,
+    "oa_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/nsg.12071",
+    "cited_by_count": 25
+  },
+  {
+    "doi": "10.1111/j.1365-246X.2009.04426.x",
+    "crossref_title": "Spectral induced polarization of partially saturated clay-rocks: a mechanistic approach",
+    "crossref_container": "Geophysical Journal International",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2010,
+          1
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1111/j.1365-246x.2009.04426.x",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "D. Jougnot",
+      "A. Ghorbani",
+      "A. Revil",
+      "P. Leroy",
+      "P. Cosenza"
+    ],
+    "openalex_title": "Spectral induced polarization of partially saturated clay-rocks: a mechanistic approach",
+    "openalex_year": 2009,
+    "openalex_journal": "Geophysical Journal International",
+    "openalex_landing_page_url": "https://doi.org/10.1111/j.1365-246x.2009.04426.x",
+    "openalex_pdf_url": "https://academic.oup.com/gji/article-pdf/180/1/210/5985599/180-1-210.pdf",
+    "is_oa": true,
+    "oa_url": "https://academic.oup.com/gji/article-pdf/180/1/210/5985599/180-1-210.pdf",
+    "cited_by_count": 176
+  },
+  {
+    "doi": "10.1029/2010WR009310",
+    "crossref_title": "Induced polarization signatures of cations exhibiting differential sorption behaviors in saturated sands",
+    "crossref_container": "Water Resources Research",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2011,
+          2
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1029/2010wr009310",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "P. Vaudelet",
+      "A. Revil",
+      "M. Schmutz",
+      "M. Franceschi",
+      "P. Bégassat"
+    ],
+    "openalex_title": "Induced polarization signatures of cations exhibiting differential sorption behaviors in saturated sands",
+    "openalex_year": 2011,
+    "openalex_journal": "Water Resources Research",
+    "openalex_landing_page_url": "https://doi.org/10.1029/2010wr009310",
+    "openalex_pdf_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1029/2010WR009310",
+    "is_oa": true,
+    "oa_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1029/2010WR009310",
+    "cited_by_count": 102
+  },
+  {
+    "doi": "10.1029/2012WR011965",
+    "crossref_title": "A new model for the spectral induced polarization signature of bacterial growth in porous media",
+    "crossref_container": "Water Resources Research",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2012,
+          9
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1029/2012wr011965",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "A. Revil",
+      "E. Atekwana",
+      "C. Zhang",
+      "A. Jardani",
+      "S. Smith"
+    ],
+    "openalex_title": "A new model for the spectral induced polarization signature of bacterial growth in porous media",
+    "openalex_year": 2012,
+    "openalex_journal": "Water Resources Research",
+    "openalex_landing_page_url": "https://doi.org/10.1029/2012wr011965",
+    "openalex_pdf_url": null,
+    "is_oa": true,
+    "oa_url": "https://normandie-univ.hal.science/hal-01742287/document",
+    "cited_by_count": 83
+  },
+  {
+    "doi": "10.1029/2007GL031840",
+    "crossref_title": "Pore‐scale spectral induced polarization signatures associated with FeS biomineral transformations",
+    "crossref_container": "Geophysical Research Letters",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2007,
+          11
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1029/2007gl031840",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Lee Slater",
+      "Dimitrios Ntarlagiannis",
+      "Yves R. Personna",
+      "Susan Hubbard"
+    ],
+    "openalex_title": "Pore‐scale spectral induced polarization signatures associated with FeS biomineral transformations",
+    "openalex_year": 2007,
+    "openalex_journal": "Geophysical Research Letters",
+    "openalex_landing_page_url": "https://doi.org/10.1029/2007gl031840",
+    "openalex_pdf_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1029/2007GL031840",
+    "is_oa": true,
+    "oa_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1029/2007GL031840",
+    "cited_by_count": 79
+  },
+  {
+    "doi": "10.1093/gji/ggz515",
+    "crossref_title": "Effect of solute concentration on the spectral induced polarization response of calcite precipitation",
+    "crossref_container": "Geophysical Journal International",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2020,
+          2,
+          1
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1093/gji/ggz515",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Satoshi Izumoto",
+      "Johan Alexander Huisman",
+      "Yuxin Wu",
+      "Harry Vereecken"
+    ],
+    "openalex_title": "Effect of solute concentration on the spectral induced polarization response of calcite precipitation",
+    "openalex_year": 2019,
+    "openalex_journal": "Geophysical Journal International",
+    "openalex_landing_page_url": "https://doi.org/10.1093/gji/ggz515",
+    "openalex_pdf_url": null,
+    "is_oa": true,
+    "oa_url": "https://www.osti.gov/biblio/1714386",
+    "cited_by_count": 39
+  },
+  {
+    "doi": "10.1007/s11440-018-0754-9",
+    "crossref_error": "HTTP Error 404: Not Found",
+    "openalex_error": "HTTP Error 404: Not Found"
+  },
+  {
+    "doi": "10.1039/D3LC00377A",
+    "crossref_title": "A microfluidic chip for geoelectrical monitoring of critical zone processes",
+    "crossref_container": "Lab on a Chip",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2023
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1039/d3lc00377a",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Flore Rembert",
+      "Arnaud Stolz",
+      "Cyprien Soulaine",
+      "Sophie Roman"
+    ],
+    "openalex_title": "A microfluidic chip for geoelectrical monitoring of critical zone processes",
+    "openalex_year": 2023,
+    "openalex_journal": "Lab on a Chip",
+    "openalex_landing_page_url": "https://doi.org/10.1039/d3lc00377a",
+    "openalex_pdf_url": "https://pubs.rsc.org/en/content/articlepdf/2023/lc/d3lc00377a",
+    "is_oa": true,
+    "oa_url": "https://pubs.rsc.org/en/content/articlepdf/2023/lc/d3lc00377a",
+    "cited_by_count": 23
+  },
+  {
+    "doi": "10.1029/2024GL111271",
+    "crossref_title": "Microfluidics and Spectral Induced Polarization for Direct Observation and Petrophysical Modeling of Calcite Dissolution",
+    "crossref_container": "Geophysical Research Letters",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2024,
+          12,
+          28
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1029/2024gl111271",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "F. Rembert",
+      "P. Leroy",
+      "A. Lassin",
+      "S. Roman"
+    ],
+    "openalex_title": "Microfluidics and Spectral Induced Polarization for Direct Observation and Petrophysical Modeling of Calcite Dissolution",
+    "openalex_year": 2024,
+    "openalex_journal": "Geophysical Research Letters",
+    "openalex_landing_page_url": "https://doi.org/10.1029/2024gl111271",
+    "openalex_pdf_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1029/2024GL111271",
+    "is_oa": true,
+    "oa_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1029/2024GL111271",
+    "cited_by_count": 5
+  },
+  {
+    "doi": "10.1029/2024JB028689",
+    "crossref_title": "Quantitative Evaluation of the Effect of Pore Fluids Distribution on Complex Conductivity Saturation Exponents",
+    "crossref_container": "Journal of Geophysical Research: Solid Earth",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2024,
+          8
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1029/2024jb028689",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Siyuan Qiang",
+      "Xiaoqing Shi",
+      "André Revil",
+      "Xueyuan Kang",
+      "Yalin Song",
+      "Kun Xing"
+    ],
+    "openalex_title": "Quantitative Evaluation of the Effect of Pore Fluids Distribution on Complex Conductivity Saturation Exponents",
+    "openalex_year": 2024,
+    "openalex_journal": "Journal of Geophysical Research Solid Earth",
+    "openalex_landing_page_url": "https://doi.org/10.1029/2024jb028689",
+    "openalex_pdf_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1029/2024JB028689",
+    "is_oa": true,
+    "oa_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1029/2024JB028689",
+    "cited_by_count": 7
+  },
+  {
+    "doi": "10.1016/j.advwatres.2012.03.003",
+    "crossref_title": "Pore-scale imaging and modelling",
+    "crossref_container": "Advances in Water Resources",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2013,
+          1
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1016/j.advwatres.2012.03.003",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Martin J. Blunt",
+      "Branko Bijeljic",
+      "Hu Dong",
+      "Oussama Gharbi",
+      "Stefan Iglauer",
+      "Peyman Mostaghimi",
+      "Adriana Paluszny",
+      "Christopher Pentland"
+    ],
+    "openalex_title": "Pore-scale imaging and modelling",
+    "openalex_year": 2012,
+    "openalex_journal": "Advances in Water Resources",
+    "openalex_landing_page_url": "https://doi.org/10.1016/j.advwatres.2012.03.003",
+    "openalex_pdf_url": null,
+    "is_oa": true,
+    "oa_url": "https://doi.org/10.1016/j.advwatres.2012.03.003",
+    "cited_by_count": 1923
+  },
+  {
+    "doi": "10.1016/j.cageo.2012.09.005",
+    "crossref_title": "Digital rock physics benchmarks—Part I: Imaging and segmentation",
+    "crossref_container": "Computers &amp; Geosciences",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2013,
+          1
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1016/j.cageo.2012.09.005",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Heiko Andrä",
+      "Nicolas Combaret",
+      "Jack Dvorkin",
+      "Erik Glatt",
+      "Junehee Han",
+      "Matthias Kabel",
+      "Youngseuk Keehm",
+      "Fabian Krzikalla"
+    ],
+    "openalex_title": "Digital rock physics benchmarks—Part I: Imaging and segmentation",
+    "openalex_year": 2012,
+    "openalex_journal": "Computers & Geosciences",
+    "openalex_landing_page_url": "https://doi.org/10.1016/j.cageo.2012.09.005",
+    "openalex_pdf_url": null,
+    "is_oa": false,
+    "oa_url": null,
+    "cited_by_count": 696
+  },
+  {
+    "doi": "10.1016/j.cageo.2012.09.008",
+    "crossref_title": "Digital rock physics benchmarks—part II: Computing effective properties",
+    "crossref_container": "Computers &amp; Geosciences",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2013,
+          1
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1016/j.cageo.2012.09.008",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Heiko Andrä",
+      "Nicolas Combaret",
+      "Jack Dvorkin",
+      "Erik Glatt",
+      "Junehee Han",
+      "Matthias Kabel",
+      "Youngseuk Keehm",
+      "Fabian Krzikalla"
+    ],
+    "openalex_title": "Digital rock physics benchmarks—part II: Computing effective properties",
+    "openalex_year": 2012,
+    "openalex_journal": "Computers & Geosciences",
+    "openalex_landing_page_url": "https://doi.org/10.1016/j.cageo.2012.09.008",
+    "openalex_pdf_url": null,
+    "is_oa": false,
+    "oa_url": null,
+    "cited_by_count": 581
+  },
+  {
+    "doi": "10.1016/j.earscirev.2013.04.003",
+    "crossref_title": "High-resolution X-ray computed tomography in geosciences: A review of the current technology and applications",
+    "crossref_container": "Earth-Science Reviews",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2013,
+          8
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1016/j.earscirev.2013.04.003",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "V. Cnudde",
+      "M.N. Boone"
+    ],
+    "openalex_title": "High-resolution X-ray computed tomography in geosciences: A review of the current technology and applications",
+    "openalex_year": 2013,
+    "openalex_journal": "Earth-Science Reviews",
+    "openalex_landing_page_url": "https://doi.org/10.1016/j.earscirev.2013.04.003",
+    "openalex_pdf_url": null,
+    "is_oa": true,
+    "oa_url": "https://biblio.ugent.be/publication/3232121/file/3232122.pdf",
+    "cited_by_count": 1522
+  },
+  {
+    "doi": "10.2138/rmg.2015.80.04",
+    "crossref_title": "Characterization and Analysis of Porosity and Pore Structures",
+    "crossref_container": "Reviews in Mineralogy and Geochemistry",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2015
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.2138/rmg.2015.80.04",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Lawrence M. Anovitz",
+      "David R. Cole"
+    ],
+    "openalex_title": "Characterization and Analysis of Porosity and Pore Structures",
+    "openalex_year": 2015,
+    "openalex_journal": "Reviews in Mineralogy and Geochemistry",
+    "openalex_landing_page_url": "https://doi.org/10.2138/rmg.2015.80.04",
+    "openalex_pdf_url": "https://pubs.geoscienceworld.org/msa/rimg/article-pdf/80/1/61/2951260/61_REV080C04.pdf",
+    "is_oa": true,
+    "oa_url": "https://pubs.geoscienceworld.org/msa/rimg/article-pdf/80/1/61/2951260/61_REV080C04.pdf",
+    "cited_by_count": 1049
+  },
+  {
+    "doi": "10.1016/j.jconhyd.2016.07.002",
+    "crossref_title": "Review of pore network modelling of porous media: Experimental characterisations, network constructions and applications to reactive transport",
+    "crossref_container": "Journal of Contaminant Hydrology",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2016,
+          9
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1016/j.jconhyd.2016.07.002",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Qingrong Xiong",
+      "Todor G. Baychev",
+      "Andrey P. Jivkov"
+    ],
+    "openalex_title": "Review of pore network modelling of porous media: Experimental characterisations, network constructions and applications to reactive transport",
+    "openalex_year": 2016,
+    "openalex_journal": "Journal of Contaminant Hydrology",
+    "openalex_landing_page_url": "https://doi.org/10.1016/j.jconhyd.2016.07.002",
+    "openalex_pdf_url": null,
+    "is_oa": true,
+    "oa_url": "https://doi.org/10.1016/j.jconhyd.2016.07.002",
+    "cited_by_count": 576
+  },
+  {
+    "doi": "10.1103/PhysRevE.96.013312",
+    "crossref_title": "Generalized network modeling: Network extraction as a coarse-scale discretization of the void space of porous media",
+    "crossref_container": "Physical Review E",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2017,
+          7,
+          20
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1103/physreve.96.013312",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Ali Q. Raeini",
+      "Branko Bijeljic",
+      "Martin J. Blunt"
+    ],
+    "openalex_title": "Generalized network modeling: Network extraction as a coarse-scale discretization of the void space of porous media",
+    "openalex_year": 2017,
+    "openalex_journal": "Physical review. E",
+    "openalex_landing_page_url": "https://doi.org/10.1103/physreve.96.013312",
+    "openalex_pdf_url": "http://link.aps.org/pdf/10.1103/PhysRevE.96.013312",
+    "is_oa": true,
+    "oa_url": "http://link.aps.org/pdf/10.1103/PhysRevE.96.013312",
+    "cited_by_count": 346
+  },
+  {
+    "doi": "10.1002/2015WR018472",
+    "crossref_title": "A laboratory study to estimate pore geometric parameters of sandstones using complex conductivity and nuclear magnetic resonance for permeability prediction",
+    "crossref_container": "Water Resources Research",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2016,
+          6
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1002/2015wr018472",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Gordon Osterman",
+      "Kristina Keating",
+      "Andrew Binley",
+      "Lee Slater"
+    ],
+    "openalex_title": "A laboratory study to estimate pore geometric parameters of sandstones using complex conductivity and nuclear magnetic resonance for permeability prediction",
+    "openalex_year": 2016,
+    "openalex_journal": "Water Resources Research",
+    "openalex_landing_page_url": "https://doi.org/10.1002/2015wr018472",
+    "openalex_pdf_url": "https://agupubs.onlinelibrary.wiley.com/doi/pdfdirect/10.1002/2015WR018472",
+    "is_oa": true,
+    "oa_url": "https://agupubs.onlinelibrary.wiley.com/doi/pdfdirect/10.1002/2015WR018472",
+    "cited_by_count": 37
+  },
+  {
+    "doi": "10.5194/se-9-1225-2018",
+    "crossref_title": "Enhanced pore space analysis by use of\n                    <i>μ</i>\n                    -CT, MIP, NMR, and SIP",
+    "crossref_container": "Solid Earth",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2018,
+          11,
+          7
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.5194/se-9-1225-2018",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Zeyu Zhang",
+      "Sabine Kruschwitz",
+      "Andreas Weller",
+      "Matthias Halisch"
+    ],
+    "openalex_title": "Enhanced pore space analysis by use of <i>μ</i> -CT, MIP, NMR, and SIP",
+    "openalex_year": 2018,
+    "openalex_journal": "Solid Earth",
+    "openalex_landing_page_url": "https://doi.org/10.5194/se-9-1225-2018",
+    "openalex_pdf_url": "https://se.copernicus.org/articles/9/1225/2018/se-9-1225-2018.pdf",
+    "is_oa": true,
+    "oa_url": "https://se.copernicus.org/articles/9/1225/2018/se-9-1225-2018.pdf",
+    "cited_by_count": 28
+  },
+  {
+    "doi": "10.1190/geo2019-0074.1",
+    "crossref_title": "Toward a better understanding of low-frequency electrical relaxation — An enhanced pore space characterization",
+    "crossref_container": "Geophysics",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2020,
+          7,
+          1
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1190/geo2019-0074.1",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Sabine Kruschwitz",
+      "Matthias Halisch",
+      "Raphael Dlugosch",
+      "Carsten Prinz"
+    ],
+    "openalex_title": "Toward a better understanding of low-frequency electrical relaxation — An enhanced pore space characterization",
+    "openalex_year": 2020,
+    "openalex_journal": "Geophysics",
+    "openalex_landing_page_url": "https://doi.org/10.1190/geo2019-0074.1",
+    "openalex_pdf_url": null,
+    "is_oa": true,
+    "oa_url": "https://doi.org/10.1190/geo2019-0074.1",
+    "cited_by_count": 22
+  },
+  {
+    "doi": "10.1190/segam2018-2997894.1",
+    "crossref_title": "Estimating pore-size distribution in carbonate reservoir rocks using joint inversion of NMR and complex conductivity data",
+    "crossref_container": "SEG Technical Program Expanded Abstracts 2018",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2018,
+          8,
+          27
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1190/segam2018-2997894.1",
+    "crossref_type": "proceedings-article",
+    "crossref_authors": [
+      "Fan Zhang",
+      "Qifei Niu",
+      "Chi Zhang"
+    ],
+    "openalex_title": "Estimating pore-size distribution in carbonate reservoir rocks using joint inversion of NMR and complex conductivity data",
+    "openalex_year": 2018,
+    "openalex_journal": null,
+    "openalex_landing_page_url": "https://doi.org/10.1190/segam2018-2997894.1",
+    "openalex_pdf_url": null,
+    "is_oa": false,
+    "oa_url": null,
+    "cited_by_count": 2
+  },
+  {
+    "doi": "10.1002/2014WR015284",
+    "crossref_title": "Anomalous solute transport in saturated porous media: Relating transport model parameters to electrical and nuclear magnetic resonance properties",
+    "crossref_container": "Water Resources Research",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2015,
+          2
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1002/2014wr015284",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Ryan D. Swanson",
+      "Andrew Binley",
+      "Kristina Keating",
+      "Samantha France",
+      "Gordon Osterman",
+      "Frederick D. Day‐Lewis",
+      "Kamini Singha"
+    ],
+    "openalex_title": "Anomalous solute transport in saturated porous media: Relating transport model parameters to electrical and nuclear magnetic resonance properties",
+    "openalex_year": 2015,
+    "openalex_journal": "Water Resources Research",
+    "openalex_landing_page_url": "https://doi.org/10.1002/2014wr015284",
+    "openalex_pdf_url": "https://agupubs.onlinelibrary.wiley.com/doi/pdfdirect/10.1002/2014WR015284",
+    "is_oa": true,
+    "oa_url": "https://agupubs.onlinelibrary.wiley.com/doi/pdfdirect/10.1002/2014WR015284",
+    "cited_by_count": 38
+  },
+  {
+    "doi": "10.1007/s12182-020-00488-0",
+    "crossref_title": "Advances in low-field nuclear magnetic resonance (NMR) technologies applied for characterization of pore space inside rocks: a critical review",
+    "crossref_container": "Petroleum Science",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2020,
+          10
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1007/s12182-020-00488-0",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Jian-Chun Guo",
+      "Hang-Yu Zhou",
+      "Jie Zeng",
+      "Kun-Jie Wang",
+      "Jie Lai",
+      "Yu-Xuan Liu"
+    ],
+    "openalex_title": "Advances in low-field nuclear magnetic resonance (NMR) technologies applied for characterization of pore space inside rocks: a critical review",
+    "openalex_year": 2020,
+    "openalex_journal": "Petroleum Science",
+    "openalex_landing_page_url": "https://doi.org/10.1007/s12182-020-00488-0",
+    "openalex_pdf_url": null,
+    "is_oa": true,
+    "oa_url": "https://doi.org/10.1007/s12182-020-00488-0",
+    "cited_by_count": 105
+  },
+  {
+    "doi": "10.1016/j.petrol.2016.12.033",
+    "crossref_title": "Complex resistivity spectra and pore geometry for predictions of reservoir properties in carbonate rocks",
+    "crossref_container": "Journal of Petroleum Science and Engineering",
+    "crossref_published": {
+      "date-parts": [
+        [
+          2017,
+          3
+        ]
+      ]
+    },
+    "crossref_url": "https://doi.org/10.1016/j.petrol.2016.12.033",
+    "crossref_type": "journal-article",
+    "crossref_authors": [
+      "Jan H. Norbisrath",
+      "Ralf J. Weger",
+      "Gregor P. Eberli"
+    ],
+    "openalex_title": "Complex resistivity spectra and pore geometry for predictions of reservoir properties in carbonate rocks",
+    "openalex_year": 2017,
+    "openalex_journal": "Journal of Petroleum Science and Engineering",
+    "openalex_landing_page_url": "https://doi.org/10.1016/j.petrol.2016.12.033",
+    "openalex_pdf_url": null,
+    "is_oa": false,
+    "oa_url": null,
+    "cited_by_count": 28
+  }
+]

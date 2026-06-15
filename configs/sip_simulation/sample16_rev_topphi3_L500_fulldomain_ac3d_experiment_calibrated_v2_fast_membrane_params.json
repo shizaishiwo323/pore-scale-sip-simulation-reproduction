@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "purpose": "Second experiment-calibrated sample16 AC3D SIP candidate after partial all-mechanism diagnostics.",
+  "created_for": "sample16_rev_topphi3_L500_z100_y120_x166_solid255_pore0",
+  "relationship_to_v1": {
+    "previous_config": "configs/sip_simulation/sample16_rev_topphi3_L500_fulldomain_ac3d_experiment_calibrated_params.json",
+    "previous_diagnostic_output": "results/sample16_rev_topphi3_L500_exp_cal_all7_y_v1",
+    "evidence": "The v1 y-direction all-mechanism diagnostic matched real conductivity well but placed the imaginary-conductivity relaxation too low in frequency: low-frequency sigma'' was too high and high-frequency sigma'' was too low.",
+    "change": "Keep the successful DC/background conductivity setting and reduce the effective membrane polarization length scale to move the relaxation toward higher frequency."
+  },
+  "material_and_polarization_parameters": {
+    "water_conductivity_s_m": 0.12,
+    "solid_conductivity_s_m": 0.0024,
+    "water_relative_permittivity": 80.0,
+    "solid_relative_permittivity": 7.0,
+    "surface_conductance_s": 1.5e-10,
+    "diffusion_coefficient_m2_s": 1.3e-9,
+    "membrane_polarizability_eta0": 0.0013,
+    "dynamic_pore_size_m": 2.45913e-6,
+    "pore_radius_scale": 1.0,
+    "membrane_length_scale": 0.1,
+    "membrane_zdc_scale": 1.0
+  },
+  "rationale": {
+    "solid_conductivity_s_m": "Retain 0.0024 S/m because v1 y-direction maxwell and all diagnostics match the experimental real-conductivity baseline within about 3-9 percent.",
+    "surface_conductance_s": "Retain 1.5e-10 S for this test so that the next diagnostic isolates the relaxation-time shift before retuning amplitude.",
+    "membrane_polarizability_eta0": "Retain 0.0013 for this test so amplitude changes can be attributed mostly to the membrane-length correction.",
+    "membrane_length_scale": "Set to 0.1 as an experimental-calibration diagnostic. Since tau_m scales with L^2, this shifts the membrane relaxation roughly two decades higher in frequency, which is the direction required by the v1 diagnostic.",
+    "status": "This is a calibrated sensitivity candidate, not the strict sample16 formal geometry-scale-1 run."
+  },
+  "diagnostic_plan": {
+    "direction": "y",
+    "components": [
+      "all"
+    ],
+    "frequencies_hz": [
+      0.1,
+      0.899882,
+      10.336926,
+      93.0201,
+      1068.520351,
+      9615.418614,
+      20000.0
+    ],
+    "decision_rule": "If real conductivity remains near the experiment and sigma'' shifts upward toward the experimental high-frequency rise without large low-frequency overprediction, use this family for the full 51-frequency sweep; otherwise scan membrane_length_scale around 0.05-0.2 before a full run."
+  },
+  "base_cli_arguments": {
+    "mhd": "results/pnextract_inputs/rev_sample16_5-16seged/topphi3_L500_z100_y120_x166/sample16_rev_topphi3_L500_z100_y120_x166_pnextract.mhd",
+    "network-dir": "results/pnextract/rev_sample16_5-16seged/topphi3_L500_z100_y120_x166/network_parsed",
+    "experiment-csv": "data_inventory/ct_backed_samples_raw_copy_20260605/sample_16_Grainstone/SIP/LKC-16.csv",
+    "segmented-volume": "results/segmented_cores/rev_sample16_5-16seged/sample16_rev_topphi3_L500_z100_y120_x166_solid255_pore0.tiff",
+    "sample-label": "Sample 16 Grainstone REV topphi3 L500 experiment-calibrated v2 fast membrane",
+    "experiment-label": "LKC-16 experiment",
+    "field-solve-mode": "gpu-cocg-lowmem",
+    "component-mode": "paper",
+    "experiment-mode": "impedance",
+    "current-resistor-ohm": 10000.0,
+    "sample-length-cm": 3.6322,
+    "sample-diameter-cm": 2.52476,
+    "water-conductivity-s-m": 0.12,
+    "solid-conductivity-s-m": 0.0024,
+    "surface-conductance-s": 1.5e-10,
+    "membrane-polarizability": 0.0013,
+    "solid-relative-permittivity": 7.0,
+    "water-relative-permittivity": 80.0,
+    "dynamic-pore-size-m": 2.45913e-6,
+    "diffusion-coefficient-m2-s": 1.3e-9,
+    "pore-radius-scale": 1.0,
+    "membrane-length-scale": 0.1,
+    "membrane-zdc-scale": 1.0,
+    "solid-background-components": [
+      "maxwell",
+      "all"
+    ],
+    "direction": "y",
+    "pore-label": 0,
+    "solid-label": 1,
+    "rtol": 1.0e-5,
+    "atol": 0.0,
+    "maxiter": 3000,
+    "dtype": "complex64",
+    "preconditioner": "fft",
+    "fft-reference": "mean-face",
+    "progress-every": 250,
+    "residual-every": 50,
+    "resume": true
+  }
+}

@@ -1,0 +1,624 @@
+[
+  {
+    "seed_title": "A Framework for Pore-Scale Simulation of Effective Electrical Conductivity and Permittivity of Porous Media in the Frequency Range From 1 mHz to 1 GHz",
+    "title": "A Framework for Pore‐Scale Simulation of Effective Electrical Conductivity and Permittivity of Porous Media in the Frequency Range From 1 mHz to 1 GHz",
+    "year": 2020,
+    "authors": [
+      "Qifei Niu",
+      "Chi Zhang",
+      "Manika Prasad"
+    ],
+    "journal": "Journal of Geophysical Research Solid Earth",
+    "doi": "10.1029/2020jb020515",
+    "landing_page_url": "https://doi.org/10.1029/2020jb020515",
+    "pdf_url": null,
+    "is_oa": false,
+    "oa_url": null,
+    "cited_by_count": 27,
+    "openalex_id": "https://openalex.org/W3089705676",
+    "abstract": "Abstract Geoelectrical methods are broadly used in earth sciences for various purposes. To correctly interpret field geoelectrical data, it is essential to have a mechanistic understanding of the effective electrical conductivity and permittivity of geological materials over a broad frequency range. Recently, the pore‐scale numerical simulation, which utilizes the digital microstructural images of the material, has become a powerful tool in studying the effective electrical properties of geological media. However, it is still difficult to incorporate surface‐related electrochemical processes in a pore‐scale simulation. In this study, we develop a general framework to consider these electrochemical processes in pore‐scale simulations, which enable the calculation of broadband effective electrical conductivity and permittivity of porous geological media. A Berea sandstone sample is utilized to demonstrate the use of the proposed framework. Laboratory experiments of the effective electrical conductivity and permittivity of the sample in the frequency range from 10 −3 to 10 9 Hz provided valuable measurement data for validating the simulation. The good agreement between our simulated spectra and the experimental data provides validation for the numerical simulation to reproduce the variations in the effective electrical conductivity and permittivity of porous geological materials induced by both the electrochemical polarizations and the interfacial polarization. This work thus provides a useful tool for studying the effective electrical properties of porous geological materials featuring complex microstructures."
+  },
+  {
+    "seed_title": "Pore-Scale Simulation of Spectral Induced Polarization",
+    "title": "Pore-Scale Simulation of Spectral Induced Polarization",
+    "year": 2022,
+    "authors": [
+      "F. D. Day‐Lewis",
+      "Timothy J. Johnson"
+    ],
+    "journal": null,
+    "doi": "10.2172/1989486",
+    "landing_page_url": "https://doi.org/10.2172/1989486",
+    "pdf_url": "https://doi.org/10.2172/1989486",
+    "is_oa": true,
+    "oa_url": "https://doi.org/10.2172/1989486",
+    "cited_by_count": 0,
+    "openalex_id": "https://openalex.org/W4384434891",
+    "abstract": "A new model was developed to simulate spectral induced polarization (SIP) in porous media.The model is based on a pore-network approximation of the soil or rock, in which bonds between pores are represented by equivalent circuits.In the circuit model, electrolytic and surface conduction occur in parallel, with the electrolyte behaving as a single resistor, and the mineral surface behaving as a resistor and capacitor in series.Based on the pore geometry, fluid conductivity, and mineral surface conductivity, an impedance network is generated.SIP spectra are calculated by solving the sinusoidal steady-state electrical problem for a range of frequencies.The new model provides a tool to bridge the gap between (1) our fundamental understanding of polarization processes at the scale of a single pore or grains and (2) existing simulation capabilities for macroscale systems that do not account for pore-scale properties.The model is implemented in Matlab and can solve two-dimensional and three-dimensional (2D and 3D) networks.Examples for regular cubic lattices are presented, but the method and code are flexible with respect to pore geometries and allow for future leveraging of existing opensource capabilities for generation of pore networks and extraction of network geometries from micro imaging of core samples."
+  },
+  {
+    "seed_title": "Pore-network extraction from micro-computerized-tomography images",
+    "title": "Pore-network extraction from micro-computerized-tomography images",
+    "year": 2009,
+    "authors": [
+      "Dong Hu",
+      "Martin J. Blunt"
+    ],
+    "journal": "Physical Review E",
+    "doi": "10.1103/physreve.80.036307",
+    "landing_page_url": "https://doi.org/10.1103/physreve.80.036307",
+    "pdf_url": null,
+    "is_oa": false,
+    "oa_url": null,
+    "cited_by_count": 1240,
+    "openalex_id": "https://openalex.org/W1973888660",
+    "abstract": "Network models that represent the void space of a rock by a lattice of pores connected by throats can predict relative permeability once the pore geometry and wettability are known. Micro-computerized-tomography scanning provides a three-dimensional image of the pore space. However, these images cannot be directly input into network models. In this paper a modified maximal ball algorithm, extending the work of Silin and Patzek [D. Silin and T. Patzek, Physica A 371, 336 (2006)], is developed to extract simplified networks of pores and throats with parametrized geometry and interconnectivity from images of the pore space. The parameters of the pore networks, such as coordination number, and pore and throat size distributions are computed and compared to benchmark data from networks extracted by other methods, experimental data, and direct computation of permeability and formation factor on the underlying images. Good agreement is reached in most cases allowing networks derived from a wide variety of rock types to be used for predictive modeling."
+  },
+  {
+    "seed_title": "Spectral induced polarization porosimetry",
+    "title": "Spectral induced polarization porosimetry",
+    "year": 2014,
+    "authors": [
+      "A. Revil",
+      "Nicolás Florsch",
+      "Christian Camerlynck"
+    ],
+    "journal": "Geophysical Journal International",
+    "doi": "10.1093/gji/ggu180",
+    "landing_page_url": "https://doi.org/10.1093/gji/ggu180",
+    "pdf_url": "https://academic.oup.com/gji/article-pdf/198/2/1016/13269516/ggu180.pdf",
+    "is_oa": true,
+    "oa_url": "https://academic.oup.com/gji/article-pdf/198/2/1016/13269516/ggu180.pdf",
+    "cited_by_count": 114,
+    "openalex_id": "https://openalex.org/W2102250040",
+    "abstract": "Induced polarization is a geophysical method looking to image and interpret low-frequency polarization mechanisms occurring in porous media. Below 10 kHz, the quadrature conductivity of metal-free sandy and clayey materials exhibits a distribution of relaxation times, which can be related to the pore size distribution of these porous materials. When the polarization spectra are fitted with a Cole-Cole model, we first observe that the main relaxation time is controlled by the main pore size of the material and that the Cole-Cole exponent c is never much above 0.5, a value corresponding to a Warburg function. The complex conductivity is then obtained through a convolution product between the pore size distribution and such Warburg function. We also provide a way to recover the pore size distribution by performing a deconvolution of measured spectra using the Warburg function. A new dataset of mercury porosimetry and induced polarization data of six siliciclastic materials supports the hypothesis that the Cole-Cole relaxation time is strongly controlled by the pore size, and especially the characteristic pore size corresponding to the peak of the pore size distribution from mercury porosimetry. The distribution of the pore throat sizes of these materials seems fairly well recovered using the Warburg decomposition of the spectral induced polarization spectra but additional data will be needed to confirm this finding."
+  },
+  {
+    "seed_title": "A theory of the low-frequency dielectric dispersion of colloidal particles in electrolyte solution",
+    "title": "A THEORY OF THE LOW-FREQUENCY DIELECTRIC DISPERSION OF COLLOIDAL PARTICLES IN ELECTROLYTE SOLUTION<sup>1,2</sup>",
+    "year": 1962,
+    "authors": [
+      "Gerhard Schwarz"
+    ],
+    "journal": "The Journal of Physical Chemistry",
+    "doi": "10.1021/j100818a067",
+    "landing_page_url": "https://doi.org/10.1021/j100818a067",
+    "pdf_url": null,
+    "is_oa": false,
+    "oa_url": null,
+    "cited_by_count": 852,
+    "openalex_id": "https://openalex.org/W2054693124",
+    "abstract": "ADVERTISEMENT RETURN TO ISSUEPREVArticleNEXTA THEORY OF THE LOW-FREQUENCY DIELECTRIC DISPERSION OF COLLOIDAL PARTICLES IN ELECTROLYTE SOLUTION1,2Gerhard SchwarzCite this: J. Phys. Chem. 1962, 66, 12, 2636–2642Publication Date (Print):December 1, 1962Publication History Published online1 May 2002Published inissue 1 December 1962https://pubs.acs.org/doi/10.1021/j100818a067https://doi.org/10.1021/j100818a067research-articleACS PublicationsRequest reuse permissionsArticle Views2044Altmetric-Citations682LEARN ABOUT THESE METRICSArticle Views are the COUNTER-compliant sum of full text article downloads since November 2008 (both PDF and HTML) across all institutions and individuals. These metrics are regularly updated to reflect usage leading up to the last few days.Citations are the number of other articles citing this article, calculated by Crossref and updated daily. Find more information about Crossref citation counts.The Altmetric Attention Score is a quantitative measure of the attention that a research article has received online. Clicking on the donut icon will load a page at altmetric.com with additional details about the score and the social media presence for the given article. Find more information on the Altmetric Attention Score and how the score is calculated. Share Add toView InAdd Full Text with ReferenceAdd Description ExportRISCitationCitation and abstractCitation and referencesMore Options Share onFacebookTwitterWechatLinked InRedditEmail Other access options Get e-Alerts"
+  },
+  {
+    "seed_title": "New pore-size parameter characterizing transport in porous media",
+    "title": "New Pore-Size Parameter Characterizing Transport in Porous Media",
+    "year": 1986,
+    "authors": [
+      "David Linton Johnson",
+      "Joel Koplik",
+      "Lawrence M. Schwartz"
+    ],
+    "journal": "Physical Review Letters",
+    "doi": "10.1103/physrevlett.57.2564",
+    "landing_page_url": "https://doi.org/10.1103/physrevlett.57.2564",
+    "pdf_url": null,
+    "is_oa": false,
+    "oa_url": null,
+    "cited_by_count": 489,
+    "openalex_id": "https://openalex.org/W1995921923",
+    "abstract": "We introduce a well-defined geometrical parameter, $\\ensuremath{\\Lambda}$, related to dynamically connected pore sizes in composite materials. $\\ensuremath{\\Lambda}$ describes the effects of an internal boundary layer on a variety of processes including electrical surface conduction, high-frequency viscous damping of acoustic waves, and healing length effects in fourth sound. We argue that $\\ensuremath{\\Lambda}$ is also related to the dc permeability to flow of a viscous fluid."
+  },
+  {
+    "seed_title": "Permeability prediction in rocks experiencing mineral precipitation and dissolution: A numerical study",
+    "title": "Permeability Prediction in Rocks Experiencing Mineral Precipitation and Dissolution: A Numerical Study",
+    "year": 2019,
+    "authors": [
+      "Qifei Niu",
+      "Chi Zhang"
+    ],
+    "journal": "Water Resources Research",
+    "doi": "10.1029/2018wr024174",
+    "landing_page_url": "https://doi.org/10.1029/2018wr024174",
+    "pdf_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1029/2018WR024174",
+    "is_oa": true,
+    "oa_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1029/2018WR024174",
+    "cited_by_count": 42,
+    "openalex_id": "https://openalex.org/W2930348888",
+    "abstract": "Abstract In this study, we focus on the electrical tortuosity‐based permeability model k = r eff 2 /8 F ( r eff is an effective pore size, and F is the formation factor) and analyze its applicability to rocks experiencing mineral precipitation and dissolution. Two limiting cases of advection‐dominated water‐rock reactions are simulated, that is, the reaction‐limited and transport‐limited cases. At the pore scale, the two precipitation/dissolution patterns are simulated with a geometrical model and a phenomenological model. The fluid and electric flows in the rocks are simulated by directly solving the linear Stokes equation and Laplace equation on the representative elementary volume of the samples. The numerical results show that evolutions of k and F differ significantly in the two limiting cases. In general, the reaction‐limited precipitation/dissolution would result in a smooth variation of k and F , which can be roughly modeled with a power function of porosity ϕ with a constant exponent. In contrast, the transport‐limited precipitation/dissolution mostly occurs near the pore throats where the fluid velocity is high. This induces a sharp change in k and F despite a minor variation in ϕ . The commonly used power laws with constant exponents are not able to describe such variations. The results also reveal that the electrical tortuosity‐based permeability prediction generally works well for rocks experiencing precipitation/dissolution if r eff can be appropriately estimated, for example, with the electrical field normalized pore size Λ. The associated prediction errors are mainly due to the use of electrical tortuosity, which might be considerably larger than the true hydraulic tortuosity."
+  },
+  {
+    "seed_title": "Predicting permeability from the characteristic relaxation time and intrinsic formation factor of complex conductivity spectra",
+    "title": "Predicting permeability from the characteristic relaxation time and intrinsic formation factor of complex conductivity spectra",
+    "year": 2015,
+    "authors": [
+      "A. Revil",
+      "Andrew Binley",
+      "Lakam Mejus",
+      "Pauline Kessouri"
+    ],
+    "journal": "Water Resources Research",
+    "doi": "10.1002/2015wr017074",
+    "landing_page_url": "https://doi.org/10.1002/2015wr017074",
+    "pdf_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/2015WR017074",
+    "is_oa": true,
+    "oa_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/2015WR017074",
+    "cited_by_count": 120,
+    "openalex_id": "https://openalex.org/W1888133144",
+    "abstract": "Abstract Low‐frequency quadrature conductivity spectra of siliclastic materials exhibit typically a characteristic relaxation time, which either corresponds to the peak frequency of the phase or the quadrature conductivity or a typical corner frequency, at which the quadrature conductivity starts to decrease rapidly toward lower frequencies. This characteristic relaxation time can be combined with the (intrinsic) formation factor and a diffusion coefficient to predict the permeability to flow of porous materials at saturation. The intrinsic formation factor can either be determined at several salinities using an electrical conductivity model or at a single salinity using a relationship between the surface and quadrature conductivities. The diffusion coefficient entering into the relationship between the permeability, the characteristic relaxation time, and the formation factor takes only two distinct values for isothermal conditions. For pure silica, the diffusion coefficient of cations, like sodium or potassium, in the Stern layer is equal to the diffusion coefficient of these ions in the bulk pore water, indicating weak sorption of these couterions. For clayey materials and clean sands and sandstones whose surface have been exposed to alumina (possibly iron), the diffusion coefficient of the cations in the Stern layer appears to be 350 times smaller than the diffusion coefficient of the same cations in the pore water. These values are consistent with the values of the ionic mobilities used to determine the amplitude of the low and high‐frequency quadrature conductivities and surface conductivity. The database used to test the model comprises a total of 202 samples. Our analysis reveals that permeability prediction with the proposed model is usually within an order of magnitude from the measured value above 0.1 mD. We also discuss the relationship between the different time constants that have been considered in previous works as characteristic relaxation time, inc"
+  },
+  {
+    "seed_title": "Permeability estimation from induced polarization: an evaluation of geophysical length scales using an effective hydraulic radius concept",
+    "title": "Permeability estimation from induced polarization: an evaluation of geophysical length scales using an effective hydraulic radius concept",
+    "year": 2019,
+    "authors": [
+      "Andreas Weller",
+      "Lee Slater"
+    ],
+    "journal": "Near Surface Geophysics",
+    "doi": "10.1002/nsg.12071",
+    "landing_page_url": "https://doi.org/10.1002/nsg.12071",
+    "pdf_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/nsg.12071",
+    "is_oa": true,
+    "oa_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/nsg.12071",
+    "cited_by_count": 25,
+    "openalex_id": "https://openalex.org/W2980142610",
+    "abstract": "ABSTRACT Geophysical length scales defined from induced‐polarization measurements can be used in models of permeability ( k ) prediction. We explore the relative merit of different induced‐polarization parameters as proxies of an effective hydraulic radius ( r eff ) that can be used to predict permeability from a modified Hagen–Poiseuille equation. Whereas geometrical measures of the hydraulic radius are good proxies of r eff , the induced‐polarization measures are not well correlated with r eff . However, a new proxy of r eff that considers both imaginary conductivity and formation factor shows an improved correlation with r eff . The resulting model enables a better quality of permeability prediction compared with the other geophysical length scales, but does not reach the predictive quality of the models based on geometrical length scales. The specific polarizability defined when incorporating the effect of the formation factor on imaginary conductivity appears to be independent of pore geometry, indicating that it is the correct parameter representing the role of the surface electrochemistry on the induced‐polarization effect. However, the joint dependence of induced‐polarization measurements on both the pore radius and the tortuosity and porosity of the interconnected pore network is a limitation to the widely explored use of induced‐polarization measurements to isolate surface properties from volumetric properties of the interconnected pore network."
+  },
+  {
+    "seed_title": "An overview of the spectral induced polarization method for near-surface applications",
+    "title": "An overview of the spectral induced polarization method for near‐surface applications",
+    "year": 2012,
+    "authors": [
+      "Andreas Kemna",
+      "Andrew Binley",
+      "Giorgio Cassiani",
+      "Ernst Niederleithinger",
+      "A. Revil",
+      "Lee Slater",
+      "Kenneth H. Williams",
+      "Adrián Flores Orozco",
+      "Franz‐Hubert Haegel",
+      "Andreas Hördt"
+    ],
+    "journal": "Near Surface Geophysics",
+    "doi": "10.3997/1873-0604.2012027",
+    "landing_page_url": "https://doi.org/10.3997/1873-0604.2012027",
+    "pdf_url": null,
+    "is_oa": true,
+    "oa_url": "https://www.osti.gov/biblio/1172258",
+    "cited_by_count": 360,
+    "openalex_id": "https://openalex.org/W2128090053",
+    "abstract": "ABSTRACT Over the last 15 years significant advancements in induced polarization (IP) research have taken place, particularly with respect to spectral IP (SIP), concerning the understanding of the mechanisms of the IP phenomenon, the conduction of accurate and broadband laboratory measurements, the modelling and inversion of IP data for imaging purposes and the increasing application of the method in near‐surface investigations. We summarize here the current state of the science of the SIP method for near‐surface applications and describe which aspects still represent open issues and should be the focus of future research efforts. Significant progress has been made over the last decade in the understanding of the microscopic mechanisms of IP; however, integrated mechanistic models involving different possible polarization processes at the grain/pore scale are still lacking. A prerequisite for the advances in the mechanistic understanding of IP was the development of improved laboratory instrumentation, which has led to a continuously growing data base of SIP measurements on various soil and rock samples. We summarize the experience of numerous experimental studies by formulating key recommendations for reliable SIP laboratory measurements. To make use of the established theoretical and empirical relationships between SIP characteristics and target petrophysical properties at the field scale, sophisticated forward modelling and inversion algorithms are needed. Considerable progress has also been made in this field, in particular with the development of complex resistivity algorithms allowing the modelling and inversion of IP data in the frequency domain. The ultimate goal for the future are algorithms and codes for the integral inversion of 3D, time‐lapse and multi‐frequency IP data, which defines a 5D inversion problem involving the dimensions space (for imaging), time (for monitoring) and frequency (for spectroscopy). We also offer guidelines for reliable and accur"
+  },
+  {
+    "seed_title": "Complex conductivity of soils",
+    "title": "Complex conductivity of soils",
+    "year": 2017,
+    "authors": [
+      "A. Revil",
+      "Antoine Coperey",
+      "Zhenlu Shao",
+      "Nicolás Florsch",
+      "Ida Lykke Fabricius",
+      "Yaping Deng",
+      "Joost Delsman",
+      "P.S. Pauw",
+      "M. Karaoulis",
+      "P. G. B. de Louw"
+    ],
+    "journal": "Water Resources Research",
+    "doi": "10.1002/2017wr020655",
+    "landing_page_url": "https://doi.org/10.1002/2017wr020655",
+    "pdf_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/2017WR020655",
+    "is_oa": true,
+    "oa_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/2017WR020655",
+    "cited_by_count": 205,
+    "openalex_id": "https://openalex.org/W2741000561",
+    "abstract": "Abstract The complex conductivity of soils remains poorly known despite the growing importance of this method in hydrogeophysics. In order to fill this gap of knowledge, we investigate the complex conductivity of 71 soils samples (including four peat samples) and one clean sand in the frequency range 0.1 Hz to 45 kHz. The soil samples are saturated with six different NaCl brines with conductivities (0.031, 0.53, 1.15, 5.7, 14.7, and 22 S m −1 , NaCl, 25°C) in order to determine their intrinsic formation factor and surface conductivity. This data set is used to test the predictions of the dynamic Stern polarization model of porous media in terms of relationship between the quadrature conductivity and the surface conductivity. We also investigate the relationship between the normalized chargeability (the difference of in‐phase conductivity between two frequencies) and the quadrature conductivity at the geometric mean frequency. This data set confirms the relationships between the surface conductivity, the quadrature conductivity, and the normalized chargeability. The normalized chargeability depends linearly on the cation exchange capacity and specific surface area while the chargeability shows no dependence on these parameters. These new data and the dynamic Stern layer polarization model are observed to be mutually consistent. Traditionally, in hydrogeophysics, surface conductivity is neglected in the analysis of resistivity data. The relationships we have developed can be used in field conditions to avoid neglecting surface conductivity in the interpretation of DC resistivity tomograms. We also investigate the effects of temperature and saturation and, here again, the dynamic Stern layer predictions and the experimental observations are mutually consistent."
+  },
+  {
+    "seed_title": "Spectral induced polarization of partially saturated clay-rocks: a mechanistic approach",
+    "title": "Spectral induced polarization of partially saturated clay-rocks: a mechanistic approach",
+    "year": 2009,
+    "authors": [
+      "Damien Jougnot",
+      "Ahmad Ghorbani",
+      "A. Revil",
+      "Philippe Leroy",
+      "Philippe Cosenza"
+    ],
+    "journal": "Geophysical Journal International",
+    "doi": "10.1111/j.1365-246x.2009.04426.x",
+    "landing_page_url": "https://doi.org/10.1111/j.1365-246x.2009.04426.x",
+    "pdf_url": "https://academic.oup.com/gji/article-pdf/180/1/210/5985599/180-1-210.pdf",
+    "is_oa": true,
+    "oa_url": "https://academic.oup.com/gji/article-pdf/180/1/210/5985599/180-1-210.pdf",
+    "cited_by_count": 176,
+    "openalex_id": "https://openalex.org/W2168418478",
+    "abstract": "We have developed a mechanistic model to interpret spectral induced polarization data of partially saturated clay-rocks. This model accounts for the polarization of the grains through an electrical double layer model with a polarization model of the inner part of the electrical double layer called the Stern layer. The polarization model accounts also for the Maxwell-Wagner polarization at frequencies higher than 100 Hz. The Maxwell-Wagner polarization is modelled by using a conductivity model modified to account for the presence of a non-wetting immiscible phase like air in the pore space. The resulting model is consistent with the first and second Archie's laws in the case where surface conductivity can be neglected. The volumetric charge density of the diffuse layer at saturation is divided by the saturation of the water phase to account for the partial water saturation of the porous material. The model comprises seven fundamental parameters: the formation factor, the second Archie's exponent, a critical water saturation level, the mean electrical potential of the pore space at saturation, the density of the counterions in the Stern layer, and at least two parameters describing the grain size distribution. Most of these parameters can be derived independently using alternative measurements and electrochemical models. Measurements were performed in the frequency range 10 mHz-45 kHz using five samples from the Callovo-Oxfordian formation in the eastern part of the Paris Basin, France. The model agrees fairly well with the experimental data at saturation and for partially saturated clay-rocks down to 1 Hz. Most of the seven physical parameters entering the model were independently evaluated."
+  },
+  {
+    "seed_title": "Induced polarization signatures of cations exhibiting differential sorption behaviors in saturated sands",
+    "title": "Induced polarization signatures of cations exhibiting differential sorption behaviors in saturated sands",
+    "year": 2011,
+    "authors": [
+      "P. Vaudelet",
+      "A. Revil",
+      "Myriam Schmutz",
+      "Marco Franceschi",
+      "P. Bégassat"
+    ],
+    "journal": "Water Resources Research",
+    "doi": "10.1029/2010wr009310",
+    "landing_page_url": "https://doi.org/10.1029/2010wr009310",
+    "pdf_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1029/2010WR009310",
+    "is_oa": true,
+    "oa_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1029/2010WR009310",
+    "cited_by_count": 102,
+    "openalex_id": "https://openalex.org/W1885542349",
+    "abstract": "Two sets of experiments were designed to understand the change in induced polarization associated with the sorption of copper and sodium, exhibiting distinct sorption behavior on a silica sand. A sand column experiment was first performed to see the change in the complex conductivity during the advective transport of a copper sulfate solution. A second set of experiments was done with the sand at equilibrium with various solutions of NaCl and CuSO 4 . In the first experiment, the copper sulfate solution replaced a sodium chloride solution, keeping the electrical conductivity of the solution nearly constant. During the passage of the copper sulfate solution, the apparent phase angle decreased from 3 ± 0.2 to 0.5 ± 0.2 mrad, while the magnitude of the conductivity of the sand remained nearly constant. A quantitative model is proposed to explain the change in the complex conductivity as a function of the chemistry assuming a polarization mechanism associated with the Stern layer (the inner part of the electrical double layer coating the water‐mineral interface). The Stern layer polarization is combined with a complexation model describing the competitive sorption of copper and sodium at the pore water interface. The change of the phase lag is directly associated with the ion exchange between sodium and copper at the surface of the silica grains. The explanation of the observed phase differences between Na and Cu relies on their different complexation behaviors, with Na being loosely absorbed, while Cu forms relatively strong complexation with both inner (monodentate) and outer sphere (bidentate) complexes. The replacement of Cu 2+ by Na + is less favorable; therefore, the kinetics of such a replacement is much slower than for the opposite replacement (Na + by Cu 2+ ). We were able to reproduce the changes in the phase lags at thermodynamic equilibrium near the relaxation frequency and in the frequency domain. These measurements and modeling results open the door to the"
+  },
+  {
+    "seed_title": "Spectral induced polarization of porous media",
+    "title": "A new model for the spectral induced polarization signature of bacterial growth in porous media",
+    "year": 2012,
+    "authors": [
+      "A. Revil",
+      "Eliot A. Atekwana",
+      "Chi Zhang",
+      "Abderrahim Jardani",
+      "S. R. Smith"
+    ],
+    "journal": "Water Resources Research",
+    "doi": "10.1029/2012wr011965",
+    "landing_page_url": "https://doi.org/10.1029/2012wr011965",
+    "pdf_url": null,
+    "is_oa": true,
+    "oa_url": "https://normandie-univ.hal.science/hal-01742287/document",
+    "cited_by_count": 83,
+    "openalex_id": "https://openalex.org/W1933573736",
+    "abstract": "The complex conductivity of porous materials and colloidal suspensions comprises two components: an in‐phase conductivity associated with electromigration of the charge carriers and a quadrature conductivity associated with the reversible storage of the charges at some polarization length scales. We developed a quantitative model to investigate the frequency domain induced polarization response of suspensions of bacteria and bacteria growth in porous media. Induced polarization of bacteria ( α polarization) is related to the properties of the electrical double layer of the bacteria. Surface conductivity and α polarization are due to the Stern layer of counterions occurring in a brush of polymers coating the surface of the bacteria. These phenomena can be related to their cation exchange capacity. The mobility of the counterions in this Stern layer is found to be very small (4.7 × 10 −10 m 2 s −1 V −1 at 25°C). This implies a very low relaxation frequency for the α polarization of the bacteria cells (typically around 0.1–5 Hz), in agreement with experimental observations. This new model can be coupled to reactive transport modeling codes in which the evolution of bacterial populations are usually described by Monod kinetics. We show that the growth rate and endogenous decay coefficients of bacteria in a porous sand can be inferred nonintrusively from time‐lapse frequency domain induced polarization data."
+  },
+  {
+    "seed_title": "Determination of permeability from spectral induced polarization in granular media",
+    "title": "Determination of permeability from spectral induced polarization in granular media",
+    "year": 2010,
+    "authors": [
+      "A. Revil",
+      "Nicolás Florsch"
+    ],
+    "journal": "Geophysical Journal International",
+    "doi": "10.1111/j.1365-246x.2010.04573.x",
+    "landing_page_url": "https://doi.org/10.1111/j.1365-246x.2010.04573.x",
+    "pdf_url": "https://academic.oup.com/gji/article-pdf/181/3/1480/6064289/181-3-1480.pdf",
+    "is_oa": true,
+    "oa_url": "https://academic.oup.com/gji/article-pdf/181/3/1480/6064289/181-3-1480.pdf",
+    "cited_by_count": 417,
+    "openalex_id": "https://openalex.org/W1977584727",
+    "abstract": "International audience"
+  },
+  {
+    "seed_title": "Pore-scale imaging and modelling",
+    "title": "Pore-scale imaging and modelling",
+    "year": 2012,
+    "authors": [
+      "Martin J. Blunt",
+      "Branko Bijeljic",
+      "Hu Dong",
+      "Oussama Gharbi",
+      "Stefan Iglauer",
+      "Peyman Mostaghimi",
+      "Adriana Paluszny",
+      "Christopher H. Pentland"
+    ],
+    "journal": "Advances in Water Resources",
+    "doi": "10.1016/j.advwatres.2012.03.003",
+    "landing_page_url": "https://doi.org/10.1016/j.advwatres.2012.03.003",
+    "pdf_url": null,
+    "is_oa": true,
+    "oa_url": "https://doi.org/10.1016/j.advwatres.2012.03.003",
+    "cited_by_count": 1923,
+    "openalex_id": "https://openalex.org/W2026632831",
+    "abstract": "Pore-scale imaging and modelling – digital core analysis – is becoming a routine service in the oil and gas industry, and has potential applications in contaminant transport and carbon dioxide storage. This paper briefly describes the underlying technology, namely imaging of the pore space of rocks from the nanometre scale upwards, coupled with a suite of different numerical techniques for simulating single and multiphase flow and transport through these images. Three example applications are then described, illustrating the range of scientific problems that can be tackled: dispersion in different rock samples that predicts the anomalous transport behaviour characteristic of highly heterogeneous carbonates; imaging of super-critical carbon dioxide in sandstone to demonstrate the possibility of capillary trapping in geological carbon storage; and the computation of relative permeability for mixed-wet carbonates and implications for oilfield waterflood recovery. The paper concludes by discussing limitations and challenges, including finding representative samples, imaging and simulating flow and transport in pore spaces over many orders of magnitude in size, the determination of wettability, and upscaling to the field scale. We conclude that pore-scale modelling is likely to become more widely applied in the oil industry including assessment of unconventional oil and gas resources. It has the potential to transform our understanding of multiphase flow processes, facilitating more efficient oil and gas recovery, effective contaminant removal and safe carbon dioxide storage."
+  },
+  {
+    "seed_title": "Digital rock physics benchmarks—Part I: Imaging and segmentation",
+    "title": "Digital rock physics benchmarks—Part I: Imaging and segmentation",
+    "year": 2012,
+    "authors": [
+      "Heiko Andrä",
+      "Nicolas Combaret",
+      "Jack Dvorkin",
+      "Erik Glatt",
+      "Junehee Han",
+      "Matthias Kabel",
+      "Youngseuk Keehm",
+      "Fabian Krzikalla",
+      "Minhui Lee",
+      "Claudio Madonna"
+    ],
+    "journal": "Computers & Geosciences",
+    "doi": "10.1016/j.cageo.2012.09.005",
+    "landing_page_url": "https://doi.org/10.1016/j.cageo.2012.09.005",
+    "pdf_url": null,
+    "is_oa": false,
+    "oa_url": null,
+    "cited_by_count": 696,
+    "openalex_id": "https://openalex.org/W2051904589",
+    "abstract": ""
+  },
+  {
+    "seed_title": "Digital rock physics benchmarks—Part II: Computing effective properties",
+    "title": "Digital rock physics benchmarks—part II: Computing effective properties",
+    "year": 2012,
+    "authors": [
+      "Heiko Andrä",
+      "Nicolas Combaret",
+      "Jack Dvorkin",
+      "Erik Glatt",
+      "Junehee Han",
+      "Matthias Kabel",
+      "Youngseuk Keehm",
+      "Fabian Krzikalla",
+      "Minhui Lee",
+      "Claudio Madonna"
+    ],
+    "journal": "Computers & Geosciences",
+    "doi": "10.1016/j.cageo.2012.09.008",
+    "landing_page_url": "https://doi.org/10.1016/j.cageo.2012.09.008",
+    "pdf_url": null,
+    "is_oa": false,
+    "oa_url": null,
+    "cited_by_count": 581,
+    "openalex_id": "https://openalex.org/W2042650924",
+    "abstract": ""
+  },
+  {
+    "seed_title": "High-resolution X-ray computed tomography in geosciences: A review of the current technology and applications",
+    "title": "High-resolution X-ray computed tomography in geosciences: A review of the current technology and applications",
+    "year": 2013,
+    "authors": [
+      "Veerle Cnudde",
+      "Matthieu Boone"
+    ],
+    "journal": "Earth-Science Reviews",
+    "doi": "10.1016/j.earscirev.2013.04.003",
+    "landing_page_url": "https://doi.org/10.1016/j.earscirev.2013.04.003",
+    "pdf_url": null,
+    "is_oa": true,
+    "oa_url": "https://biblio.ugent.be/publication/3232121/file/3232122.pdf",
+    "cited_by_count": 1522,
+    "openalex_id": "https://openalex.org/W2025836343",
+    "abstract": ""
+  },
+  {
+    "seed_title": "Characterization and Analysis of Porosity and Pore Structures",
+    "title": "Characterization and Analysis of Porosity and Pore Structures",
+    "year": 2015,
+    "authors": [
+      "Lawrence M. Anovitz",
+      "David R. Cole"
+    ],
+    "journal": "Reviews in Mineralogy and Geochemistry",
+    "doi": "10.2138/rmg.2015.80.04",
+    "landing_page_url": "https://doi.org/10.2138/rmg.2015.80.04",
+    "pdf_url": "https://pubs.geoscienceworld.org/msa/rimg/article-pdf/80/1/61/2951260/61_REV080C04.pdf",
+    "is_oa": true,
+    "oa_url": "https://pubs.geoscienceworld.org/msa/rimg/article-pdf/80/1/61/2951260/61_REV080C04.pdf",
+    "cited_by_count": 1049,
+    "openalex_id": "https://openalex.org/W2278652762",
+    "abstract": "Porosity plays a clearly important role in geology. It controls fluid storage in aquifers, oil and gas fields and geothermal systems, and the extent and connectivity of the pore structure control fluid flow and transport through geological formations, as well as the relationship between the properties of individual minerals and the bulk properties of the rock. In order to quantify the relationships between porosity, storage, transport and rock properties, however, the pore structure must be measured and quantitatively described. The overall importance of porosity, at least with respect to the use of rocks as building stone was recognized by TS Hunt in his “Chemical and Geological Essays” (1875, reviewed by JD Dana 1875) who noted:\n\n> “Other things being equal, it may properly be said that the value of a stone for building purposes is inversely as its porosity or absorbing power.”\n\nIn a Geological Survey report prepared for the U.S. Atomic Energy Commission, Manger (1963) summarized porosity and bulk density measurements for sedimentary rocks. He tabulated more than 900 items of porosity and bulk density data for sedimentary rocks with up to 2,109 porosity determinations per item. Amongst these he summarized several early studies, including those of Schwarz (1870–1871), Cook (1878), Wheeler (1896), Buckley (1898), Gary (1898), Moore (1904), Fuller (1906), Sorby (1908), Hirschwald (1912), Grubenmann et al. (1915), and Kessler (1919), many of which were concerned with rocks and clays of commercial utility. There have, of course, been many more such determinations since that time.\n\nThere are a large number of methods for quantifying porosity, and an increasingly complex idea of what it means to do so. Manger (1963) listed the techniques by which the porosity determinations he summarized were made. He separated these into seven methods for …"
+  },
+  {
+    "seed_title": "Review of pore network modelling of porous media: Experimental characterisations, network constructions and applications to reactive transport",
+    "error": "HTTP Error 400: Bad Request"
+  },
+  {
+    "seed_title": "Generalized network modeling: Network extraction as a coarse-scale discretization of the void space of porous media",
+    "title": "Generalized network modeling: Network extraction as a coarse-scale discretization of the void space of porous media",
+    "year": 2017,
+    "authors": [
+      "Ali Q. Raeini",
+      "Branko Bijeljic",
+      "Martin J. Blunt"
+    ],
+    "journal": "Physical review. E",
+    "doi": "10.1103/physreve.96.013312",
+    "landing_page_url": "https://doi.org/10.1103/physreve.96.013312",
+    "pdf_url": "http://link.aps.org/pdf/10.1103/PhysRevE.96.013312",
+    "is_oa": true,
+    "oa_url": "http://link.aps.org/pdf/10.1103/PhysRevE.96.013312",
+    "cited_by_count": 346,
+    "openalex_id": "https://openalex.org/W2737985238",
+    "abstract": "A generalized network extraction workflow is developed for parameterizing three-dimensional (3D) images of porous media. The aim of this workflow is to reduce the uncertainties in conventional network modeling predictions introduced due to the oversimplification of complex pore geometries encountered in natural porous media. The generalized network serves as a coarse discretization of the surface generated from a medial-axis transformation of the 3D image. This discretization divides the void space into individual pores and then subdivides each pore into sub-elements called half-throat connections. Each half-throat connection is further segmented into corners by analyzing the medial axis curves of its axial plane. The parameters approximating each corner-corner angle, volume, and conductivity-are extracted at different discretization levels, corresponding to different wetting layer thickness and local capillary pressures during multiphase flow simulations. Conductivities are calculated using direct single-phase flow simulation so that the network can reproduce the single-phase flow permeability of the underlying image exactly. We first validate the algorithm by using it to discretize synthetic angular pore geometries and show that the network model reproduces the corner angles accurately. We then extract network models from micro-CT images of porous rocks and show that the network extraction preserves macroscopic properties, the permeability and formation factor, and the statistics of the micro-CT images."
+  },
+  {
+    "seed_title": "Network generation for pore-space characterization and pore-scale modeling",
+    "not_found": true
+  },
+  {
+    "seed_title": "A laboratory study to estimate pore geometric parameters of sandstones using complex conductivity and nuclear magnetic resonance for permeability prediction",
+    "title": "A laboratory study to estimate pore geometric parameters of sandstones using complex conductivity and nuclear magnetic resonance for permeability prediction",
+    "year": 2016,
+    "authors": [
+      "Gordon Osterman",
+      "Kristina Keating",
+      "Andrew Binley",
+      "Lee Slater"
+    ],
+    "journal": "Water Resources Research",
+    "doi": "10.1002/2015wr018472",
+    "landing_page_url": "https://doi.org/10.1002/2015wr018472",
+    "pdf_url": "https://agupubs.onlinelibrary.wiley.com/doi/pdfdirect/10.1002/2015WR018472",
+    "is_oa": true,
+    "oa_url": "https://agupubs.onlinelibrary.wiley.com/doi/pdfdirect/10.1002/2015WR018472",
+    "cited_by_count": 37,
+    "openalex_id": "https://openalex.org/W2299302073",
+    "abstract": "Abstract We estimate parameters from the Katz and Thompson permeability model using laboratory complex electrical conductivity (CC) and nuclear magnetic resonance (NMR) data to build permeability models parameterized with geophysical measurements. We use the Katz and Thompson model based on the characteristic hydraulic length scale, determined from mercury injection capillary pressure estimates of pore throat size, and the intrinsic formation factor, determined from multisalinity conductivity measurements, for this purpose. Two new permeability models are tested, one based on CC data and another that incorporates CC and NMR data. From measurements made on forty‐five sandstone cores collected from fifteen different formations, we evaluate how well the CC relaxation time and the NMR transverse relaxation times compare to the characteristic hydraulic length scale and how well the formation factor estimated from CC parameters compares to the intrinsic formation factor. We find: (1) the NMR transverse relaxation time models the characteristic hydraulic length scale more accurately than the CC relaxation time ( of 0.69 and 0.33 and normalized root mean square errors (NRMSE) of 0.16 and 0.21, respectively); (2) the CC estimated formation factor is well correlated with the intrinsic formation factor (NRMSE=0.23). We demonstrate that that permeability estimates from the joint‐NMR‐CC model (NRMSE=0.13) compare favorably to estimates from the Katz and Thompson model (NRMSE=0.074). This model advances the capability of the Katz and Thompson model by employing parameters measureable in the field giving it the potential to more accurately estimate permeability using geophysical measurements than are currently possible."
+  },
+  {
+    "seed_title": "Enhanced pore space analysis by use of μ-CT, MIP, NMR, and SIP",
+    "error": "HTTP Error 400: Bad Request"
+  },
+  {
+    "seed_title": "Estimating pore-size distribution in carbonate reservoir rocks using joint inversion of NMR and complex conductivity data",
+    "title": "Estimating pore-size distribution in carbonate reservoir rocks using joint inversion of NMR and complex conductivity data",
+    "year": 2018,
+    "authors": [
+      "Fan Zhang",
+      "Qifei Niu",
+      "Chi Zhang"
+    ],
+    "journal": null,
+    "doi": "10.1190/segam2018-2997894.1",
+    "landing_page_url": "https://doi.org/10.1190/segam2018-2997894.1",
+    "pdf_url": null,
+    "is_oa": false,
+    "oa_url": null,
+    "cited_by_count": 2,
+    "openalex_id": "https://openalex.org/W2890825910",
+    "abstract": "In this study, we applied our recently developed joint inversion algorithm of nuclear magnetic resonance (NMR) and complex conductivity (or spectral induced polarization – SIP) data on complex carbonate reservoir rocks to better estimate pore size distribution. The basic principles of NMR and SIP porosimetries as well as the intrinsic petrophysical relationships among them have been discussed and reviewed. A brief introduction of the proposed Levenberg-Marquardt algorithm is also given to demonstrate the workflow of joint inversion method we used. Results of joint inversion from oomoldic grainstone datasets showed similar improvement of pore size distribution estimation as previously studied using Berea sandstone. NMR data obviously contribute more than SIP data during the inversion. The mismatch between the inverted SIP data and the experimental data indicating an alternative SIP model is needed. Here, we proposed a new SIP model considering both electrical double layer polarization as well as the membrane polarization. This new model predicts more realistic real and imaginary conductivities, especially at intermediate frequencies. Our results provide us a new perspective on understanding the SIP mechanisms in rocks with complex structure. Presentation Date: Wednesday, October 17, 2018 Start Time: 8:30:00 AM Location: 213B (Anaheim Convention Center) Presentation Type: Oral"
+  },
+  {
+    "seed_title": "Anomalous solute transport in saturated porous media: Relating transport model parameters to electrical and nuclear magnetic resonance properties",
+    "title": "Anomalous solute transport in saturated porous media: Relating transport model parameters to electrical and nuclear magnetic resonance properties",
+    "year": 2015,
+    "authors": [
+      "R. D. Swanson",
+      "Andrew Binley",
+      "Kristina Keating",
+      "Samantha France",
+      "Gordon Osterman",
+      "F. D. Day‐Lewis",
+      "Kamini Singha"
+    ],
+    "journal": "Water Resources Research",
+    "doi": "10.1002/2014wr015284",
+    "landing_page_url": "https://doi.org/10.1002/2014wr015284",
+    "pdf_url": "https://agupubs.onlinelibrary.wiley.com/doi/pdfdirect/10.1002/2014WR015284",
+    "is_oa": true,
+    "oa_url": "https://agupubs.onlinelibrary.wiley.com/doi/pdfdirect/10.1002/2014WR015284",
+    "cited_by_count": 38,
+    "openalex_id": "https://openalex.org/W2113893519",
+    "abstract": "Abstract The advection‐dispersion equation (ADE) fails to describe commonly observed non‐Fickian solute transport in saturated porous media, necessitating the use of other models such as the dual‐domain mass‐transfer (DDMT) model. DDMT model parameters are commonly calibrated via curve fitting, providing little insight into the relation between effective parameters and physical properties of the medium. There is a clear need for material characterization techniques that can provide insight into the geometry and connectedness of pore spaces related to transport model parameters. Here, we consider proton nuclear magnetic resonance (NMR), direct‐current (DC) resistivity, and complex conductivity (CC) measurements for this purpose, and assess these methods using glass beads as a control and two different samples of the zeolite clinoptilolite, a material that demonstrates non‐Fickian transport due to intragranular porosity. We estimate DDMT parameters via calibration of a transport model to column‐scale solute tracer tests, and compare NMR, DC resistivity, CC results, which reveal that grain size alone does not control transport properties and measured geophysical parameters; rather, volume and arrangement of the pore space play important roles. NMR cannot provide estimates of more‐mobile and less‐mobile pore volumes in the absence of tracer tests because these estimates depend critically on the selection of a material‐dependent and flow‐dependent cutoff time. Increased electrical connectedness from DC resistivity measurements are associated with greater mobile pore space determined from transport model calibration. CC was hypothesized to be related to length scales of mass transfer, but the CC response is unrelated to DDMT."
+  },
+  {
+    "seed_title": "Advances in low-field nuclear magnetic resonance (NMR) technologies applied for characterization of pore space inside rocks: a critical review",
+    "title": "Advances in low-field nuclear magnetic resonance (NMR) technologies applied for characterization of pore space inside rocks: a critical review",
+    "year": 2020,
+    "authors": [
+      "Jianchun Guo",
+      "Hang-Yu Zhou",
+      "Jie Zeng",
+      "Kun-Jie Wang",
+      "Jie Lai",
+      "Yu-Xuan Liu"
+    ],
+    "journal": "Petroleum Science",
+    "doi": "10.1007/s12182-020-00488-0",
+    "landing_page_url": "https://doi.org/10.1007/s12182-020-00488-0",
+    "pdf_url": null,
+    "is_oa": true,
+    "oa_url": "https://doi.org/10.1007/s12182-020-00488-0",
+    "cited_by_count": 105,
+    "openalex_id": "https://openalex.org/W3044193979",
+    "abstract": "Abstract NMR serves as an important technique for probing rock pore space, such as pore structure characterization, fluid identification, and petrophysical property testing, due to the reusability of cores, convenience in sample processing, and time efficiency in laboratory tests. In practice, NMR signal collection is normally achieved through polarized nuclei relaxation which releases crucial relaxation messages for result interpretation. The impetus of this work is to help engineers and researchers with petroleum background obtain new insights into NMR principals and extend existing methodologies for characterization of unconventional formations. This article first gives a brief description of the development history of relaxation theories and models for porous media. Then, the widely used NMR techniques for characterizing petrophysical properties and pore structures are presented. Meanwhile, limitations and deficiencies of them are summarized. Finally, future work on improving these insufficiencies and approaches of enhancement applicability for NMR technologies are discussed."
+  },
+  {
+    "seed_title": "Petrophysical principles of applications of NMR logging",
+    "title": "Petrophysical Principles of Applications of NMR Logging",
+    "year": 1997,
+    "authors": [
+      "W.E. Kenyon"
+    ],
+    "journal": "The Log analyst/The log analyst",
+    "doi": "",
+    "landing_page_url": "https://onepetro.org/petrophysics/article/170864/Petrophysical-Principles-of-Applications-of-NMR",
+    "pdf_url": null,
+    "is_oa": false,
+    "oa_url": null,
+    "cited_by_count": 441,
+    "openalex_id": "https://openalex.org/W2282904491",
+    "abstract": ""
+  },
+  {
+    "seed_title": "NMR relaxation in porous media",
+    "title": "The Modified Stretched-Exponential Model for Characterization of NMR Relaxation in Porous Media",
+    "year": 1996,
+    "authors": [
+      "M. Peyron",
+      "Gregory K. Pierens",
+      "A.J. Lucas",
+      "Laurance D. Hall",
+      "Robert C. Stewart"
+    ],
+    "journal": "Journal of Magnetic Resonance Series A",
+    "doi": "10.1006/jmra.1996.0029",
+    "landing_page_url": "https://doi.org/10.1006/jmra.1996.0029",
+    "pdf_url": null,
+    "is_oa": false,
+    "oa_url": null,
+    "cited_by_count": 65,
+    "openalex_id": "https://openalex.org/W2047065058",
+    "abstract": ""
+  },
+  {
+    "seed_title": "NMR relaxation time distributions in sedimentary rocks",
+    "not_found": true
+  },
+  {
+    "seed_title": "Microfluidics and Spectral Induced Polarization for Direct Observation and Quantification of Mineral Precipitation and Dissolution in Porous Media",
+    "not_found": true
+  },
+  {
+    "seed_title": "A microfluidic chip for geoelectrical monitoring of critical zone processes",
+    "title": "A microfluidic chip for geoelectrical monitoring of critical zone processes",
+    "year": 2023,
+    "authors": [
+      "Flore Rembert",
+      "Arnaud Stolz",
+      "Cyprien Soulaine",
+      "Sophie Roman"
+    ],
+    "journal": "Lab on a Chip",
+    "doi": "10.1039/d3lc00377a",
+    "landing_page_url": "https://doi.org/10.1039/d3lc00377a",
+    "pdf_url": "https://pubs.rsc.org/en/content/articlepdf/2023/lc/d3lc00377a",
+    "is_oa": true,
+    "oa_url": "https://pubs.rsc.org/en/content/articlepdf/2023/lc/d3lc00377a",
+    "cited_by_count": 23,
+    "openalex_id": "https://openalex.org/W4383483688",
+    "abstract": "We miniaturize geoelectrical acquisition using advanced microfabrication technologies to investigate coupled processes in the critical zone. We focus on the development of the complex electrical conductivity acquisition with the spectral induced polarization (SIP) method on a microfluidic chip equipped with electrodes. SIP is an innovative detection method that has the potential to monitor biogeochemical processes. However, due to the lack of microscale visualization of the processes, the interpretation of the SIP response remains under debate. This approach at the micrometer scale allows working in well-controlled conditions, with real-time monitoring by high-speed and high-resolution microscopy. It enables direct observation of microscopic reactive transport processes in the critical zone. We monitor the dissolution of pure calcite, a common geochemical reaction studied as an analog of the water-mineral interactions. We highlight the strong correlation between SIP response and dissolution through image processing. These results demonstrate that the proposed technological advancement will provide a further understanding of the critical zone processes through SIP observation."
+  },
+  {
+    "seed_title": "Quantitative Evaluation of the Effect of Pore Fluids Distribution on Complex Conductivity Saturation Exponents",
+    "title": "Quantitative Evaluation of the Effect of Pore Fluids Distribution on Complex Conductivity Saturation Exponents",
+    "year": 2024,
+    "authors": [
+      "Siyuan Qiang",
+      "Xiaoqing Shi",
+      "A. Revil",
+      "Xueyuan Kang",
+      "Yalin Song",
+      "Kun Xing"
+    ],
+    "journal": "Journal of Geophysical Research Solid Earth",
+    "doi": "10.1029/2024jb028689",
+    "landing_page_url": "https://doi.org/10.1029/2024jb028689",
+    "pdf_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1029/2024JB028689",
+    "is_oa": true,
+    "oa_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1029/2024JB028689",
+    "cited_by_count": 7,
+    "openalex_id": "https://openalex.org/W4401481432",
+    "abstract": "Abstract The induced polarization (IP) method holds a strong potential to better characterize the critical zone of our planet especially in areas characterized by multi‐phase flow. Power‐law relationships between the bulk, surface, and quadrature conductivities versus the pore water saturation are potentially useable to map the subsurface water content distribution. However, the saturation exponents n and p in these power‐law relationships have been observed to vary with the texture of geomaterials and the wettabilities of pore fluids. Traditional experimental setups in the laboratory do not allow to independently visualize the pore fluid distribution. Therefore, the physical interpretations of the two saturation exponents have remained unclear. We developed a novel milli‐fluidic micromodel using clay‐coated glass beads that exhibit excellent visibility and high IP response. Through laboratory experiments, we simultaneously determined the micromodel complex conductivity and acquired the corresponding pore‐scale fluid distributions generated by drainage and imbibition through such class of porous materials. Finite‐element simulations of complex conductivity based on the upscaling of the complex surface conductance of grains were conducted to determine the saturation exponents under ideal pore fluid distributions. Results indicate that saturation exponents n and p vary depending on the ganglia size of the insulating fluids. The saturation exponents n and p exhibit power‐law relationships with the change rate of pore water connectivity with saturation, which is calculated through the computation of the derivative of Euler characteristics. These findings provide a new physical explanation to the relationships between the saturation exponents and the microscopic fluid distributions within the geomaterials."
+  },
+  {
+    "seed_title": "Pore-scale modeling of electrical resistivity and permeability in porous media",
+    "not_found": true
+  },
+  {
+    "seed_title": "Linking pore-scale geometry and electrical conductivity in rocks",
+    "not_found": true
+  }
+]

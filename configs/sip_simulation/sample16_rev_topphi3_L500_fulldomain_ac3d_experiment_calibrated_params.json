@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "purpose": "Experiment-calibrated parameter set for sample16 full-domain AC3D SIP workflow.",
+  "created_for": "sample16_rev_topphi3_L500_z100_y120_x166_solid255_pore0",
+  "calibration_strategy": {
+    "status": "candidate_for_diagnostic_then_full_sweep",
+    "basis": "The previous strict Niu-style full-domain run underpredicted real conductivity while overpredicting the positive imaginary-conductivity amplitude. This parameter set separates the DC/background-conduction correction from the polarization-strength correction.",
+    "do_not_interpret_as": "A post-hoc real/imag plotting scale. These values are intended for a new AC3D field solve after short diagnostics."
+  },
+  "input_data": {
+    "field_solve_mhd": "results/pnextract_inputs/rev_sample16_5-16seged/topphi3_L500_z100_y120_x166/sample16_rev_topphi3_L500_z100_y120_x166_pnextract.mhd",
+    "network_dir": "results/pnextract/rev_sample16_5-16seged/topphi3_L500_z100_y120_x166/network_parsed",
+    "experiment_csv": "data_inventory/ct_backed_samples_raw_copy_20260605/sample_16_Grainstone/SIP/LKC-16.csv",
+    "segmented_volume": "results/segmented_cores/rev_sample16_5-16seged/sample16_rev_topphi3_L500_z100_y120_x166_solid255_pore0.tiff"
+  },
+  "material_and_polarization_parameters": {
+    "water_conductivity_s_m": 0.12,
+    "solid_conductivity_s_m": 0.0024,
+    "water_relative_permittivity": 80.0,
+    "solid_relative_permittivity": 7.0,
+    "surface_conductance_s": 1.5e-10,
+    "diffusion_coefficient_m2_s": 1.3e-9,
+    "membrane_polarizability_eta0": 0.0013,
+    "dynamic_pore_size_m": 2.45913e-6,
+    "pore_radius_scale": 1.0,
+    "membrane_length_scale": 1.0,
+    "membrane_zdc_scale": 1.0
+  },
+  "rationale": {
+    "solid_conductivity_s_m": "Set to 0.0024 S/m as an experiment-calibrated background/leakage term for sample16 rather than the strict Niu mineral-insulator setting. The previous solid=0 run implied an x-direction low-frequency apparent formation factor near 1130, far above the sample16 reference F=54.35.",
+    "surface_conductance_s": "Reduced from 1.3e-9 S to 1.5e-10 S because the previous run's positive imaginary-conductivity amplitude was too high while its trend was useful.",
+    "membrane_polarizability_eta0": "Reduced from 0.01 to 0.0013, close to the diagnostic positive-imaginary amplitude factor 0.126. This targets polarization strength without changing extracted throat geometry.",
+    "geometry_scales": "Keep pore_radius_scale, membrane_length_scale, and membrane_zdc_scale at 1.0 so the run remains tied to pnextract geometry; geometry scaling should remain a separately labeled sensitivity test."
+  },
+  "diagnostic_plan": {
+    "step_1": "Run maxwell at 0.1 Hz for directions x, y, and z using this parameter set.",
+    "step_2": "Choose the direction whose low-frequency real effective conductivity and apparent formation factor best match LKC-16.",
+    "step_3": "Run all mechanism at representative frequencies 0.1, 1, 10, 100, 1000, 10000, and 20000 Hz.",
+    "step_4": "Only run the full 51-frequency four-mechanism sweep if the diagnostic trend and amplitude are plausible."
+  },
+  "sample_bulk_geometry_for_experiment_conversion": {
+    "sample_length_cm": 3.6322,
+    "sample_diameter_cm": 2.52476,
+    "current_resistor_ohm": 10000.0,
+    "formation_factor_reference": 54.35
+  },
+  "solver_defaults": {
+    "field_solve_mode": "gpu-cocg-lowmem",
+    "direction": "x",
+    "dtype": "complex64",
+    "rtol": 1.0e-5,
+    "atol": 0.0,
+    "maxiter": 3000,
+    "preconditioner": "fft",
+    "fft_reference": "mean-face",
+    "progress_every": 25,
+    "residual_every": 50,
+    "resume": true
+  },
+  "base_cli_arguments": {
+    "mhd": "results/pnextract_inputs/rev_sample16_5-16seged/topphi3_L500_z100_y120_x166/sample16_rev_topphi3_L500_z100_y120_x166_pnextract.mhd",
+    "network-dir": "results/pnextract/rev_sample16_5-16seged/topphi3_L500_z100_y120_x166/network_parsed",
+    "experiment-csv": "data_inventory/ct_backed_samples_raw_copy_20260605/sample_16_Grainstone/SIP/LKC-16.csv",
+    "segmented-volume": "results/segmented_cores/rev_sample16_5-16seged/sample16_rev_topphi3_L500_z100_y120_x166_solid255_pore0.tiff",
+    "sample-label": "Sample 16 Grainstone REV topphi3 L500 experiment-calibrated",
+    "experiment-label": "LKC-16 experiment",
+    "field-solve-mode": "gpu-cocg-lowmem",
+    "component-mode": "paper",
+    "experiment-mode": "impedance",
+    "current-resistor-ohm": 10000.0,
+    "sample-length-cm": 3.6322,
+    "sample-diameter-cm": 2.52476,
+    "water-conductivity-s-m": 0.12,
+    "solid-conductivity-s-m": 0.0024,
+    "surface-conductance-s": 1.5e-10,
+    "membrane-polarizability": 0.0013,
+    "solid-relative-permittivity": 7.0,
+    "water-relative-permittivity": 80.0,
+    "dynamic-pore-size-m": 2.45913e-6,
+    "diffusion-coefficient-m2-s": 1.3e-9,
+    "pore-radius-scale": 1.0,
+    "membrane-length-scale": 1.0,
+    "membrane-zdc-scale": 1.0,
+    "solid-background-components": [
+      "maxwell",
+      "all"
+    ],
+    "pore-label": 0,
+    "solid-label": 1,
+    "rtol": 1.0e-5,
+    "atol": 0.0,
+    "maxiter": 3000,
+    "dtype": "complex64",
+    "preconditioner": "fft",
+    "fft-reference": "mean-face",
+    "progress-every": 25,
+    "residual-every": 50,
+    "resume": true
+  }
+}

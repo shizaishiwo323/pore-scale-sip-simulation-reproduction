@@ -1,0 +1,232 @@
+{
+  "schema_version": 1,
+  "purpose": "Planned parameter set for a full-domain 3-D AC SIP mechanism sweep before launching the solver.",
+  "created_for": "sample16_rev_topphi3_L500_z100_y120_x166_solid255_pore0",
+  "runner": {
+    "script": "code/scripts/sip_simulation/run_sample89_3d_sip_comparison.py",
+    "note": "This script is reusable for sample16 even though the filename still says sample89. It does not currently parse this JSON directly; Codex will read this file and translate cli_arguments into a command when the run is requested."
+  },
+  "input_data": {
+    "segmented_volume_tiff": "results/segmented_cores/rev_sample16_5-16seged/sample16_rev_topphi3_L500_z100_y120_x166_solid255_pore0.tiff",
+    "field_solve_mhd": "results/pnextract_inputs/rev_sample16_5-16seged/topphi3_L500_z100_y120_x166/sample16_rev_topphi3_L500_z100_y120_x166_pnextract.mhd",
+    "field_solve_raw": "results/pnextract_inputs/rev_sample16_5-16seged/topphi3_L500_z100_y120_x166/sample16_rev_topphi3_L500_z100_y120_x166_pnextract_pore0_solid1.raw",
+    "network_dir": "results/pnextract/rev_sample16_5-16seged/topphi3_L500_z100_y120_x166/network_parsed",
+    "experiment_csv": "data_inventory/ct_backed_samples_raw_copy_20260605/sample_16_Grainstone/SIP/LKC-16.csv",
+    "physical_properties_xlsx": "data_inventory/ct_backed_samples_raw_copy_20260605/physical_properties/\\u6837\\u54c1\\u5c5e\\u6027.xlsx"
+  },
+  "volume_geometry": {
+    "source_tiff_labels": {
+      "pore_value": 0,
+      "solid_value": 255
+    },
+    "solver_raw_labels": {
+      "pore_label": 0,
+      "solid_label": 1
+    },
+    "shape_zyx": [
+      500,
+      500,
+      500
+    ],
+    "voxel_size_um": 1.92,
+    "voxel_size_m": 1.92e-6,
+    "domain_size_um_xyz": [
+      960.0,
+      960.0,
+      960.0
+    ],
+    "pore_voxels": 23852287,
+    "solid_voxels": 101147713,
+    "total_voxels": 125000000,
+    "porosity_from_selected_rev": 0.190818296,
+    "pnextract_downsample": 1
+  },
+  "sample_bulk_geometry_for_experiment_conversion": {
+    "sample_id": "16",
+    "sample_label": "Sample 16 Grainstone REV topphi3 L500",
+    "experiment_label": "LKC-16 experiment",
+    "sample_length_cm": 3.6322,
+    "sample_diameter_cm": 2.52476,
+    "current_resistor_ohm": 10000.0,
+    "formation_factor_F_reference": 54.35,
+    "nmr_porosity_pct_reference": 23.88,
+    "helium_porosity_pct_reference": 26.4,
+    "notes": "Length, diameter, Lambda, and formation factor are taken from the sample-16 rows in the physical-properties workbook. The selected REV porosity is recorded separately and is not forced to match plug-scale porosity."
+  },
+  "frequency_plan": {
+    "mode": "use_experiment_frequencies",
+    "source": "LKC-16.csv",
+    "frequency_range_hz": [
+      0.1,
+      20000.0
+    ],
+    "n_frequencies": 51,
+    "frequencies_hz": [
+      0.1,
+      0.12765,
+      0.162945,
+      0.207999,
+      0.265511,
+      0.338925,
+      0.432637,
+      0.552261,
+      0.704961,
+      0.899882,
+      1.148698,
+      1.466313,
+      1.871747,
+      2.389284,
+      3.04992,
+      3.893221,
+      4.969693,
+      6.343811,
+      8.09787,
+      10.336926,
+      13.195079,
+      16.84351,
+      21.50073,
+      27.445668,
+      35.034377,
+      44.72136,
+      57.086787,
+      72.871247,
+      93.0201,
+      118.740097,
+      151.571658,
+      193.481123,
+      246.978529,
+      315.267933,
+      402.439313,
+      513.713524,
+      655.754982,
+      837.070812,
+      1068.520351,
+      1363.96554,
+      1741.101132,
+      2222.514472,
+      2837.038291,
+      3621.477549,
+      4622.813756,
+      5901.018779,
+      7532.646667,
+      9615.418614,
+      12274.075662,
+      15667.849668,
+      20000.0
+    ]
+  },
+  "mechanisms": {
+    "components_to_run": [
+      "maxwell",
+      "pore",
+      "membrane",
+      "all"
+    ],
+    "component_mode": "paper",
+    "solid_background_components": [
+      "maxwell",
+      "all"
+    ],
+    "definitions": {
+      "maxwell": "Two-phase water/solid AC3D solve with dc conductivity contrast plus high-frequency permittivity only.",
+      "pore": "Niu paper-mode pore-only AC3D solve: water is sigma_w + Delta sigma_pore*, solid is zero. This is not pore minus maxwell.",
+      "membrane": "Niu paper-mode membrane-only AC3D solve: water is sigma_w + Delta sigma_membrane*, solid is zero. This is not membrane minus maxwell.",
+      "all": "Combined AC3D solve with Maxwell background plus pore and membrane increments."
+    }
+  },
+  "material_and_polarization_parameters": {
+    "water_conductivity_s_m": 0.12,
+    "solid_conductivity_s_m": 0.0024,
+    "water_relative_permittivity": 80.0,
+    "solid_relative_permittivity": 7.0,
+    "surface_conductance_s": 1.3e-9,
+    "diffusion_coefficient_m2_s": 1.3e-9,
+    "membrane_polarizability_eta0": 0.01,
+    "dynamic_pore_size_m": 2.45913e-6,
+    "dynamic_pore_size_source_lambda_um": 2.45913,
+    "pore_radius_scale": 1.0,
+    "membrane_length_scale": 1.0,
+    "membrane_zdc_scale": 1.0
+  },
+  "solver": {
+    "field_solve_mode": "gpu-cocg-lowmem",
+    "direction": "x",
+    "dtype": "complex64",
+    "rtol": 1.0e-5,
+    "atol": 0.0,
+    "maxiter": 3000,
+    "preconditioner": "fft",
+    "fft_reference": "mean-face",
+    "jacobi_omega": 1.0,
+    "sor_omega": 1.35,
+    "progress_every": 25,
+    "residual_every": 50,
+    "resume": true,
+    "notes": "The low-memory COCG backend is selected because the 500^3 REV has 125 million cells. The preconditioner and fft_reference fields are retained for command compatibility but are ignored by the low-memory COCG backend."
+  },
+  "outputs": {
+    "out_dir": "results/sample16_rev_topphi3_L500_fulldomain_ac3d_physical_v1",
+    "output_prefix": "sample16_rev_topphi3_L500_fulldomain_ac3d_physical"
+  },
+  "rationale": {
+    "geometry": "Use the full 500^3 REV at 1.92 um/voxel with downsample=1 because the user requested full-domain simulation before any further simplification. The REV porosity is measured from the selected TIFF and kept as provenance.",
+    "frequency": "Use exactly the LKC-16 experimental frequencies, 0.1-20000 Hz with 51 points, so the simulation-to-experiment comparison is not an extrapolated frequency diagnostic.",
+    "water_sigma": "Use 0.12 S/m from the sample-16 SIP parameter table as the electrolyte conductivity baseline. This controls the dc conduction through connected pore water.",
+    "solid_sigma": "Use 0.0024 S/m from the sample-16 property table as the real solid/mineral background conductivity for Maxwell and total mechanisms.",
+    "permittivity": "Use eps_w/eps0=80 and eps_s/eps0=7 to represent high-frequency dielectric storage in water and carbonate solid. Their contrast drives Maxwell-Wagner interfacial polarization in the AC3D field solve.",
+    "pore_polarization": "Use Sigma_S=1.3e-9 S and D=1.3e-9 m2/s with the pnextract pore-radius distribution. Pore polarization is controlled by diffusion time scales tied to local pore radii.",
+    "membrane_polarization": "Use eta0=0.01 and the pnextract throat length/resistance distribution with no empirical geometry scaling. This follows the current sample16 rule that formal runs should prefer extracted pore radii and throat lengths.",
+    "dynamic_pore_size": "Use Lambda=2.45913 um from the sample-16 physical-properties workbook, not the old hard-coded 2.7 um default. Lambda maps microscopic conductance increments to apparent water conductivity.",
+    "scaling": "Keep pore_radius_scale=1, membrane_length_scale=1, and membrane_zdc_scale=1. Any non-unit scaling should be treated as a sensitivity or diagnostic run, not the formal physical run.",
+    "solver": "Use an actual AC3D field solve, not pnm-formation-factor, to preserve full-domain geometry and Maxwell field redistribution. Use gpu-cocg-lowmem/complex64 for memory feasibility on 125 million cells."
+  },
+  "cli_arguments": {
+    "mhd": "results/pnextract_inputs/rev_sample16_5-16seged/topphi3_L500_z100_y120_x166/sample16_rev_topphi3_L500_z100_y120_x166_pnextract.mhd",
+    "network-dir": "results/pnextract/rev_sample16_5-16seged/topphi3_L500_z100_y120_x166/network_parsed",
+    "experiment-csv": "data_inventory/ct_backed_samples_raw_copy_20260605/sample_16_Grainstone/SIP/LKC-16.csv",
+    "segmented-volume": "results/segmented_cores/rev_sample16_5-16seged/sample16_rev_topphi3_L500_z100_y120_x166_solid255_pore0.tiff",
+    "components": [
+      "maxwell",
+      "pore",
+      "membrane",
+      "all"
+    ],
+    "sample-label": "Sample 16 Grainstone REV topphi3 L500",
+    "experiment-label": "LKC-16 experiment",
+    "output-prefix": "sample16_rev_topphi3_L500_fulldomain_ac3d_physical",
+    "field-solve-mode": "gpu-cocg-lowmem",
+    "component-mode": "paper",
+    "experiment-mode": "impedance",
+    "current-resistor-ohm": 10000.0,
+    "sample-length-cm": 3.6322,
+    "sample-diameter-cm": 2.52476,
+    "water-conductivity-s-m": 0.12,
+    "solid-conductivity-s-m": 0,
+    "surface-conductance-s": 1.3e-9,
+    "membrane-polarizability": 0.01,
+    "solid-relative-permittivity": 7.0,
+    "water-relative-permittivity": 80.0,
+    "dynamic-pore-size-m": 2.45913e-6,
+    "diffusion-coefficient-m2-s": 1.3e-9,
+    "pore-radius-scale": 1.0,
+    "membrane-length-scale": 1.0,
+    "membrane-zdc-scale": 1.0,
+    "solid-background-components": [
+      "maxwell",
+      "all"
+    ],
+    "direction": "x",
+    "pore-label": 0,
+    "solid-label": 1,
+    "rtol": 1.0e-5,
+    "atol": 0.0,
+    "maxiter": 3000,
+    "dtype": "complex64",
+    "preconditioner": "fft",
+    "fft-reference": "mean-face",
+    "progress-every": 25,
+    "residual-every": 50,
+    "resume": true,
+    "out-dir": "results/sample16_rev_topphi3_L500_fulldomain_ac3d_physical_v1"
+  }
+}

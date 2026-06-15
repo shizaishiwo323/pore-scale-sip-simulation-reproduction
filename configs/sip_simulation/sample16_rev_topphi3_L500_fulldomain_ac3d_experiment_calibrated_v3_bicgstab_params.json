@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "purpose": "Third experiment-calibrated sample16 AC3D SIP candidate using BiCGSTAB after COCG residual diagnostics.",
+  "created_for": "sample16_rev_topphi3_L500_z100_y120_x166_solid255_pore0",
+  "relationship_to_previous": {
+    "v2_config": "configs/sip_simulation/sample16_rev_topphi3_L500_fulldomain_ac3d_experiment_calibrated_v2_fast_membrane_params.json",
+    "v2_output": "results/sample16_rev_topphi3_L500_exp_cal_v2_all7_y_v1",
+    "bicgstab_probe": "results/sample16_rev_topphi3_L500_exp_cal_v2_bicgstab_probe_1068Hz_y",
+    "diagnosis": "The COCG v2 all-7 run had high residuals at several frequencies. A BiCGSTAB probe at 1068.520351 Hz reduced the residual to about 4.3e-3 and showed the imaginary response was still too large by roughly a factor of five.",
+    "change": "Keep the successful y direction, solid background conductivity, and membrane_length_scale=0.1; reduce membrane_polarizability_eta0 from 0.0013 to 0.00026 and use gpu-bicgstab-compact."
+  },
+  "material_and_polarization_parameters": {
+    "water_conductivity_s_m": 0.12,
+    "solid_conductivity_s_m": 0.0024,
+    "water_relative_permittivity": 80.0,
+    "solid_relative_permittivity": 7.0,
+    "surface_conductance_s": 1.5e-10,
+    "diffusion_coefficient_m2_s": 1.3e-9,
+    "membrane_polarizability_eta0": 0.00026,
+    "dynamic_pore_size_m": 2.45913e-6,
+    "pore_radius_scale": 1.0,
+    "membrane_length_scale": 0.1,
+    "membrane_zdc_scale": 1.0
+  },
+  "solver": {
+    "field_solve_mode": "gpu-bicgstab-compact",
+    "direction": "y",
+    "dtype": "complex64",
+    "rtol": 1.0e-5,
+    "atol": 0.0,
+    "maxiter": 1000,
+    "preconditioner": "fft",
+    "fft_reference": "mean-face"
+  },
+  "diagnostic_plan": {
+    "components": [
+      "all"
+    ],
+    "frequencies_hz": [
+      0.1,
+      0.899882,
+      10.336926,
+      93.0201,
+      1068.520351,
+      9615.418614,
+      20000.0
+    ],
+    "decision_rule": "If v3 seven-point diagnostics preserve the real-conductivity baseline and bring the imaginary-conductivity amplitude/trend near LKC-16, use v3 settings for the full 51-frequency sweep."
+  }
+}

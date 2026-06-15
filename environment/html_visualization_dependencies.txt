@@ -1,0 +1,22 @@
+Purpose: interactive single-file PyVista/VTK HTML export for Berea pore-network visualization.
+
+Installed in C:\Users\imgw\.conda\envs\ml:
+
+    C:\Users\imgw\.conda\envs\ml\python.exe -m pip install "pyvista[jupyter]"
+
+Key packages added by the extra:
+
+- trame
+- trame-vtk
+- trame-vuetify
+- trame-client
+- trame-server
+- wslink
+
+These packages are needed by pyvista.Plotter.export_html to write offline VTK.js HTML files.
+
+Additional helper for pnextract Windows binary extraction:
+
+    C:\Users\imgw\.conda\envs\ml\python.exe -m pip install py7zr
+
+py7zr is used only to extract C:\Users\imgw\Documents\Codex\论文复现\pore-scale-simulation-reproduction\pnextract\bin.7z into a generated results/tools directory.

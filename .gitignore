@@ -9,7 +9,23 @@ __pycache__/
 .venv/
 venv/
 .ipynb_checkpoints/
+~$*
 
 # Large or local-only raw inputs
 *.raw
 *.bin
+*.h5
+*.tif
+*.tiff
+*.ilp
+*.dwg
+*.dxf
+*.bak
+
+# Local data inventories and regenerated outputs
+data_inventory/
+outputs/
+results/
+figures/segmented_cores/
+figures/carbonates_sip/
+figures/berea_pore_network/*.html

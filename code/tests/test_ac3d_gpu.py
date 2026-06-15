@@ -7,7 +7,11 @@ from pore_scale_electrical.ac3d_gpu import (
     face_type_conductivity_gpu,
     make_fft_poisson_preconditioner_gpu,
     matrix_free_matvec_face_types_gpu,
+    solve_ac3d_bicgstab_compact_gpu_face_types,
+    solve_ac3d_cocg_gpu_face_types,
+    solve_ac3d_red_black_sor_gpu_face_types,
     solve_ac3d_matrix_free_gpu_face_types,
+    solve_ac3d_weighted_jacobi_gpu_face_types,
 )
 from pore_scale_electrical.ac3d_solver import (
     face_type_conductivity,
@@ -81,3 +85,91 @@ def test_gpu_fft_preconditioner_solver_matches_direct_small_grid():
     assert gpu.info == 0
     assert gpu.residual_norm < 1e-8
     assert np.isclose(gpu.effective_conductivity_s_m, direct.effective_conductivity_s_m, rtol=1e-8, atol=1e-10)
+
+
+def test_gpu_weighted_jacobi_solver_matches_direct_small_grid():
+    labels = np.ones((4, 4, 3), dtype=np.uint16)
+    labels[:, 2:, :] = 2
+    water_sigma = 1.0 + 0.1j
+    solid_sigma = 4.0 + 0.2j
+    grid = phase_conductivity_grid(labels, 1, 2, water_sigma, solid_sigma, dtype=np.complex64)
+    face_data = face_type_conductivity_gpu(labels, 1, 2, water_sigma, solid_sigma, dtype=np.complex64)
+
+    direct = solve_ac3d(grid, direction="y")
+    gpu = solve_ac3d_weighted_jacobi_gpu_face_types(
+        face_data,
+        direction="y",
+        rtol=1e-6,
+        maxiter=10000,
+        omega=0.65,
+        residual_every=1000,
+    )
+
+    assert gpu.residual_norm < 1e-5
+    assert np.isclose(gpu.effective_conductivity_s_m, direct.effective_conductivity_s_m, rtol=1e-4, atol=1e-6)
+
+
+def test_gpu_red_black_sor_solver_matches_direct_even_periodic_grid():
+    labels = np.ones((4, 4, 4), dtype=np.uint16)
+    labels[:, 2:, :] = 2
+    water_sigma = 1.0 + 0.1j
+    solid_sigma = 4.0 + 0.2j
+    grid = phase_conductivity_grid(labels, 1, 2, water_sigma, solid_sigma, dtype=np.complex64)
+    face_data = face_type_conductivity_gpu(labels, 1, 2, water_sigma, solid_sigma, dtype=np.complex64)
+
+    direct = solve_ac3d(grid, direction="y")
+    gpu = solve_ac3d_red_black_sor_gpu_face_types(
+        face_data,
+        direction="y",
+        rtol=1e-6,
+        maxiter=10000,
+        omega=1.25,
+        residual_every=100,
+    )
+
+    assert gpu.residual_norm < 1e-5
+    assert np.isclose(gpu.effective_conductivity_s_m, direct.effective_conductivity_s_m, rtol=1e-4, atol=1e-6)
+
+
+def test_gpu_cocg_solver_matches_direct_small_grid():
+    labels = np.ones((4, 4, 3), dtype=np.uint16)
+    labels[:, 2:, :] = 2
+    water_sigma = 1.0 + 0.1j
+    solid_sigma = 4.0 + 0.2j
+    grid = phase_conductivity_grid(labels, 1, 2, water_sigma, solid_sigma, dtype=np.complex64)
+    face_data = face_type_conductivity_gpu(labels, 1, 2, water_sigma, solid_sigma, dtype=np.complex64)
+
+    direct = solve_ac3d(grid, direction="y")
+    gpu = solve_ac3d_cocg_gpu_face_types(
+        face_data,
+        direction="y",
+        rtol=1e-7,
+        maxiter=200,
+        residual_every=1,
+    )
+
+    assert gpu.info == 0
+    assert gpu.residual_norm < 1e-6
+    assert np.isclose(gpu.effective_conductivity_s_m, direct.effective_conductivity_s_m, rtol=1e-5, atol=1e-7)
+
+
+def test_gpu_compact_bicgstab_solver_matches_direct_small_grid():
+    labels = np.ones((4, 4, 3), dtype=np.uint16)
+    labels[:, 2:, :] = 2
+    water_sigma = 1.0 + 0.1j
+    solid_sigma = 4.0 + 0.2j
+    grid = phase_conductivity_grid(labels, 1, 2, water_sigma, solid_sigma, dtype=np.complex64)
+    face_data = face_type_conductivity_gpu(labels, 1, 2, water_sigma, solid_sigma, dtype=np.complex64)
+
+    direct = solve_ac3d(grid, direction="y")
+    gpu = solve_ac3d_bicgstab_compact_gpu_face_types(
+        face_data,
+        direction="y",
+        rtol=1e-7,
+        maxiter=200,
+        residual_every=1,
+    )
+
+    assert gpu.info == 0
+    assert gpu.residual_norm < 1e-6
+    assert np.isclose(gpu.effective_conductivity_s_m, direct.effective_conductivity_s_m, rtol=1e-5, atol=1e-7)
