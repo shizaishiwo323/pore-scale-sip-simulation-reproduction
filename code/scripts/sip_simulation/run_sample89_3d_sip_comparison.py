@@ -293,11 +293,14 @@ def run_component_sweep(
     fft_reference: str,
     progress_every: int,
     residual_every: int,
+    iteration_sleep_s: float,
+    zero_solid_regularization_s_m: float,
     resume: bool,
     solver_backend: str,
     jacobi_omega: float,
     sor_omega: float,
     max_new_results: int | None = None,
+    accept_residual_le: float | None = None,
 ) -> pd.DataFrame:
     dtype = parse_gpu_complex_dtype(dtype_name)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -332,6 +335,11 @@ def run_component_sweep(
             break
 
         water_sigma, solid_sigma = phase_conductivities(spectrum_row, used_frequency)
+        original_solid_sigma = solid_sigma
+        solid_regularization_applied = False
+        if zero_solid_regularization_s_m > 0.0 and abs(solid_sigma) == 0.0:
+            solid_sigma = complex(zero_solid_regularization_s_m, 0.0)
+            solid_regularization_applied = True
         conductance_values = cp.asarray(face_type_conductance_values(water_sigma, solid_sigma, dtype=dtype), dtype=dtype)
         face_data = GPUFaceTypeConductivity(
             face_types=gpu_face_types,
@@ -344,6 +352,8 @@ def run_component_sweep(
         memory_before = gpu_memory_info()
 
         def report_progress(iterations: int) -> None:
+            if iteration_sleep_s > 0:
+                time.sleep(iteration_sleep_s)
             if progress_every > 0 and iterations % progress_every == 0:
                 elapsed = time.perf_counter() - start_time
                 print(f"[{mechanism}] {used_frequency:g}Hz iterations={iterations} elapsed_s={elapsed:.1f}", flush=True)
@@ -452,6 +462,10 @@ def run_component_sweep(
             "water_sigma_imag_s_m": float(water_sigma.imag),
             "solid_sigma_real_s_m": float(solid_sigma.real),
             "solid_sigma_imag_s_m": float(solid_sigma.imag),
+            "original_solid_sigma_real_s_m": float(original_solid_sigma.real),
+            "original_solid_sigma_imag_s_m": float(original_solid_sigma.imag),
+            "zero_solid_regularization_s_m": float(zero_solid_regularization_s_m),
+            "solid_regularization_applied": solid_regularization_applied,
             "effective_sigma_real_s_m": float(result.effective_conductivity_s_m.real),
             "effective_sigma_imag_s_m": float(result.effective_conductivity_s_m.imag),
             "real_relative_permittivity": float(result.effective_conductivity_s_m.imag / (omega * 8.8541878128e-12)),
@@ -473,11 +487,20 @@ def run_component_sweep(
             "residual_history_path": str(residual_history_path) if residual_rows else None,
             "result_path": str(result_path),
         }
-        output["converged"] = can_reuse_solution_as_warm_start(
+        strict_converged = can_reuse_solution_as_warm_start(
             info=result.info,
             residual_norm=result.residual_norm,
             rtol=rtol,
         )
+        accepted_nonconverged_result = (
+            accept_residual_le is not None
+            and int(result.info) == int(maxiter)
+            and float(result.residual_norm) <= float(accept_residual_le)
+        )
+        output["converged_strict"] = strict_converged
+        output["accepted_nonconverged_result"] = accepted_nonconverged_result
+        output["accept_residual_le"] = accept_residual_le
+        output["converged"] = strict_converged or accepted_nonconverged_result
         if not output["converged"]:
             failed_path = frequency_dir / "failed_result.json"
             output["result_path"] = str(failed_path)
@@ -852,11 +875,35 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--rtol", type=float, default=1.0e-5)
     parser.add_argument("--atol", type=float, default=0.0)
     parser.add_argument("--maxiter", type=int, default=1000)
+    parser.add_argument(
+        "--accept-residual-le",
+        type=float,
+        default=None,
+        help=(
+            "Optional practical acceptance threshold for relative residual norm when a solve stops exactly at "
+            "--maxiter. This does not mark the solve as strictly converged; metadata records the relaxed acceptance."
+        ),
+    )
     parser.add_argument("--dtype", choices=["complex64", "complex128"], default="complex64")
     parser.add_argument("--preconditioner", choices=["none", "jacobi", "fft"], default="fft")
     parser.add_argument("--fft-reference", choices=["mean-face", "mean-abs", "pore"], default="mean-face")
     parser.add_argument("--progress-every", type=int, default=25)
     parser.add_argument("--residual-every", type=int, default=0)
+    parser.add_argument(
+        "--iteration-sleep-s",
+        type=float,
+        default=0.0,
+        help="Sleep this many seconds after each solver iteration to reduce average GPU duty cycle.",
+    )
+    parser.add_argument(
+        "--zero-solid-regularization-s-m",
+        type=float,
+        default=0.0,
+        help=(
+            "Optional numerical floor applied only when a component spectrum has exactly zero solid conductivity. "
+            "This removes null modes in pore/membrane single-mechanism solves; result metadata records the original zero value."
+        ),
+    )
     parser.add_argument(
         "--max-new-results",
         type=int,
@@ -963,11 +1010,14 @@ def main() -> None:
                 fft_reference=args.fft_reference,
                 progress_every=args.progress_every,
                 residual_every=args.residual_every,
+                iteration_sleep_s=args.iteration_sleep_s,
+                zero_solid_regularization_s_m=args.zero_solid_regularization_s_m,
                 resume=args.resume,
                 solver_backend=args.field_solve_mode,
                 jacobi_omega=args.jacobi_omega,
                 sor_omega=args.sor_omega,
                 max_new_results=args.max_new_results,
+                accept_residual_le=args.accept_residual_le,
             )
             sweep_frames.append(frame)
 
@@ -978,7 +1028,17 @@ def main() -> None:
     if "all" in set(simulation["mechanism"]):
         scaled_experiment, experiment_scale = scale_experiment_to_simulation(experiment, simulation)
         scaled_experiment.to_csv(scaled_experiment_path, index=False)
-        trend_score = score_trend(simulation, experiment_absolute)
+        all_sim = simulation[simulation["mechanism"] == "all"].sort_values("frequency_hz").reset_index(drop=True)
+        if len(all_sim) == len(experiment_absolute):
+            trend_score = score_trend(simulation, experiment_absolute)
+        else:
+            trend_score = {
+                "trend_pass": 0,
+                "reason": (
+                    "trend score skipped for partial mechanism chunk: "
+                    f"all_count={len(all_sim)} experiment_count={len(experiment_absolute)}"
+                ),
+            }
     else:
         scaled_experiment = experiment.copy()
         experiment_scale = float("nan")
@@ -1039,6 +1099,7 @@ def main() -> None:
             "pore_radius_scale": args.pore_radius_scale,
             "membrane_length_scale": args.membrane_length_scale,
             "membrane_zdc_scale": args.membrane_zdc_scale,
+            "zero_solid_regularization_s_m": args.zero_solid_regularization_s_m,
             "solid_background_components": args.solid_background_components,
         },
         "trend_score": trend_score,
@@ -1051,9 +1112,11 @@ def main() -> None:
             "rtol": args.rtol,
             "atol": args.atol,
             "maxiter": args.maxiter,
+            "accept_residual_le": args.accept_residual_le,
             "dtype": args.dtype,
             "preconditioner": args.preconditioner,
             "fft_reference": args.fft_reference,
+            "zero_solid_regularization_s_m": args.zero_solid_regularization_s_m,
             "max_new_results": args.max_new_results,
         },
         "spectra_metadata": spectra_metadata,
