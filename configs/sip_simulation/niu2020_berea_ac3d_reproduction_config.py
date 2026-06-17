@@ -232,4 +232,31 @@ INPUT_POLICY = InputPolicy(
     note=(
         "Use Figure6/Figure8 only for experimental scatter.  Figure8 paper "
         "simulation, pore, membrane, and interfacial columns are paper-reference "
-        "blocks and must not be plotted as this project's simul
+        "blocks and must not be plotted as this project's simulation output."
+    ),
+)
+
+
+# This is not a paper parameter.  It records the explicit project diagnostic
+# correction currently documented in AGENTS.md for matching the membrane
+# relaxation when pnextract throat geometry differs from the authors' internal
+# pore-throat/resistance definition.
+DIAGNOSTIC_CORRECTION = DiagnosticCorrectionConfig(
+    membrane_length_scale=0.0446683592150963,
+    membrane_zdc_scale=10.0,
+    note="Project diagnostic correction only; do not describe it as a hidden Niu et al. parameter.",
+)
+
+
+NIU2020_BEREA_CONFIG = Niu2020BereaConfig(
+    reference_pdf=REFERENCE_PDF,
+    data_dir=DATA_DIR,
+    ct=CT,
+    petrophysical=PETROPHYSICAL,
+    materials=MATERIALS,
+    polarization=POLARIZATION,
+    frequencies=FREQUENCIES,
+    mechanisms=MECHANISMS,
+    input_policy=INPUT_POLICY,
+    diagnostic_correction=DIAGNOSTIC_CORRECTION,
+)
