@@ -43,5 +43,30 @@ def test_niu2020_config_documents_mechanism_definitions_and_input_limits():
     assert set(cfg.mechanisms.definitions) == {"interfacial", "pore", "membrane", "all"}
     assert "solid phase is zero" in cfg.mechanisms.definitions["pore"]
     assert "solid phase is zero" in cfg.mechanisms.definitions["membrane"]
-    assert cfg.input_policy.allowed_experiment_workbooks == ("Figure6.xlsx", "Figure8.xlsx")
+    assert cfg.input_policy.allowed_experiment_workbooks == ("Figure7.xlsx", "Figure8.xlsx")
+    assert cfg.input_policy.allowed_geometry_workbooks == ("Figure5.xlsx",)
     assert cfg.input_policy.paper_simulation_columns_used_as_simulation is False
+    assert cfg.input_policy.post_extraction_geometry_scaling_allowed is False
+    assert cfg.input_policy.default_pnextract_executable.name == "pnextract.exe"
+    assert not hasattr(cfg, "diagnostic_correction")
+
+
+def test_niu2020_config_is_chinese_annotated_with_paper_anchors():
+    text = CONFIG_PATH.read_text(encoding="utf-8")
+
+    assert "Niu 2020 Berea AC3D/SIP 复现参数" in text
+    assert "Section 4.2" in text
+    assert "Table 1" in text
+    assert "Figure 3" in text
+    assert "Equation 17" in text
+    assert "Equation 18" in text
+    assert "Equation 19" in text
+    assert "Equation 20" in text
+    assert "Equation 21" in text
+    assert "Equation 12" in text
+    assert "动态孔径" in text
+    assert "不要把 Figure8.xlsx 的 Simulation" in text
+    assert "不允许对 pnextract 提取后的孔径、孔喉长度" in text
+    assert "使用 pnextract 内置默认参数" in text
+    retired_length_scale = "membrane_length_" + "scale=0.0446683592150963"
+    assert retired_length_scale not in text

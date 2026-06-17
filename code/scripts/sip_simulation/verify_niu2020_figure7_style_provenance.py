@@ -159,20 +159,22 @@ def write_markdown(path: Path, report: dict[str, object]) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
+    default_result_dir = PROJECT_ROOT / "results" / "niu2020_berea_reproduction_20260617_original_pnextract_defaults"
+    default_sweep_dir = default_result_dir / "simulation_sweeps"
     parser.add_argument(
         "--source-data-csv",
         default=str(PROJECT_ROOT / "results" / "source_data" / "niu2020_figure7_style_corrected_reproduction_source_data.csv"),
     )
     parser.add_argument("--figure8", default=str(PROJECT_ROOT / "data" / "Niu 2020data" / "Figure8.xlsx"))
-    parser.add_argument("--all-csv", default=str(PROJECT_ROOT / "results" / "niu2020_berea_full350_all_scaled_membrane_fft_x" / "sweep_results.csv"))
-    parser.add_argument("--pore-csv", default=str(PROJECT_ROOT / "results" / "niu2020_berea_full350_pore_fft_x" / "sweep_results.csv"))
+    parser.add_argument("--all-csv", default=str(default_sweep_dir / "niu2020_berea_full350_all_original_pnextract_fft_x" / "sweep_results.csv"))
+    parser.add_argument("--pore-csv", default=str(default_sweep_dir / "niu2020_berea_full350_pore_fft_x" / "sweep_results.csv"))
     parser.add_argument(
         "--membrane-csv",
-        default=str(PROJECT_ROOT / "results" / "niu2020_berea_full350_membrane_scaled_fft_x" / "sweep_results.csv"),
+        default=str(default_sweep_dir / "niu2020_berea_full350_membrane_original_pnextract_fft_x" / "sweep_results.csv"),
     )
     parser.add_argument(
         "--interfacial-csv",
-        default=str(PROJECT_ROOT / "results" / "niu2020_berea_full350_interfacial_precision_merged" / "sweep_results.csv"),
+        default=str(default_sweep_dir / "niu2020_berea_full350_interfacial_precision_merged" / "sweep_results.csv"),
     )
     parser.add_argument("--out-json", default=str(PROJECT_ROOT / "results" / "niu2020" / "niu2020_figure7_style_corrected_provenance.json"))
     parser.add_argument("--out-md", default=str(PROJECT_ROOT / "results" / "niu2020" / "niu2020_figure7_style_corrected_provenance.md"))

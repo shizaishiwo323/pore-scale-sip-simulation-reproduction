@@ -87,6 +87,29 @@ def test_writes_mhd_with_xyz_dims_for_zyx_numpy_volume(tmp_path):
     assert "write_vtkNetwork true" in text
 
 
+def test_writes_mhd_with_extra_pnextract_lines(tmp_path):
+    module = load_module()
+    raw_path = tmp_path / "sample_pore0_solid1.raw"
+    raw_path.write_bytes(b"\x00\x01")
+    mhd_path = tmp_path / "sample.mhd"
+
+    module.write_pnextract_mhd(
+        mhd_path,
+        raw_path,
+        shape_zyx=(2, 3, 4),
+        voxel_size_um=2.8,
+        title="explicit_pnextract_parameter_case",
+        pnextract_lines=[
+            "minRPore 1.75",
+            "write_cnm true",
+        ],
+    )
+
+    text = mhd_path.read_text(encoding="utf-8")
+    assert "minRPore 1.75" in text
+    assert "write_cnm true" in text
+
+
 def test_build_render_command_passes_segmented_volume_for_porosity_overlay(tmp_path):
     module = load_module()
     cmd = module.build_render_command(

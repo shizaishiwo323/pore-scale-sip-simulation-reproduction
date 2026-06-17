@@ -18,7 +18,7 @@ def load_module():
     return module
 
 
-def test_collect_source_data_marks_corrected_scaled_membrane():
+def test_collect_source_data_marks_original_pnextract_without_geometry_scaling():
     module = load_module()
     experiment = pd.DataFrame(
         {
@@ -44,10 +44,10 @@ def test_collect_source_data_marks_corrected_scaled_membrane():
         "our_corrected_membrane",
         "our_corrected_interfacial",
     }
-    assert source["correction"].dropna().unique().tolist() == ["membrane_length_zdc_scaled"]
+    assert source["correction"].dropna().unique().tolist() == ["original_pnextract_defaults_no_geometry_scaling"]
     assert set(source["component_correction"].dropna()) == {
-        "includes_scaled_membrane",
-        "length_zdc_scaled",
+        "includes_original_pnextract_membrane",
+        "original_pnextract_geometry",
         "precision_merged_low_frequency",
     }
 

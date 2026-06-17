@@ -16,10 +16,10 @@ import pandas as pd
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 EPSILON0_F_M = 8.8541878128e-12
-CORRECTION_TAG = "membrane_length_zdc_scaled"
+CORRECTION_TAG = "original_pnextract_defaults_no_geometry_scaling"
 COMPONENT_CORRECTIONS = {
-    "all": "includes_scaled_membrane",
-    "membrane": "length_zdc_scaled",
+    "all": "includes_original_pnextract_membrane",
+    "membrane": "original_pnextract_geometry",
     "pore": "unmodified_full350_ac3d",
     "interfacial": "precision_merged_low_frequency",
 }
@@ -187,7 +187,7 @@ def write_summary(components: pd.DataFrame, output_md: Path) -> None:
         "# Corrected Niu 2020 Figure 7-Style SIP Reproduction",
         "",
         "This figure uses Niu 2020 experimental columns as scatter data and this project's corrected AC3D sweeps as mechanism curves.",
-        "The membrane component uses the explicit length/Zdc scaling diagnosed from the pnextract geometry mismatch; paper simulation curves are not used as plotted input.",
+        "The membrane component uses original pnextract geometry without post-extraction length or Zdc scaling; paper simulation curves are not used as plotted input.",
         "The interfacial component uses the precision-merged low-frequency AC3D curve because the original complex64 low-frequency sweep is dominated by residual-floor error after division by omega epsilon0.",
         "",
         "| mechanism | points | converged info=0 | max residual | source |",
@@ -214,22 +214,24 @@ def parse_component_paths(args: argparse.Namespace) -> dict[str, Path]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
+    default_result_dir = PROJECT_ROOT / "results" / "niu2020_berea_reproduction_20260617_original_pnextract_defaults"
+    default_sweep_dir = default_result_dir / "simulation_sweeps"
     parser.add_argument("--data-dir", default=str(PROJECT_ROOT / "data" / "Niu 2020data"))
     parser.add_argument(
         "--all-csv",
-        default=str(PROJECT_ROOT / "results" / "niu2020_berea_full350_all_scaled_membrane_fft_x" / "sweep_results.csv"),
+        default=str(default_sweep_dir / "niu2020_berea_full350_all_original_pnextract_fft_x" / "sweep_results.csv"),
     )
     parser.add_argument(
         "--pore-csv",
-        default=str(PROJECT_ROOT / "results" / "niu2020_berea_full350_pore_fft_x" / "sweep_results.csv"),
+        default=str(default_sweep_dir / "niu2020_berea_full350_pore_fft_x" / "sweep_results.csv"),
     )
     parser.add_argument(
         "--membrane-csv",
-        default=str(PROJECT_ROOT / "results" / "niu2020_berea_full350_membrane_scaled_fft_x" / "sweep_results.csv"),
+        default=str(default_sweep_dir / "niu2020_berea_full350_membrane_original_pnextract_fft_x" / "sweep_results.csv"),
     )
     parser.add_argument(
         "--interfacial-csv",
-        default=str(PROJECT_ROOT / "results" / "niu2020_berea_full350_interfacial_precision_merged" / "sweep_results.csv"),
+        default=str(default_sweep_dir / "niu2020_berea_full350_interfacial_precision_merged" / "sweep_results.csv"),
     )
     parser.add_argument(
         "--figure-base",

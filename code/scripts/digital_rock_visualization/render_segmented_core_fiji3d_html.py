@@ -35,14 +35,14 @@ from render_segmented_core_html import (  # noqa: E402
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_OUTPUT = (
     PROJECT_ROOT
-    / "figures"
+    / "results"
     / "segmented_cores"
     / "sample_89_Grainstone_89seged_fiji3d_viewer_style_volume_interactive.html"
 )
 DEFAULT_METADATA = (
     PROJECT_ROOT
     / "results"
-    / "source_data"
+    / "segmented_cores"
     / "sample_89_Grainstone_89seged_fiji3d_viewer_style_volume_interactive_metadata.json"
 )
 FIJI3D_PLUGIN_REFERENCE = Path.home() / "Fiji.app" / "plugins" / "3D_Viewer-5.0.0.jar"
@@ -70,20 +70,21 @@ def fiji3d_component_specs(values: list[int] | np.ndarray, *, visible_mode: str 
     fallback_colors = ["#f0c419", "#30b36b", "#9b59b6", "#ff7f0e", "#17becf", "#8c564b"]
     fallback_i = 0
     for index, value in enumerate(int(v) for v in sorted(values)):
+        label = component_label(value)
         color = DEFAULT_COMPONENT_COLORS.get(value)
         if color is None:
             color = fallback_colors[fallback_i % len(fallback_colors)]
             fallback_i += 1
         visible = (
             visible_mode == "all"
-            or (visible_mode == "pore" and value == 0)
-            or (visible_mode == "solid" and value == 255)
+            or (visible_mode == "pore" and label == "pore")
+            or (visible_mode == "solid" and label == "solid")
             or (visible_mode == "first" and index == 0)
         )
         specs.append(
             {
                 "value": value,
-                "label": component_label(value),
+                "label": label,
                 "color": color,
                 "visible": bool(visible),
                 "opacity": float(DEFAULT_VOXEL_OPACITY.get(value, 0.34)),
@@ -111,6 +112,177 @@ def _hex_to_rgb01(color: str) -> tuple[float, float, float]:
         int(clean[2:4], 16) / 255.0,
         int(clean[4:6], 16) / 255.0,
     )
+
+
+def _inject_once_before_body(html_path: Path, marker: str, snippet: str) -> None:
+    text = html_path.read_text(encoding="utf-8", errors="ignore")
+    if marker in text:
+        return
+    if "</body>" in text:
+        text = text.replace("</body>", snippet + "\n</body>", 1)
+    else:
+        text += snippet
+    html_path.write_text(text, encoding="utf-8")
+
+
+def _vtk_object_discovery_script() -> str:
+    return r"""
+<script id="segmented-core-vtk-discovery">
+(function() {
+  function asArray(value) {
+    try {
+      return Array.from(value || []);
+    } catch (_error) {
+      return [];
+    }
+  }
+  function isObjectLike(value) {
+    return value !== null && (typeof value === 'object' || typeof value === 'function');
+  }
+  function isRenderWindowCandidate(value) {
+    return isObjectLike(value) && typeof value.getRenderers === 'function' && typeof value.render === 'function';
+  }
+  function isVolumeCandidate(value) {
+    return isObjectLike(value) && typeof value.getMapper === 'function' && typeof value.getProperty === 'function';
+  }
+  function cacheRenderWindow(renderWindow) {
+    if (!isRenderWindowCandidate(renderWindow)) return null;
+    window.segmentedCoreRenderWindow = renderWindow;
+    window.global = window.global || {};
+    if (!window.global.renderWindow) window.global.renderWindow = renderWindow;
+    return renderWindow;
+  }
+  function cacheVolume(volume) {
+    if (!isVolumeCandidate(volume)) return null;
+    window.segmentedCoreVolumes = window.segmentedCoreVolumes || [];
+    if (!window.segmentedCoreVolumes.includes(volume)) window.segmentedCoreVolumes.push(volume);
+    return volume;
+  }
+  function volumesFromRenderer(renderer) {
+    const candidates = [];
+    if (!renderer) return candidates;
+    if (typeof renderer.getVolumes === 'function') candidates.push(...asArray(renderer.getVolumes()));
+    if (typeof renderer.getViewProps === 'function') candidates.push(...asArray(renderer.getViewProps()));
+    if (typeof renderer.getActors === 'function') candidates.push(...asArray(renderer.getActors()));
+    return candidates.filter(isVolumeCandidate);
+  }
+  function findVolumeFromRenderWindow(renderWindow) {
+    if (!isRenderWindowCandidate(renderWindow)) return null;
+    cacheRenderWindow(renderWindow);
+    const renderers = asArray(renderWindow.getRenderers && renderWindow.getRenderers());
+    for (const renderer of renderers) {
+      const volume = volumesFromRenderer(renderer).find(isVolumeCandidate);
+      if (volume) return cacheVolume(volume);
+    }
+    return null;
+  }
+  function shouldSkipTraversal(value) {
+    if (!isObjectLike(value)) return true;
+    if (value === window || value === document || value === document.body || value === document.documentElement) return true;
+    if (value.nodeType || value.window === value) return true;
+    return false;
+  }
+  function discoverObjectGraph(roots) {
+    const queue = asArray(roots).filter(isObjectLike);
+    const seen = new WeakSet();
+    let scanned = 0;
+    while (queue.length && scanned < 5000) {
+      const current = queue.shift();
+      if (!isObjectLike(current) || seen.has(current)) continue;
+      seen.add(current);
+      scanned += 1;
+      if (isRenderWindowCandidate(current)) {
+        const volume = findVolumeFromRenderWindow(current);
+        if (volume) return volume;
+      }
+      if (isVolumeCandidate(current)) return cacheVolume(current);
+      if (shouldSkipTraversal(current)) continue;
+      let names = [];
+      try {
+        names = Object.getOwnPropertyNames(current).slice(0, 180);
+      } catch (_error) {
+        names = [];
+      }
+      for (const name of names) {
+        if (name === 'parent' || name === 'ownerDocument' || name === 'children') continue;
+        let child = null;
+        try {
+          child = current[name];
+        } catch (_error) {
+          continue;
+        }
+        if (isVolumeCandidate(child)) return cacheVolume(child);
+        if (isRenderWindowCandidate(child)) {
+          const volume = findVolumeFromRenderWindow(child);
+          if (volume) return volume;
+        }
+        if (isObjectLike(child) && !seen.has(child) && !shouldSkipTraversal(child)) queue.push(child);
+      }
+    }
+    return null;
+  }
+  function getGlobalObject() {
+    const bareGlobal = (typeof global !== 'undefined') ? global : null;
+    const safeGlobalThis = (typeof globalThis !== 'undefined') ? globalThis : null;
+    return bareGlobal || window.global || (safeGlobalThis && safeGlobalThis.global) || {};
+  }
+  window.segmentedCoreDiscoverVtkObjects = function() {
+    const globalObject = getGlobalObject();
+    const explicitRenderWindows = [
+      window.segmentedCoreRenderWindow,
+      window.renderWindow,
+      globalObject && globalObject.renderWindow,
+    ];
+    for (const renderWindow of explicitRenderWindows) {
+      const volume = findVolumeFromRenderWindow(renderWindow);
+      if (volume) return volume;
+    }
+    const cachedVolume = asArray(window.segmentedCoreVolumes).find(isVolumeCandidate);
+    if (cachedVolume) {
+      cacheVolume(cachedVolume);
+      return cachedVolume;
+    }
+    return discoverObjectGraph([
+      window.segmentedCoreVolumes,
+      window.segmentedCoreActors,
+      globalObject,
+      window.global,
+    ]);
+  };
+  window.segmentedCoreGetVolumePayload = function() {
+    const volume = window.segmentedCoreDiscoverVtkObjects();
+    const mapper = volume && volume.getMapper && volume.getMapper();
+    const image = mapper && mapper.getInputData && mapper.getInputData();
+    const dims = image && image.getDimensions && image.getDimensions();
+    const bounds = image && image.getBounds && image.getBounds();
+    const pointData = image && image.getPointData && image.getPointData();
+    const scalars = pointData && pointData.getScalars && pointData.getScalars();
+    if (!volume || !mapper || !image || !dims || dims.length < 3 || !scalars) return null;
+    const payload = {
+      volume,
+      mapper,
+      image: image || null,
+      scalars,
+      dims: dims && dims.length >= 3 ? [Number(dims[0]), Number(dims[1]), Number(dims[2])] : null,
+      bounds: bounds && bounds.length >= 6 ? asArray(bounds).map(Number) : null,
+    };
+    window.segmentedCoreVtkPayload = payload;
+    return payload;
+  };
+  window.segmentedCoreRenderScene = function() {
+    const globalObject = getGlobalObject();
+    const renderWindow = cacheRenderWindow(
+      window.segmentedCoreRenderWindow || window.renderWindow || (globalObject && globalObject.renderWindow)
+    );
+    if (renderWindow && renderWindow.render) renderWindow.render();
+  };
+})();
+</script>
+"""
+
+
+def inject_vtk_object_discovery(html_path: Path) -> None:
+    _inject_once_before_body(html_path, "segmented-core-vtk-discovery", _vtk_object_discovery_script())
 
 
 def apply_fiji3d_threshold_transfer_functions(volume_actor: object, component_specs: list[dict]) -> None:
@@ -222,6 +394,7 @@ def _fiji3d_slice_panel_css_top() -> int:
 
 
 def inject_fiji3d_controls(html_path: Path, components: list[dict]) -> None:
+    inject_vtk_object_discovery(html_path)
     rows = []
     for index, spec in enumerate(components):
         checked = " checked" if spec.get("visible", False) else ""
@@ -311,26 +484,8 @@ def inject_fiji3d_controls(html_path: Path, components: list[dict]) -> None:
     return [((value >> 16) & 255) / 255, ((value >> 8) & 255) / 255, (value & 255) / 255];
   }}
   function getVolume() {{
-    if (Array.isArray(window.segmentedCoreVolumes) && window.segmentedCoreVolumes.length) {{
-      return window.segmentedCoreVolumes.find((item) => item && item.getProperty) || null;
-    }}
-    const bareGlobal = (typeof global !== 'undefined') ? global : null;
-    const safeGlobalThis = (typeof globalThis !== 'undefined') ? globalThis : null;
-    const globalObject = bareGlobal || window.global || (safeGlobalThis && safeGlobalThis.global) || {{}};
-    const rw = window.segmentedCoreRenderWindow || globalObject.renderWindow || window.renderWindow;
-    if (!rw || !rw.getRenderers) return null;
-    const renderers = rw.getRenderers();
-    const renderer = renderers && renderers[0];
-    if (!renderer) return null;
-    if (renderer.getVolumes) {{
-      const volumes = Array.from(renderer.getVolumes() || []);
-      return volumes.find((item) => item && item.getProperty) || null;
-    }}
-    if (renderer.getViewProps) {{
-      const props = Array.from(renderer.getViewProps() || []);
-      return props.find((item) => item && item.getProperty && !item.getMapper) || null;
-    }}
-    return null;
+    const payload = window.segmentedCoreGetVolumePayload && window.segmentedCoreGetVolumePayload();
+    return payload && payload.volume ? payload.volume : null;
   }}
   function setStatus(text) {{
     const status = document.getElementById('segmented-core-fiji3d-status');
@@ -369,11 +524,7 @@ def inject_fiji3d_controls(html_path: Path, components: list[dict]) -> None:
         opacityTransfer.addPoint(scalarValue + 0.5, 0);
       }}
     }});
-    const bareGlobal = (typeof global !== 'undefined') ? global : null;
-    const safeGlobalThis = (typeof globalThis !== 'undefined') ? globalThis : null;
-    const globalObject = bareGlobal || window.global || (safeGlobalThis && safeGlobalThis.global) || {{}};
-    const rw = window.segmentedCoreRenderWindow || globalObject.renderWindow || window.renderWindow;
-    if (rw && rw.render) rw.render();
+    if (window.segmentedCoreRenderScene) window.segmentedCoreRenderScene();
     setStatus('Applied');
   }}
   window.segmentedCoreApplyFiji3DControls = applyControls;
@@ -395,6 +546,7 @@ def inject_fiji3d_controls(html_path: Path, components: list[dict]) -> None:
 
 
 def inject_fiji3d_slice_controls(html_path: Path, components: list[dict]) -> None:
+    inject_vtk_object_discovery(html_path)
     panel = f"""
 <div id="segmented-core-fiji3d-slice-controls" style="
   position: fixed;
@@ -462,41 +614,13 @@ def inject_fiji3d_slice_controls(html_path: Path, components: list[dict]) -> Non
 (function() {{
   const specs = {json.dumps(components, ensure_ascii=False)};
   function getVolume() {{
-    if (Array.isArray(window.segmentedCoreVolumes) && window.segmentedCoreVolumes.length) {{
-      return window.segmentedCoreVolumes.find((item) => item && item.getMapper) || null;
-    }}
-    const bareGlobal = (typeof global !== 'undefined') ? global : null;
-    const safeGlobalThis = (typeof globalThis !== 'undefined') ? globalThis : null;
-    const globalObject = bareGlobal || window.global || (safeGlobalThis && safeGlobalThis.global) || {{}};
-    const rw = window.segmentedCoreRenderWindow || globalObject.renderWindow || window.renderWindow;
-    if (!rw || !rw.getRenderers) return null;
-    const renderers = rw.getRenderers();
-    const renderer = renderers && renderers[0];
-    if (!renderer) return null;
-    if (renderer.getVolumes) {{
-      const volumes = Array.from(renderer.getVolumes() || []);
-      return volumes.find((item) => item && item.getMapper) || null;
-    }}
-    if (renderer.getViewProps) {{
-      const props = Array.from(renderer.getViewProps() || []);
-      return props.find((item) => item && item.getMapper && item.getProperty && !item.getProperty().setColor) || null;
-    }}
-    return null;
+    const payload = window.segmentedCoreGetVolumePayload && window.segmentedCoreGetVolumePayload();
+    return payload && payload.volume ? payload.volume : null;
   }}
   function getVolumePayload() {{
-    const volume = getVolume();
-    const mapper = volume && volume.getMapper && volume.getMapper();
-    const image = mapper && mapper.getInputData && mapper.getInputData();
-    const dims = image && image.getDimensions && image.getDimensions();
-    const bounds = image && image.getBounds && image.getBounds();
-    if (!volume || !mapper || !image || !dims || dims.length < 3) return null;
-    return {{
-      volume,
-      mapper,
-      image,
-      dims: [Number(dims[0]), Number(dims[1]), Number(dims[2])],
-      bounds: bounds && bounds.length >= 6 ? bounds.map(Number) : null,
-    }};
+    const payload = window.segmentedCoreGetVolumePayload && window.segmentedCoreGetVolumePayload();
+    if (!payload || !payload.volume || !payload.mapper || !payload.image || !payload.dims || payload.dims.length < 3) return null;
+    return payload;
   }}
   function setSliceStatus(text) {{
     const status = document.getElementById('segmented-core-fiji3d-slice-status');
@@ -518,11 +642,7 @@ def inject_fiji3d_slice_controls(html_path: Path, components: list[dict]) -> Non
     return true;
   }}
   function renderScene() {{
-    const bareGlobal = (typeof global !== 'undefined') ? global : null;
-    const safeGlobalThis = (typeof globalThis !== 'undefined') ? globalThis : null;
-    const globalObject = bareGlobal || window.global || (safeGlobalThis && safeGlobalThis.global) || {{}};
-    const rw = window.segmentedCoreRenderWindow || globalObject.renderWindow || window.renderWindow;
-    if (rw && rw.render) rw.render();
+    if (window.segmentedCoreRenderScene) window.segmentedCoreRenderScene();
   }}
   function makePlane(origin, normal) {{
     let mtime = Date.now();
@@ -622,10 +742,8 @@ def inject_fiji3d_slice_controls(html_path: Path, components: list[dict]) -> Non
     setSliceStatus('3D clipped at ' + axis.toUpperCase() + ' index ' + sliceIndex + ' / ' + maxIndex + ', keeping ' + sideLabel + ' side');
   }}
   function installClipPersistenceHook() {{
-    const bareGlobal = (typeof global !== 'undefined') ? global : null;
-    const safeGlobalThis = (typeof globalThis !== 'undefined') ? globalThis : null;
-    const globalObject = bareGlobal || window.global || (safeGlobalThis && safeGlobalThis.global) || {{}};
-    const rw = window.segmentedCoreRenderWindow || globalObject.renderWindow || window.renderWindow;
+    const payload = window.segmentedCoreGetVolumePayload && window.segmentedCoreGetVolumePayload();
+    const rw = window.segmentedCoreRenderWindow || (payload && payload.renderWindow);
     if (!rw || !rw.render) return false;
     if (window.segmentedCoreClipPersistenceInstalled) return true;
     const originalRender = rw.render.bind(rw);
@@ -735,7 +853,7 @@ def main() -> None:
         "output_html": str(out),
         "renderer": "pyvista/vtk fiji-3d-viewer-like label volume single-file html",
         "fiji_3d_viewer_plugin_reference": str(FIJI3D_PLUGIN_REFERENCE),
-        "segmentation_convention": {"solid": int(args.solid_value), "pore": 0},
+        "segmentation_convention": {"solid": int(args.solid_value), "pore": int(stats["pore_value"])},
         "component_values": [int(v) for v in component_values],
         "initial_visible": args.initial_visible,
         "downsample": int(args.downsample),

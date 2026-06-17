@@ -50,6 +50,17 @@ def test_fiji3d_components_default_to_solid_visible():
     assert components[1]["opacity"] > 0
 
 
+def test_fiji3d_components_recognize_berea_256_512_labels():
+    module = load_module()
+
+    components = module.fiji3d_component_specs([256, 512], visible_mode="pore")
+
+    assert components[0]["label"] == "pore"
+    assert components[0]["visible"] is True
+    assert components[1]["label"] == "solid"
+    assert components[1]["visible"] is False
+
+
 def test_fiji3d_plotter_uses_single_volume_actor_and_no_surface_mesh():
     module = load_module()
     components = module.fiji3d_component_specs([0, 255], visible_mode="solid")
@@ -109,6 +120,15 @@ def test_fiji3d_controls_are_injected_with_phase_color_opacity_and_threshold(tmp
     assert "getRGBTransferFunction" in html
     assert "addRGBPoint" in html
     assert "addPoint" in html
+    assert "segmented-core-vtk-discovery" in html
+    assert "window.segmentedCoreDiscoverVtkObjects" in html
+    assert "window.segmentedCoreGetVolumePayload" in html
+    assert "discoverObjectGraph" in html
+    assert "cacheRenderWindow" in html
+    assert "cacheVolume" in html
+    assert "getPointData" in html
+    assert "getScalars" in html
+    assert "!item.getMapper" not in html
     assert "segmentedCoreApplyFiji3DControls" in html
     assert ">Apply<" in html
 
@@ -138,6 +158,15 @@ def test_fiji3d_clip_controls_are_injected_with_axis_slider_and_apply(tmp_path):
     assert "getInputData" in html
     assert "getDimensions" in html
     assert "getBounds" in html
+    assert "segmented-core-vtk-discovery" in html
+    assert "window.segmentedCoreDiscoverVtkObjects" in html
+    assert "window.segmentedCoreGetVolumePayload" in html
+    assert "discoverObjectGraph" in html
+    assert "cacheRenderWindow" in html
+    assert "cacheVolume" in html
+    assert "getPointData" in html
+    assert "getScalars" in html
+    assert "!item.getMapper" not in html
     assert "makePlane" in html
     assert "isA: function(name) { return name === 'vtkPlane'; }" in html
     assert "getOrigin: function() { return planeOrigin.slice(); }" in html
@@ -228,6 +257,7 @@ def test_fiji3d_main_exports_html_with_slice_and_phase_controls(tmp_path, monkey
     assert "segmented-core-fiji3d-apply" in html
     assert "window.segmentedCoreApplyFiji3DClip" in html
     assert "segmentedCoreApplyFiji3DControls" in html
+    assert "window.segmentedCoreGetVolumePayload" in html
     assert metadata["slice_controls"]["enabled"] is True
     assert metadata["slice_controls"]["realtime"] is False
     assert metadata["slice_controls"]["mode"] == "vtk_volume_clipping_plane"

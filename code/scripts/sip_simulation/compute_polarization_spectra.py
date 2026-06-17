@@ -32,6 +32,15 @@ from pore_scale_electrical.polarization import (  # noqa: E402
 NS = {"a": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
 
 
+def reject_post_extraction_geometry_scale(name: str, value: float) -> None:
+    """Forbid post-extraction geometry scaling in production spectra."""
+    if not np.isclose(float(value), 1.0, rtol=0.0, atol=1.0e-15):
+        raise ValueError(
+            f"{name}={value:g} is not allowed. Re-extract the pore network with a calibrated pnextract "
+            "algorithm instead of scaling extracted geometry or geometry-derived resistance."
+        )
+
+
 def col_index(cell_ref: str) -> int:
     letters = re.match(r"[A-Z]+", cell_ref).group(0)
     idx = 0
@@ -116,6 +125,9 @@ def compute_spectra(
         raise ValueError("membrane_length_scale must be positive")
     if membrane_zdc_scale <= 0:
         raise ValueError("membrane_zdc_scale must be positive")
+    reject_post_extraction_geometry_scale("pore_radius_scale", pore_radius_scale)
+    reject_post_extraction_geometry_scale("membrane_length_scale", membrane_length_scale)
+    reject_post_extraction_geometry_scale("membrane_zdc_scale", membrane_zdc_scale)
 
     effective_radius = pores["radius_m"].to_numpy(dtype=float) * pore_radius_scale
     cp = pore_polarization_conductance(
@@ -221,19 +233,19 @@ def main() -> None:
         "--pore-radius-scale",
         type=float,
         default=1.0,
-        help="Scale pore radii before computing pore-polarization relaxation times; recorded in metadata.",
+        help="Must remain 1.0. Post-extraction pore geometry scaling is forbidden.",
     )
     parser.add_argument(
         "--membrane-length-scale",
         type=float,
         default=1.0,
-        help="Explicit scale applied to throat length L before Titov membrane relaxation; default preserves extracted geometry.",
+        help="Must remain 1.0. Re-extract geometry instead of scaling throat length.",
     )
     parser.add_argument(
         "--membrane-zdc-scale",
         type=float,
         default=1.0,
-        help="Explicit scale applied to throat dc resistance before Titov membrane conductance; default preserves extracted geometry.",
+        help="Must remain 1.0. Re-extract geometry instead of scaling geometry-derived Zdc.",
     )
     args = parser.parse_args()
 

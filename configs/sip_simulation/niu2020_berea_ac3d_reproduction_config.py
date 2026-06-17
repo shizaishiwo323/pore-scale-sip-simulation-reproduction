@@ -1,8 +1,24 @@
-"""Niu et al. (2020) Berea AC3D/SIP reproduction parameters.
+"""Niu 2020 Berea AC3D/SIP 复现参数。
 
-This is an executable configuration file, not a result file.  Values below
-come from Niu et al. (2020), Table 1 and Sections 4-5, unless a note says the
-value is a project-side provenance or diagnostic choice.
+这是可执行 Python 配置文件，也是本项目复现 Niu et al. (2020) Berea
+砂岩 SIP 模拟时的参数清单。每个数值都尽量保留论文锚点，便于后期
+核对：
+
+- Figure 3 / Section 4: Berea 砂岩二值 micro-CT REV，350^3 体素，
+  体素边长 2.8 um。
+- Section 4.1 / Table 1: 样品孔隙度、比表面积、formation factor、
+  平均孔径和水相电导率。
+- Section 4.2 / Table 1: AC3D 相属性、EDL 孔极化、膜极化和动态孔径
+  参数。
+- Equation 12: 将孔/膜极化复电导 C* 转换为水相体积复电导率增量。
+- Equation 17 / Equation 18: Schwarz 型孔极化 C_p* 与 tau_p。
+- Equation 19 / Equation 20 / Equation 21: Titov 型膜极化 Z_m*、tau_m
+  与 C_m*。
+- Section 5.3: interfacial / pore / membrane / all 单机制模拟定义。
+
+除非字段明确标注为 project diagnostic/provenance，参数均按论文描述取值。
+不要把 Figure8.xlsx 的 Simulation 列当成本项目模拟结果；正式曲线必须
+追溯到本项目 sweep_results.csv。
 """
 
 from __future__ import annotations
@@ -22,7 +38,7 @@ DATA_DIR = PROJECT_ROOT / "data" / "Niu 2020data"
 
 
 class CTConfig(NamedTuple):
-    """Digital Berea sandstone input used by the AC3D finite-difference solve."""
+    """数字岩心输入：AC3D 有限差分场求解使用的 Berea 砂岩分割体。"""
 
     raw_path: Path
     tiff_path: Path
@@ -35,7 +51,7 @@ class CTConfig(NamedTuple):
 
 
 class MaterialConfig(NamedTuple):
-    """Intrinsic phase properties assigned to water and nonconductive solid."""
+    """相属性：水相和非金属固相的本征电导率/介电常数。"""
 
     water_conductivity_s_m: float
     solid_conductivity_s_m: float
@@ -46,7 +62,7 @@ class MaterialConfig(NamedTuple):
 
 
 class PetrophysicalConfig(NamedTuple):
-    """Rock-scale properties reported in Table 1 for context and validation."""
+    """Table 1 岩石物性：用于论文参数核对和 provenance，不覆盖体素审计。"""
 
     porosity_fraction: float
     specific_surface_area_m2_g: float
@@ -56,7 +72,7 @@ class PetrophysicalConfig(NamedTuple):
 
 
 class PolarizationConfig(NamedTuple):
-    """Electrochemical polarization parameters used for pore and membrane terms."""
+    """电化学极化参数：孔极化、膜极化和动态孔径上尺度。"""
 
     surface_conductance_s: float
     diffusion_coefficient_m2_s: float
@@ -69,7 +85,7 @@ class PolarizationConfig(NamedTuple):
 
 
 class FrequencyConfig(NamedTuple):
-    """Frequency band of the paper experiment and simulation comparison."""
+    """频率范围：论文实验/模拟对比覆盖 1 mHz 到 1 GHz。"""
 
     min_hz: float
     max_hz: float
@@ -79,31 +95,26 @@ class FrequencyConfig(NamedTuple):
 
 
 class MechanismConfig(NamedTuple):
-    """Section 5.3 single-mechanism material assignments."""
+    """Section 5.3 单机制材料赋值定义。"""
 
     definitions: dict[str, str]
     plotting_labels: dict[str, str]
 
 
 class InputPolicy(NamedTuple):
-    """Allowed raw inputs for this reproduction step."""
+    """输入数据红线：限定本复现步骤允许使用的数据来源。"""
 
     allowed_ct_files: tuple[str, ...]
+    allowed_geometry_workbooks: tuple[str, ...]
     allowed_experiment_workbooks: tuple[str, ...]
     paper_simulation_columns_used_as_simulation: bool
-    note: str
-
-
-class DiagnosticCorrectionConfig(NamedTuple):
-    """Project-side diagnostic correction, kept separate from paper parameters."""
-
-    membrane_length_scale: float
-    membrane_zdc_scale: float
+    post_extraction_geometry_scaling_allowed: bool
+    default_pnextract_executable: Path
     note: str
 
 
 class Niu2020BereaConfig(NamedTuple):
-    """Complete parameter bundle for the Berea SIP reproduction."""
+    """Niu 2020 Berea SIP 复现的完整参数包。"""
 
     reference_pdf: Path
     data_dir: Path
@@ -114,15 +125,15 @@ class Niu2020BereaConfig(NamedTuple):
     frequencies: FrequencyConfig
     mechanisms: MechanismConfig
     input_policy: InputPolicy
-    diagnostic_correction: DiagnosticCorrectionConfig
 
 
-# CT volume:
-# - The project copy stores the Berea micro-CT as a 350 x 350 x 350 volume.
-# - Project convention is little-endian uint16 RAW with labels 1=pore/water and
-#   2=solid.  The TIFF copy is the same segmentation in image-stack form.
-# - The physical voxel edge length is 2.8 um, matching the project AGENTS.md
-#   route and the Niu AC3D 350^3 REV described in Section 4.
+# CT 体素尺寸信息：
+# - 论文 Figure 3 标注 Berea 砂岩二值图像为 350^3 voxels，
+#   每个体素尺寸为 2.8 x 2.8 x 2.8 um。
+# - 本项目 microCT_Berea.raw 按 little-endian uint16 读取，形状为
+#   (z, y, x) = (350, 350, 350)。这一步只读取原始 CT，不覆盖或改名。
+# - 本地 raw 标签约定为 1 = pore/water，2 = solid；TIFF 是同一分割体
+#   的图像栈副本，后续可视化会另外生成 pore=0/solid=255 的派生二值体。
 CT = CTConfig(
     raw_path=DATA_DIR / "microCT_Berea.raw",
     tiff_path=DATA_DIR / "microCT_Berea.tiff",
@@ -131,14 +142,16 @@ CT = CTConfig(
     voxel_size_m=2.8e-6,
     pore_label=1,
     solid_label=2,
-    note="Berea segmented REV for the 350^3 AC3D solve; labels follow the local Niu data copy.",
+    note="Figure 3 / Section 4: Berea segmented REV for the 350^3 AC3D solve; labels follow the local Niu data copy.",
 )
 
 
-# Table 1 petrophysical properties:
-# - These values describe the laboratory Berea sample and are useful for
-#   validation/provenance.  They are not identical to every voxel-count
-#   statistic in the segmented RAW copy; keep those as separate data audits.
+# Table 1 岩石物性参数：
+# - 孔隙度 phi = 20.2%，比表面积 Sm = 0.5 m2/g，formation factor F = 16.3，
+#   mean pore size rm = 35 um。
+# - 这些是论文报告的样品尺度物性，用于校验和说明；它们不强行覆盖
+#   microCT_Berea.raw 的体素计数孔隙度，因为分割 REV 与实验样品统计口径
+#   可能不同。
 PETROPHYSICAL = PetrophysicalConfig(
     porosity_fraction=0.202,
     specific_surface_area_m2_g=0.5,
@@ -148,32 +161,36 @@ PETROPHYSICAL = PetrophysicalConfig(
 )
 
 
-# Intrinsic phase properties:
-# - sigma_w = 0.043 S/m is Table 1 water conductivity.
-# - The solid phase is treated as nonconductive for Berea quartz-rich sandstone;
-#   Section 1 notes nonmetallic mineral conductivity is negligible, and Section
-#   5.3 sets solid conductivity to zero in pore/membrane single-mechanism runs.
-# - eps_w = 80 eps0 and eps_s = 7 eps0 are Table 1 intrinsic permittivities.
-# - eps0 = 8.85e-12 F/m is the vacuum permittivity listed in the Table 1 note.
+# 固体、液体的电导率和介电常数：
+# - Section 4.1 说明实验用 NaCl 溶液饱和，水相电导率 sigma_w = 0.043 S/m；
+#   Table 1 也列出该值。
+# - Berea 砂岩主要为石英，非金属矿物固相按 nonconductive 处理，因此
+#   固相 dc 电导率设为 0 S/m。
+# - Section 4.2 / Table 1 给出水相本征介电常数 epsilon_w = 80 epsilon0，
+#   固相本征介电常数 epsilon_s = 7 epsilon0。
+# - Table 1 note 给出真空介电常数 epsilon0 = 8.85e-12 F/m。
 MATERIALS = MaterialConfig(
     water_conductivity_s_m=0.043,
     solid_conductivity_s_m=0.0,
     water_relative_permittivity=80.0,
     solid_relative_permittivity=7.0,
     epsilon0_f_m=8.85e-12,
-    note="Use water dc conductivity plus high-frequency dielectric storage; solid has zero dc conductivity.",
+    note="Section 4.2 / Table 1: water dc conductivity plus high-frequency dielectric storage; solid has zero dc conductivity.",
 )
 
 
-# Polarization model parameters:
-# - Sigma_S = 1.3e-9 S, D = 1.3e-9 m^2/s, Lambda = 2.7 um, and eta0 = 1%
-#   are Table 1 values.
-# - Pore polarization uses pore radii from the pore-size distribution and
-#   tau_p = r^2/(2D).
-# - Membrane polarization uses pore-throat lengths and dc throat resistances;
-#   Table 1/Section 4 says Zdc is calculated from throat geometry and water
-#   conductivity, with tau_m = L^2/(4D).
-# - The volumetric water-phase increment follows Delta sigma_w* = 2 C*/Lambda.
+# 孔极化、膜极化和动态孔径：
+# - Section 4.2 / Table 1 给出 Sigma_S = 1.3e-9 S、D = 1.3e-9 m2/s、
+#   Lambda = 2.7 um、膜极化 polarizability eta0 = 1%。
+# - Equation 17: C_p* = Sigma_S * i omega tau_p / (1 + i omega tau_p)，
+#   即 Schwarz 型孔极化复电导；Equation 18: tau_p = r^2 / (2D)。
+# - 孔极化使用 Figure 4a / Figure5.xlsx 的 pore node size distribution；
+#   r 是孔半径/孔节点尺寸相关特征长度。
+# - Equation 19: Titov 型膜极化复阻抗 Z_m*；Equation 20:
+#   tau_m = L^2 / (4D)；Equation 21: C_m* = 1/Z_m* - 1/Zdc。
+# - 膜极化使用论文 Figure 4b 分布，或本项目 pnextract 孔喉长度/阻抗统计；
+#   Zdc 由孔喉几何、孔喉长度和水电导率计算。
+# - Equation 12: 动态孔径 Lambda 用于上尺度，Delta sigma_w* = 2 C* / Lambda。
 POLARIZATION = PolarizationConfig(
     surface_conductance_s=1.3e-9,
     diffusion_coefficient_m2_s=1.3e-9,
@@ -184,15 +201,19 @@ POLARIZATION = PolarizationConfig(
     upscaling_formula="Delta sigma_w* = 2 C* / Lambda",
     geometry_note=(
         "Pore radii and throat lengths/resistances are distribution-driven; "
-        "Figure5.xlsx contains paper pore/throat distributions, while full "
-        "local membrane runs use pnextract-derived throat geometry."
+        "the paper Figure 4 distributions are stored locally as Figure5.xlsx, "
+        "while full local membrane runs use pnextract-derived throat geometry."
     ),
 )
 
 
-# The paper title and Figures 6-7 state the comparison band as 1 mHz to 1 GHz.
-# Figure8.xlsx contains 40 paper simulation points, but those paper simulation
-# columns are not used as this project's reproduced simulation curves.
+# 频率范围：
+# - 论文标题、摘要、Section 4 和 Figures 6-7 都描述对比频带为
+#   10^-3 到 10^9 Hz。
+# - Figure8.xlsx 中含有论文作者的 simulation/component 数值块；本地工作簿
+#   的这些块有 40 个频点。该数量用于 provenance，不代表论文正文另有
+#   “40 个频点”的文字说明。这些数值块只可用于对照或误差审计，不作为
+#   本项目复现模拟曲线。
 FREQUENCIES = FrequencyConfig(
     min_hz=1.0e-3,
     max_hz=1.0e9,
@@ -202,13 +223,15 @@ FREQUENCIES = FrequencyConfig(
 )
 
 
-# Section 5.3 mechanism split:
-# - Interfacial/Maxwell: assign only water/solid dc conductivity and intrinsic
-#   high-frequency permittivity; no pore or membrane increment.
-# - Pore: water phase is sigma_w + Delta sigma_pore*; solid phase is zero.
-# - Membrane: water phase is sigma_w + Delta sigma_membrane*; solid phase is zero.
-# - All: combine water dc conductivity, high-frequency permittivity, pore and
-#   membrane increments; solid keeps high-frequency permittivity and zero dc.
+# Section 5.3 单机制拆分：
+# - interfacial / Maxwell-Wagner：只给水相和固相赋 dc conductivity 与
+#   high-frequency permittivity；不加入孔极化或膜极化。
+# - pore polarization：水相为 sigma_w + Delta sigma_pore*；solid phase is zero；
+#   不加入 Maxwell 背景和膜极化。
+# - membrane polarization：水相为 sigma_w + Delta sigma_membrane*；solid phase is zero；
+#   不加入 Maxwell 背景和孔极化。
+# - all：水相包含 sigma_w、高频介电项、Delta sigma_pore* 和
+#   Delta sigma_membrane*；固相包含高频介电项，dc 电导率仍为 0。
 MECHANISMS = MechanismConfig(
     definitions={
         "interfacial": "water and solid receive only dc conductivity and high-frequency permittivity; no pore or membrane increment",
@@ -227,24 +250,19 @@ MECHANISMS = MechanismConfig(
 
 INPUT_POLICY = InputPolicy(
     allowed_ct_files=("microCT_Berea.raw", "microCT_Berea.tiff"),
-    allowed_experiment_workbooks=("Figure6.xlsx", "Figure8.xlsx"),
+    allowed_geometry_workbooks=("Figure5.xlsx",),
+    allowed_experiment_workbooks=("Figure7.xlsx", "Figure8.xlsx"),
     paper_simulation_columns_used_as_simulation=False,
+    post_extraction_geometry_scaling_allowed=False,
+    default_pnextract_executable=PROJECT_ROOT / "code" / "vendor" / "pnextract" / "bin" / "pnextract.exe",
     note=(
-        "Use Figure6/Figure8 only for experimental scatter.  Figure8 paper "
+        "Use Figure7/Figure8 only for experimental scatter. Figure8 paper "
         "simulation, pore, membrane, and interfacial columns are paper-reference "
-        "blocks and must not be plotted as this project's simulation output."
+        "blocks. 不要把 Figure8.xlsx 的 Simulation 列当成本项目模拟结果。"
+        "不允许对 pnextract 提取后的孔径、孔喉长度或由几何计算的 Zdc 再施加缩放因子；"
+        "若几何不匹配，必须用原版 pnextract 算法和明确记录的参数重新提取；默认不追加 "
+        "minRPore 或 medialSurfaceSettings 校准行，使用 pnextract 内置默认参数。"
     ),
-)
-
-
-# This is not a paper parameter.  It records the explicit project diagnostic
-# correction currently documented in AGENTS.md for matching the membrane
-# relaxation when pnextract throat geometry differs from the authors' internal
-# pore-throat/resistance definition.
-DIAGNOSTIC_CORRECTION = DiagnosticCorrectionConfig(
-    membrane_length_scale=0.0446683592150963,
-    membrane_zdc_scale=10.0,
-    note="Project diagnostic correction only; do not describe it as a hidden Niu et al. parameter.",
 )
 
 
@@ -258,5 +276,4 @@ NIU2020_BEREA_CONFIG = Niu2020BereaConfig(
     frequencies=FREQUENCIES,
     mechanisms=MECHANISMS,
     input_policy=INPUT_POLICY,
-    diagnostic_correction=DIAGNOSTIC_CORRECTION,
 )

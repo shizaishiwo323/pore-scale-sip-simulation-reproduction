@@ -15,8 +15,11 @@ import pandas as pd
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
-OUTER_LEGACY_ROOT = PROJECT_ROOT.parent
+DEFAULT_RESULT_DIR = PROJECT_ROOT / "results" / "niu2020_berea_reproduction_20260617_original_pnextract_defaults"
+DEFAULT_SWEEP_DIR = DEFAULT_RESULT_DIR / "simulation_sweeps"
 MECHANISMS = ["interfacial", "pore", "membrane", "all"]
+FREQUENCY_X_LIMITS = (1.0e-4, 1.0e9)
+SIGMA_IMAG_Y_LIMITS = (1.0e-7, 1.0e1)
 LABELS = {
     "experiment": "Experiment",
     "interfacial": "Dielectric",
@@ -37,22 +40,10 @@ LINESTYLES = {
     "all": "-",
 }
 DEFAULT_SWEEPS = {
-    "all": OUTER_LEGACY_ROOT
-    / "outputs"
-    / "ac3d_gpu_full350_complex64_fft_representative_12freq_rtol1e-5"
-    / "sweep_results.csv",
-    "pore": OUTER_LEGACY_ROOT
-    / "outputs"
-    / "ac3d_gpu_full350_complex64_fft_paper_component_pore_rtol1e-5"
-    / "sweep_results.csv",
-    "membrane": OUTER_LEGACY_ROOT
-    / "outputs"
-    / "ac3d_gpu_full350_complex64_fft_paper_component_membrane_rtol1e-5"
-    / "sweep_results.csv",
-    "interfacial": OUTER_LEGACY_ROOT
-    / "outputs"
-    / "ac3d_gpu_full350_complex64_fft_paper_component_interfacial_rtol1e-5"
-    / "sweep_results.csv",
+    "all": DEFAULT_SWEEP_DIR / "niu2020_berea_full350_all_original_pnextract_fft_x" / "sweep_results.csv",
+    "pore": DEFAULT_SWEEP_DIR / "niu2020_berea_full350_pore_fft_x" / "sweep_results.csv",
+    "membrane": DEFAULT_SWEEP_DIR / "niu2020_berea_full350_membrane_original_pnextract_fft_x" / "sweep_results.csv",
+    "interfacial": DEFAULT_SWEEP_DIR / "niu2020_berea_full350_interfacial_precision_merged" / "sweep_results.csv",
 }
 
 
@@ -66,7 +57,7 @@ def read_numeric_block(path: Path, cols: list[int], names: list[str]) -> pd.Data
 
 
 def read_real_conductivity_experiment(data_dir: Path) -> pd.DataFrame:
-    return read_numeric_block(data_dir / "Figure6.xlsx", [0, 1], ["frequency_hz", "real_conductivity_s_m"])
+    return read_numeric_block(data_dir / "Figure7.xlsx", [2, 3], ["frequency_hz", "real_conductivity_s_m"])
 
 
 def read_imaginary_conductivity_experiment(data_dir: Path) -> pd.DataFrame:
@@ -98,7 +89,7 @@ def collect_source_data(
             "dataset": "experiment_real",
             "frequency_hz": real_experiment["frequency_hz"],
             "real_conductivity_s_m": real_experiment["real_conductivity_s_m"],
-            "source": "data/Niu 2020data/Figure6.xlsx columns 0-1",
+            "source": "data/Niu 2020data/Figure7.xlsx columns 2-3",
             "paper_simulation_columns_used": False,
         }
     )
@@ -158,7 +149,7 @@ def make_figure(
         }
     )
     fig, axes = plt.subplots(2, 1, figsize=(6.4, 9.6), constrained_layout=True)
-    fig.suptitle(title, fontsize=18, y=0.995)
+    axes[0].set_title(title, fontsize=18, pad=14)
 
     ax = axes[0]
     ax.loglog(
@@ -172,7 +163,7 @@ def make_figure(
     )
     plot_mechanism(ax, components, "all", "effective_sigma_real_s_m")
     ax.set_ylabel("$\\sigma'$ (S/m)")
-    ax.set_xlim(1.0e-4, 1.0e5)
+    ax.set_xlim(*FREQUENCY_X_LIMITS)
     ax.set_ylim(1.0e-4, 1.0e-1)
     ax.legend(loc="upper left", frameon=False, fontsize=12, handlelength=2.8)
 
@@ -190,8 +181,8 @@ def make_figure(
         plot_mechanism(ax, components, mechanism, "effective_sigma_imag_s_m")
     ax.set_xlabel("Frequency (Hz)")
     ax.set_ylabel("$\\sigma''$ (S/m)")
-    ax.set_xlim(1.0e-4, 1.0e5)
-    ax.set_ylim(1.0e-7, 1.0e-3)
+    ax.set_xlim(*FREQUENCY_X_LIMITS)
+    ax.set_ylim(*SIGMA_IMAG_Y_LIMITS)
     ax.legend(loc="upper left", frameon=False, fontsize=12, handlelength=2.8)
 
     for axis in axes:
@@ -206,15 +197,31 @@ def make_figure(
 
 
 def write_provenance(path: Path, data_dir: Path, component_paths: dict[str, Path], source_data_csv: Path) -> None:
+    spectra_dir = PROJECT_ROOT / "results" / "spectra" / "niu2020_berea_fullres_original_pnextract_defaults"
+    base_spectrum = spectra_dir / "polarization_spectra_from_pnextract.csv"
+    component_spectra_dir = spectra_dir / "components_paper_mode"
     lines = [
         "# Niu 2020 Conductivity Mechanism Comparison Provenance",
         "",
         "This figure compares Niu 2020 Berea experimental conductivity data against local AC3D sweep outputs.",
         "",
-        f"- Real-conductivity experiment: `{data_dir / 'Figure6.xlsx'}` columns 0-1.",
+        "## Allowed Inputs",
+        "",
+        f"- CT segmentation: `{data_dir / 'microCT_Berea.raw'}` and `{data_dir / 'microCT_Berea.tiff'}`.",
+        f"- Real-conductivity experiment: `{data_dir / 'Figure7.xlsx'}` columns 2-3.",
         f"- Imaginary-conductivity experiment: `{data_dir / 'Figure8.xlsx'}` columns 0-1.",
-        f"- Source data CSV: `{source_data_csv}`.",
         "- Figure8 paper simulation/component columns are not used as this project's simulation curves.",
+        "",
+        "## Polarization Input Spectra",
+        "",
+        f"- Base pnextract spectrum: `{base_spectrum}`.",
+        f"- Paper-mode mechanism spectra directory: `{component_spectra_dir}`.",
+        "- No post-extraction pore/throat geometry or geometry-derived Zdc scaling is used.",
+        "- Pore/throat geometry must come from the original pnextract executable with built-in default medial-surface parameters unless explicit run metadata says otherwise.",
+        "",
+        "## Plotted Data",
+        "",
+        f"- Source data CSV: `{source_data_csv}`.",
         "- The plotted sigma'' simulation values use absolute magnitude for log-axis display; signed values are preserved in source data.",
         "",
         "## Simulation CSVs",
@@ -246,15 +253,15 @@ def main() -> None:
     parser.add_argument("--interfacial-csv", default=str(DEFAULT_SWEEPS["interfacial"]))
     parser.add_argument(
         "--figure-base",
-        default=str(PROJECT_ROOT / "figures" / "niu2020" / "niu2020_conductivity_mechanism_comparison"),
+        default=str(DEFAULT_RESULT_DIR / "figures" / "niu2020_conductivity_mechanism_comparison"),
     )
     parser.add_argument(
         "--source-data-csv",
-        default=str(PROJECT_ROOT / "results" / "source_data" / "niu2020_conductivity_mechanism_comparison_source_data.csv"),
+        default=str(DEFAULT_RESULT_DIR / "source_data" / "niu2020_conductivity_mechanism_comparison_source_data.csv"),
     )
     parser.add_argument(
         "--provenance-md",
-        default=str(PROJECT_ROOT / "results" / "niu2020" / "niu2020_conductivity_mechanism_comparison_provenance.md"),
+        default=str(DEFAULT_RESULT_DIR / "provenance" / "niu2020_conductivity_mechanism_comparison_provenance.md"),
     )
     parser.add_argument("--title", default="Niu 2020 Berea")
     args = parser.parse_args()

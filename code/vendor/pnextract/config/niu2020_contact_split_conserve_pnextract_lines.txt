@@ -1,0 +1,5 @@
+# Original pnextract default settings.
+# This file is intentionally comment-only. Result-package builders keep reading
+# it for compatibility, but no parameter lines are appended to generated .mhd
+# files. pnextract therefore uses its built-in defaults, including default
+# minRPore/Rnoise and medialSurfaceSettings values reported by the executable.

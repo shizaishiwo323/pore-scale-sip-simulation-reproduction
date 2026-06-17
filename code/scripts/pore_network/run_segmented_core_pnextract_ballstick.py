@@ -117,9 +117,11 @@ def write_pnextract_mhd(
     shape_zyx: tuple[int, int, int],
     voxel_size_um: float,
     title: str,
+    pnextract_lines: list[str] | None = None,
 ) -> None:
     z, y, x = (int(v) for v in shape_zyx)
     element_size = f"{voxel_size_um:g} {voxel_size_um:g} {voxel_size_um:g}"
+    extra_lines = [line.strip() for line in (pnextract_lines or []) if line.strip()]
     text = "\n".join(
         [
             "ObjectType = Image",
@@ -136,6 +138,8 @@ def write_pnextract_mhd(
             "write_vtkNetwork true",
             "write_elements false",
             "",
+            *extra_lines,
+            "",
         ]
     )
     mhd_path.write_text(text, encoding="utf-8")
@@ -149,6 +153,7 @@ def prepare_pnextract_input(
     pore_values: str | list[int],
     voxel_size_um: float,
     downsample: int,
+    pnextract_lines: list[str] | None = None,
 ) -> dict:
     prepare_dir.mkdir(parents=True, exist_ok=True)
     volume = load_segmented_volume(segmented_volume, downsample=downsample)
@@ -167,6 +172,7 @@ def prepare_pnextract_input(
         shape_zyx=tuple(mapped.shape),
         voxel_size_um=effective_voxel_size_um,
         title=title,
+        pnextract_lines=pnextract_lines,
     )
     summary = {
         "segmented_volume": str(segmented_volume),
@@ -179,6 +185,7 @@ def prepare_pnextract_input(
         or {"pore_values": [int(v) for v in pore_values], "mode": "explicit_pore_values"},
         "raw_path": str(raw_path),
         "mhd_path": str(mhd_path),
+        "pnextract_lines": [line.strip() for line in (pnextract_lines or []) if line.strip()],
         "raw_size_bytes": int(raw_path.stat().st_size),
         **stats,
     }
@@ -422,6 +429,12 @@ def main() -> None:
     parser.add_argument("--skip-pnextract", action="store_true", help="Only prepare pnextract RAW/MHD input.")
     parser.add_argument("--skip-render", action="store_true", help="Run pnextract/parse but do not render HTML.")
     parser.add_argument("--skip-distribution", action="store_true", help="Do not write pore/throat distribution PNG.")
+    parser.add_argument(
+        "--pnextract-line",
+        action="append",
+        default=[],
+        help="Append one raw pnextract parameter line to the generated .mhd input; repeat for multiple lines.",
+    )
     args = parser.parse_args()
 
     segmented_volume = Path(args.input)
@@ -436,6 +449,7 @@ def main() -> None:
         pore_values=args.pore_values,
         voxel_size_um=args.voxel_size_um,
         downsample=args.downsample,
+        pnextract_lines=args.pnextract_line,
     )
     resolved_pore_value = int(prepare_summary["pore_values"][0])
     resolved_solid_value = int(

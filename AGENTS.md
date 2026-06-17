@@ -47,7 +47,7 @@ sip模拟/
     literature_review/                  # 写作和文献综述材料
     superpowers/                        # 历史计划记录
   environment/                          # Python/CuPy/GPU 环境快照
-  figures/                              # 整理图件和交互 HTML
+  figures/                              # 历史/兼容图件；新的正式模拟图件优先放入 results/<run>/figures/
   notebooks/                            # 可复跑探索流程
   paper_data/                           # Figure 5-8 工作簿兼容副本
   results/                              # 模拟输出、source data、metadata、provenance
@@ -78,7 +78,7 @@ sip模拟/
 - `data_inventory/ct_backed_samples_raw_copy_20260605/` 中的 CT 样品原始拷贝和物性表。
 - `code/vendor/pnextract/`。这是上游参考代码副本，默认只读；需要项目自有封装时放到 `code/scripts/pore_network/` 或 `code/src/`。
 
-如果必须生成转换版数据、裁剪数据或中间数组，写入 `results/`、`figures/`、`configs/` 或明确命名的子目录，并保留输入路径、参数和运行命令。
+如果必须生成转换版数据、裁剪数据、中间数组或 full-grid sweep 数值结果，写入 `results/` 下对应运行目录，并保留输入路径、参数和运行命令。新的正式复现图件、HTML、source data、metadata、provenance、本次运行采用的配置文件，以及可追溯到正式图件的 `sweep_results.csv` 等机制扫频结果，都应集中放在 `results/<run_name>/` 内；不要再把正式图件单独散放到顶层 `figures/`，也不要把正式 sweep 目录单独散放到 `results/` 顶层与结果包同级。顶层 `figures/` 只作为历史兼容或用户明确要求的导出位置。
 
 ## 工作环境
 
@@ -131,6 +131,18 @@ Set-Location 'C:\Users\imgw\Documents\Codex\SIP模拟\sip模拟'
 
 旧的 `code/scripts/*.py` 顶层脚本多为兼容 wrapper 或历史入口。新增功能和 bugfix 应优先落在分类目录的真实脚本里；只有兼容性确实需要时才同步 wrapper。
 
+## SIP 模拟结果包固定流程
+
+以后每次做 SIP 模拟、复现、机制对比或样品扩展时，除非用户明确说明只做快速诊断，否则结果目录 `results/<run_name>/` 必须按完整结果包思路组织，至少包含以下四类输出：
+
+1. 参数配置文件：把本次模拟采用的全部参数选择写入 `results/<run_name>/configs/`，优先使用可复跑的 Python/JSON/YAML 配置文件；配置中必须用中文详细注释每个关键参数为什么这样选，包括输入数据、体素尺度、相标签、边界条件、电导率/介电常数、孔极化/膜极化参数、缩放因子、频率范围、求解器容差、GPU/full-grid 或 smoke 设置。若参数来自论文、补充材料、Excel、标定或诊断性假设，要在注释或 metadata 中明确来源，不要把诊断性修正写成论文隐藏原始参数。
+2. 三维数字岩心和孔隙网络可视化：导出数字岩心三维 HTML 和孔隙网络三维 HTML，优先使用 Fiji/ImageJ 3D Viewer 风格的 PyVista/VTK 交互 HTML。输出应放在 `results/<run_name>/digital_rock/` 和 `results/<run_name>/pore_network/`，并保留输入体数据、二值化/重映射规则、downsample、voxel size、孔隙率、pnextract 版本和运行命令。
+3. 孔隙网络几何分布图：导出类似 `results/niu2020_berea_reproduction/pore_network/berea_pnextract_vs_niu2020_pore_throat_distribution.png` 的孔隙/孔喉分布直方图或两联图。至少包含 pore node size distribution 和 pore throat length distribution；横轴通常使用 log 尺度，纵轴使用 volume fraction、frequency fraction 或清楚标注的统计量。有实验数据、论文 Figure 数据或既有复现结果可对标时，必须画对比图，并同步导出 source data CSV、metadata 和差异说明。
+4. full-grid / sweep 数值结果：正式机制扫频结果必须放在 `results/<run_name>/simulation_sweeps/` 下，例如 `results/<run_name>/simulation_sweeps/<mechanism_run>/sweep_results.csv`，并保留每个频率点的 `result.json`、`residual_history.csv`、运行 `config.yml` 和求解收敛信息。不要把这些机制 sweep 目录单独放在 `results/` 顶层与完整结果包同级；若是临时 smoke、diagnostic 或 sensitivity 运行，目录名和 provenance 必须明确标注。
+5. SIP 机制结果图：正式展示 SIP 模拟时，必须同时给出不同极化机制和全部机制综合的比较可视化，包括 `interfacial / pore / membrane / all` 或当前样品/模型对应的机制拆分，并与实验或论文结果对比讨论。图件风格可参考 `Prompts/模拟结果图参考.png`，但横轴、纵轴范围和线性/log 设置应根据本次模拟结果、实验频带和正负值情况自适应选择；不要机械套用固定坐标范围。图件必须可追溯到本项目实际生成的 `results/<run_name>/simulation_sweeps/<mechanism_run>/sweep_results.csv`、source data 和 provenance，不能直接把论文工作簿中的 simulation 列冒充为本项目模拟曲线。
+
+若某次任务因为运行成本、缺少输入数据或用户明确要求而无法生成其中某一项，应在 `results/<run_name>/provenance/` 或结果说明中写明缺失原因、后续补齐入口和当前结果的诊断/正式属性。
+
 ## Niu 2020 三维 AC3D 约定
 
 当前 Niu 2020 Berea 正式路线使用 `data/Niu 2020data/`：
@@ -149,17 +161,18 @@ Figure 7/8 机制分离必须遵守 Section 5.3 的“only consider one polariza
 
 不要把 `Figure8.xlsx` 中的 Simulation、Pore polarization、Membrane polarization、Interfacial polarization 列直接绘成“我们的模拟结果”。这些列只能用于论文对照、误差审计或 provenance 证明未使用。正式图必须能追溯到本项目 `sweep_results.csv`。
 
-当前修正后的 membrane 诊断参数：
+当前 membrane 几何规则：
 
-- `membrane_length_scale = 0.0446683592150963`
-- `membrane_zdc_scale = 10.0`
-
-这是一条显式、可追踪的诊断性修正，表示 pnextract 几何与论文作者内部孔喉几何/电阻定义不完全一致。不要把它写成论文隐藏原始参数。
+- 不允许对 pnextract 提取后的孔径、孔喉长度或由几何计算的 `Zdc` 施加缩放因子。
+- 默认使用原版 `code/vendor/pnextract/bin/pnextract.exe` 重新提取孔隙网络；该可执行文件应由 `C:\Users\imgw\Documents\Codex\SIP模拟\pnextract` 原有源码重编译得到。
+- Niu 2020 Berea 的默认 PNM 提取不再追加 `minRPore` 或 `medialSurfaceSettings` 校准行，使用 pnextract 内置默认参数。兼容参数文件 `code/vendor/pnextract/config/niu2020_contact_split_conserve_pnextract_lines.txt` 目前只保留说明注释，不包含会被追加到 `.mhd` 的参数行。
+- 如果未来做诊断性参数扫描，必须在结果目录、metadata 和 provenance 中明确标为 diagnostic / sensitivity，不得把诊断参数写成默认算法参数。
+- 旧的缩放因子诊断路线已经废弃，不得作为正式复现依据。
 
 推荐入口：
 
 - `code/scripts/sip_simulation/compute_polarization_spectra.py`
-- `code/scripts/sip_simulation/diagnose_niu2020_membrane_mismatch.py`
+- `code/scripts/sip_simulation/diagnose_niu2020_membrane_mismatch.py`（仅保留废弃说明，不再扫描缩放因子）
 - `code/scripts/sip_simulation/make_polarization_component_spectra.py`
 - `code/scripts/sip_simulation/run_ac3d_matrix_free_gpu_sweep.py`
 - `code/scripts/sip_simulation/plot_niu2020_figure7_style_corrected.py`
@@ -167,13 +180,18 @@ Figure 7/8 机制分离必须遵守 Section 5.3 的“only consider one polariza
 
 关键结果/provenance：
 
-- `figures/niu2020/niu2020_figure7_style_corrected_reproduction.png`
-- `results/source_data/niu2020_figure7_style_corrected_reproduction_source_data.csv`
-- `results/niu2020/niu2020_figure7_style_corrected_provenance.md`
-- `results/niu2020_berea_full350_all_scaled_membrane_fft_x/sweep_results.csv`
-- `results/niu2020_berea_full350_membrane_scaled_fft_x/sweep_results.csv`
-- `results/niu2020_berea_full350_pore_fft_x/sweep_results.csv`
-- `results/niu2020_berea_full350_interfacial_precision_merged/sweep_results.csv`
+- 新的正式结果包优先使用 `results/niu2020_berea_reproduction_20260617_original_pnextract_defaults/`。
+- `results/niu2020_berea_reproduction_20260617_original_pnextract_defaults/configs/niu2020_berea_parameters_zh.py`
+- `results/niu2020_berea_reproduction_20260617_original_pnextract_defaults/figures/niu2020_conductivity_mechanism_comparison.png`
+- `results/niu2020_berea_reproduction_20260617_original_pnextract_defaults/source_data/niu2020_conductivity_mechanism_comparison_source_data.csv`
+- `results/niu2020_berea_reproduction_20260617_original_pnextract_defaults/provenance/niu2020_conductivity_mechanism_comparison_provenance.md`
+- `results/niu2020_berea_reproduction_20260617_original_pnextract_defaults/digital_rock/`
+- `results/niu2020_berea_reproduction_20260617_original_pnextract_defaults/pore_network/`
+- `results/niu2020_berea_reproduction_20260617_original_pnextract_defaults/simulation_sweeps/`
+
+正式复现入口：
+
+- `code/scripts/sip_simulation/build_niu2020_berea_result_package.py`：将中文参数配置、full-grid 机制 sweep、SIP 实部/虚部对比图、source data、provenance、Fiji/VTK 风格三维数字岩心交互 HTML、孔隙网络 HTML 和 Figure 4 风格孔节点/孔喉分布图集中写入 `results/niu2020_berea_reproduction/`。三维数字岩心和孔隙网络部分必须复用 `notebooks/seged_DRP_and_PNM.ipynb` 的正确链路：先把原始分割 TIFF 重映射为 `pore=0, solid=255` 的二值 TIFF/RAW，再用该二值体调用 `render_segmented_core_fiji3d_html.py` 和 `run_segmented_core_pnextract_ballstick.py`。不要把缺少 `pore_center_x_m/y_m/z_m` 的 Figure5 汇总表或历史 summary CSV 当作可渲染的三维孔隙网络。
 
 禁止恢复旧错误路线：
 
@@ -239,8 +257,8 @@ Figure 7/8 机制分离必须遵守 Section 5.3 的“only consider one polariza
 
 分割数字岩心 HTML：
 
-- 使用 `code/scripts/digital_rock_visualization/render_segmented_core_html.py` 生成 PyVista/VTK real mesh 与 volume actor 离线 HTML。
-- 若目标接近 Fiji/ImageJ 3D Viewer，使用 `code/scripts/digital_rock_visualization/render_segmented_core_fiji3d_html.py`。
+- 后续三维数字岩心可视化只保留 Fiji/ImageJ 3D Viewer 风格的 PyVista/VTK 交互 HTML，使用 `code/scripts/digital_rock_visualization/render_segmented_core_fiji3d_html.py`。
+- 不再把 `visualize_digital_rock_3d.py` 生成的静态 PNG/旧 PyVista HTML 作为正式数字岩心结果；除非用户明确要求诊断性临时预览，否则不要生成或写入结果包。
 - 分割体 HTML 必须保留右上角孔隙率面板，孔隙率按原始全分辨率体素计数：`count(volume == 0) / volume.size`。
 - 当前样品 89 `89seged.tiff` 孔隙率为 `8.28%`，对应 `31,235,076 pore px / 377,241,600 total px`。
 - 当前只确认 `pixel_size_y_um = 1.7`；没有独立 x/z 标定前，脚本按各向同性 `voxel_spacing_um_xyz=[1.7,1.7,1.7]` 处理。论文级几何解释必须说明该假设。
@@ -248,8 +266,10 @@ Figure 7/8 机制分离必须遵守 Section 5.3 的“only consider one polariza
 pnextract 球棍网络：
 
 - 使用 `code/scripts/pore_network/run_segmented_core_pnextract_ballstick.py` 生成 pnextract RAW/MHD 输入、运行 pnextract、解析 network CSV、渲染球棍 HTML。
+- 与 `notebooks/seged_DRP_and_PNM.ipynb` 保持一致：正式 DRP/PNM 可视化先生成 `solid255_pore0.tiff` 和 `solid255_pore0.raw`，后续 Fiji HTML、数字岩心预览和 pnextract 都使用这个二值体；相标签统一为 `pore=0, solid=255`。
 - 默认 `downsample=4` 是为了本机运行和 HTML 交互可用；metadata 必须保留 `downsample`、`source_voxel_size_um`、`effective_voxel_size_um` 和输入路径。
-- `figures/segmented_cores/` 中的 HTML 是可再生图件，不是原始输入。
+- 新的正式 HTML、PNG、metadata 和 source data 必须写入 `results/<run_name>/pore_network/` 或 `results/<run_name>/digital_rock/`；不要再把正式输出写入 `figures/segmented_cores/`。
+- 导出孔隙网络后，必须同时绘制类似 Niu Figure 4 的两联图：左图为 pore node size distribution，右图为 pore throat length distribution，横轴 log 尺度、纵轴 volume/frequency fraction，并把源数据 CSV 和 metadata/provenance 放入同一结果目录。Niu 2020 Berea 可使用 `data/Niu 2020data/Figure5.xlsx` 重绘论文 Figure 4 风格分布图。
 
 Berea 孔隙网络可视化：
 
@@ -273,9 +293,10 @@ Berea 孔隙网络可视化：
 - 阅读/推导/审计：`docs/notes/`
 - 长线计划：`docs/plans/`
 - 论文/补充资料副本：`docs/references/` 或 `docs/validation/`
-- 运行配置：`configs/`
-- 可再生数值结果和 metadata：`results/`
-- 图件、HTML 和论文图：`figures/`
+- 通用模板配置：`configs/`
+- 本次实际采用的运行配置：`results/<run_name>/configs/`，参数注释优先写中文，便于后期人工核对。
+- 可再生数值结果、metadata、source data、provenance、图件和 HTML：`results/<run_name>/`
+- 顶层图件兼容副本：`figures/`，只有用户明确要求或历史兼容时使用。
 - notebook 探索：`notebooks/`
 
 ## 文件安全限制

@@ -1,0 +1,6 @@
+# Niu 2020 Berea calibrated contact-split V2 pnextract settings.
+# These lines are appended verbatim to the generated .mhd input.
+# They reproduce results/niu2020_berea_contact_split_conserve_pnextract_v2:
+# 15439 pores, 19743 contact-split throats, throat L1 ~= 0.364497 vs Niu Figure5.
+minRPore 0.02
+medialSurfaceSettings 0.02 0.98 0.85 0.1 1.8 2.2 0 0 0.05
