@@ -8,6 +8,8 @@ __pycache__/
 # Local environments and notebooks
 .venv/
 venv/
+environment/porespy_smoke_venv/
+environment/open_pnm_tools/
 .ipynb_checkpoints/
 ~$*
 
@@ -22,10 +24,18 @@ venv/
 *.dxf
 *.bak
 
+# Local vendor build artifacts and archives
+code/vendor/**/build/local/
+code/vendor/**/bin.7z
+
 # Local data inventories and regenerated outputs
 data_inventory/
 outputs/
 results/
+tmp/
+
+# Local scratch notebooks
+临时*.ipynb
 figures/segmented_cores/
 figures/carbonates_sip/
 figures/berea_pore_network/*.html
