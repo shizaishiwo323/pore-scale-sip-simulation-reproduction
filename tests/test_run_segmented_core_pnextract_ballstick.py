@@ -131,6 +131,23 @@ def test_build_render_command_passes_segmented_volume_for_porosity_overlay(tmp_p
     assert "0" in cmd
     assert "--solid-value" in cmd
     assert "255" in cmd
+    cmd_with_paraview = module.build_render_command(
+        python_exe=Path("python"),
+        pores_csv=tmp_path / "pores.csv",
+        throats_csv=tmp_path / "throats.csv",
+        html_out=tmp_path / "network.html",
+        metadata_out=tmp_path / "metadata.json",
+        segmented_volume=tmp_path / "89seged.tiff",
+        voxel_size_m=2.5e-6,
+        pore_value=0,
+        solid_value=255,
+        paraview_out_dir=tmp_path / "paraview",
+        paraview_prefix="network",
+    )
+    assert "--paraview-out-dir" in cmd_with_paraview
+    assert str(tmp_path / "paraview") in cmd_with_paraview
+    assert "--paraview-prefix" in cmd_with_paraview
+    assert "network" in cmd_with_paraview
 
 
 def test_run_command_replaces_undecodable_subprocess_output(tmp_path):

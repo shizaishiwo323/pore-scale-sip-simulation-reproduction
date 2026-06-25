@@ -250,8 +250,10 @@ def build_render_command(
     voxel_size_m: float,
     pore_value: int,
     solid_value: int,
+    paraview_out_dir: Path | None = None,
+    paraview_prefix: str | None = None,
 ) -> list[str]:
-    return [
+    command = [
         str(python_exe),
         str(PROJECT_ROOT / "code" / "scripts" / "pore_network" / "render_berea_pore_network_html.py"),
         "--pores",
@@ -271,6 +273,10 @@ def build_render_command(
         "--solid-value",
         str(solid_value),
     ]
+    if paraview_out_dir is not None:
+        command.extend(["--paraview-out-dir", str(paraview_out_dir)])
+        command.extend(["--paraview-prefix", str(paraview_prefix or html_out.stem)])
+    return command
 
 
 def run_command(command: list[str], *, cwd: Path) -> subprocess.CompletedProcess:
@@ -499,17 +505,21 @@ def main() -> None:
     render_result = None
     if not args.skip_render:
         metadata_out = Path(args.metadata_out)
+        html_out = Path(args.html_out)
+        paraview_out_dir = html_out.parent / "paraview"
         render_result = run_command(
             build_render_command(
                 python_exe=python_exe,
                 pores_csv=parsed_dir / "pores.csv",
                 throats_csv=parsed_dir / "throats.csv",
-                html_out=Path(args.html_out),
+                html_out=html_out,
                 metadata_out=metadata_out,
                 segmented_volume=segmented_volume,
                 voxel_size_m=float(args.voxel_size_um) * float(args.downsample) * 1e-6,
                 pore_value=resolved_pore_value,
                 solid_value=resolved_solid_value,
+                paraview_out_dir=paraview_out_dir,
+                paraview_prefix=html_out.stem,
             ),
             cwd=PROJECT_ROOT,
         )
@@ -556,6 +566,8 @@ def main() -> None:
                     voxel_size_m=float(args.voxel_size_um) * float(args.downsample) * 1e-6,
                     pore_value=resolved_pore_value,
                     solid_value=resolved_solid_value,
+                    paraview_out_dir=Path(args.html_out).parent / "paraview",
+                    paraview_prefix=Path(args.html_out).stem,
                 ),
             },
             "stdout": {

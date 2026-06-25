@@ -17,6 +17,34 @@ sys.path.insert(0, str(ROOT / "src"))
 from pore_scale_electrical.polarization import PolarizationParameters  # noqa: E402
 
 
+DIAGNOSTIC_MEMBRANE_PROVENANCE_COLUMNS = [
+    "membrane_geometry_mode",
+    "passive_area_source",
+    "passive_length_source",
+    "passive_weight_source",
+    "passive_zdc_source",
+    "passive_branch_alpha",
+    "passive_branch_alpha_median",
+    "passive_branch_alpha_mean",
+    "passive_branch_alpha_min",
+    "passive_branch_alpha_max",
+    "passive_branch_alpha_source",
+    "passive_transport_number_difference",
+    "passive_titov_geometry_factor_median",
+    "passive_anion_transport_number_reference",
+    "active_anion_transport_number_inferred",
+    "neutral_passive_mobility_contrast_inferred",
+    "edl_debye_length_m",
+    "edl_thickness_multiplier",
+    "edl_selectivity",
+    "maximum_transport_number_difference",
+    "passive_transport_number_edl_limited_fraction",
+    "edl_selection_rule",
+    "edl_selection_rmse_tolerance",
+    "edl_selected_peak_normalized_rmse",
+]
+
+
 def make_component_spectrum(
     base: pd.DataFrame,
     component: str,
@@ -75,7 +103,70 @@ def make_component_spectrum(
     return out
 
 
-def main() -> None:
+def make_diagnostic_all_spectrum(
+    base: pd.DataFrame,
+    diagnostic_membrane: pd.DataFrame,
+    params: PolarizationParameters,
+) -> pd.DataFrame:
+    diagnostic_columns = [
+        "frequency_hz",
+        "delta_sigma_membrane_real_s_m",
+        "delta_sigma_membrane_imag_s_m",
+    ] + [column for column in DIAGNOSTIC_MEMBRANE_PROVENANCE_COLUMNS if column in diagnostic_membrane.columns]
+    merged = base.merge(
+        diagnostic_membrane[diagnostic_columns].rename(
+            columns={
+                "delta_sigma_membrane_real_s_m": "diagnostic_membrane_real_s_m",
+                "delta_sigma_membrane_imag_s_m": "diagnostic_membrane_imag_s_m",
+            }
+        ),
+        on="frequency_hz",
+        how="inner",
+    ).sort_values("frequency_hz")
+    omega = merged["omega_rad_s"].to_numpy(dtype=float)
+    delta_real = (
+        merged["delta_sigma_pore_real_s_m"].to_numpy(dtype=float)
+        + merged["diagnostic_membrane_real_s_m"].to_numpy(dtype=float)
+    )
+    delta_imag = (
+        merged["delta_sigma_pore_imag_s_m"].to_numpy(dtype=float)
+        + merged["diagnostic_membrane_imag_s_m"].to_numpy(dtype=float)
+    )
+    out = pd.DataFrame(
+        {
+            "frequency_hz": merged["frequency_hz"].to_numpy(dtype=float),
+            "omega_rad_s": omega,
+            "component": "all_diagnostic_volume_area",
+            "component_mode": "paper_diagnostic_membrane_replacement",
+            "delta_sigma_component_real_s_m": delta_real,
+            "delta_sigma_component_imag_s_m": delta_imag,
+            "apparent_water_sigma_real_s_m": params.water_conductivity_s_m + delta_real,
+            "apparent_water_sigma_imag_s_m": omega * params.water_permittivity_f_m + delta_imag,
+            "solid_sigma_real_s_m": np.zeros(len(merged), dtype=float),
+            "solid_sigma_imag_s_m": omega * params.solid_permittivity_f_m,
+        }
+    )
+    for column in DIAGNOSTIC_MEMBRANE_PROVENANCE_COLUMNS:
+        if column in merged.columns:
+            out[column] = merged[column].to_numpy()
+    return out
+
+
+def unique_nonnull_value(frame: pd.DataFrame, column: str) -> str | float | None:
+    if column not in frame.columns:
+        return None
+    values = pd.Series(frame[column]).dropna().unique()
+    if len(values) == 1:
+        value = values[0]
+        if isinstance(value, np.generic):
+            return value.item()
+        return value
+    if len(values) == 0:
+        return None
+    return "mixed"
+
+
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", default=str(ROOT / "outputs" / "polarization_spectra_from_pnextract.csv"))
     parser.add_argument("--out-dir", default=str(ROOT / "outputs" / "polarization_component_spectra"))
@@ -86,7 +177,12 @@ def main() -> None:
         default="paper",
         help="paper follows Niu et al. section 5.3 for individual mechanisms; legacy preserves the earlier dielectric-background split.",
     )
-    args = parser.parse_args()
+    parser.add_argument(
+        "--diagnostic-membrane-component",
+        default=None,
+        help="Optional diagnostic membrane component CSV used to create an all_diagnostic_volume_area spectrum.",
+    )
+    args = parser.parse_args(argv)
 
     base = pd.read_csv(args.input)
     params = PolarizationParameters()
@@ -111,6 +207,23 @@ def main() -> None:
         spectrum.to_csv(path, index=False)
         metadata[component] = str(path)
         print(f"wrote {path}")
+    if args.diagnostic_membrane_component:
+        diagnostic_membrane = pd.read_csv(args.diagnostic_membrane_component)
+        diagnostic_spectrum = make_diagnostic_all_spectrum(base, diagnostic_membrane, params)
+        diagnostic_path = out_dir / "polarization_spectra_all_diagnostic_volume_area.csv"
+        diagnostic_spectrum.to_csv(diagnostic_path, index=False)
+        metadata["diagnostic_membrane_component"] = str(args.diagnostic_membrane_component)
+        metadata["all_diagnostic_volume_area"] = str(diagnostic_path)
+        for column in DIAGNOSTIC_MEMBRANE_PROVENANCE_COLUMNS:
+            value = unique_nonnull_value(diagnostic_spectrum, column)
+            if value is not None:
+                metadata_key = "diagnostic_membrane_geometry_mode" if column == "membrane_geometry_mode" else f"diagnostic_membrane_{column}"
+                metadata[metadata_key] = value
+        metadata["all_diagnostic_volume_area_note"] = (
+            "Paper-mode all spectrum with the original membrane increment replaced by the diagnostic "
+            "two-length active/passive membrane component."
+        )
+        print(f"wrote {diagnostic_path}")
     metadata_path = out_dir / "metadata.json"
     metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"wrote {metadata_path}")

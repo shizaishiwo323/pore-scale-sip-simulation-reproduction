@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 from pathlib import Path
 
@@ -41,6 +42,9 @@ def build_scene_payload(
     sphere_radius_scale: float,
     tube_radius_scale: float,
     min_tube_radius_vox: float,
+    max_tube_radius_vox: float | None = None,
+    tube_radius_mode: str = "effective_radius",
+    throat_diagnostics: pd.DataFrame | None = None,
     sphere_color: str = "#ff0000",
     tube_color: str = "#004cff",
     elev_deg: float = 18.0,
@@ -58,20 +62,70 @@ def build_scene_payload(
     coords = pores.set_index("pore_id")[["x_vox", "y_vox", "z_vox"]]
     internal = throats[(throats["pore1_id"] > 0) & (throats["pore2_id"] > 0)].copy()
     internal = internal[internal["pore1_id"].isin(coords.index) & internal["pore2_id"].isin(coords.index)]
+    if tube_radius_mode != "effective_radius" and throat_diagnostics is None:
+        raise ValueError(f"{tube_radius_mode} requires throat_diagnostics")
+    if throat_diagnostics is not None:
+        diagnostics = throat_diagnostics.copy()
+        if "split_throat_id" not in diagnostics.columns:
+            raise ValueError("throat diagnostics CSV must include split_throat_id")
+        diagnostic_columns = [
+            column
+            for column in [
+                "split_throat_id",
+                "length_voxels",
+                "volume_voxels3",
+                "radius_unclamped_voxels",
+                "radius_voxels",
+            ]
+            if column in diagnostics.columns
+        ]
+        internal = internal.merge(
+            diagnostics[diagnostic_columns],
+            left_on="throat_id",
+            right_on="split_throat_id",
+            how="left",
+            suffixes=("", "_diagnostic"),
+        )
 
     segments: list[list[float]] = []
+    raw_radius_voxels: list[float] = []
+    visual_radius_voxels: list[float] = []
+    clipped_to_min = 0
+    clipped_to_max = 0
     for row in internal.itertuples(index=False):
         p1 = coords.loc[row.pore1_id].to_numpy(dtype=float)
         p2 = coords.loc[row.pore2_id].to_numpy(dtype=float)
         if float(np.linalg.norm(p2 - p1)) <= 1e-9:
             continue
-        radius_vox = max(float(row.throat_radius_m) / voxel_size_m * tube_radius_scale, min_tube_radius_vox)
+        if tube_radius_mode == "effective_radius":
+            raw_radius_vox = float(row.throat_radius_m) / voxel_size_m
+        elif tube_radius_mode == "diagnostic_unclamped_radius":
+            raw_radius_vox = float(getattr(row, "radius_unclamped_voxels", np.nan))
+        elif tube_radius_mode == "diagnostic_volume_length_area":
+            volume_voxels3 = float(getattr(row, "volume_voxels3", np.nan))
+            length_voxels = float(getattr(row, "length_voxels", np.nan))
+            raw_radius_vox = float(np.sqrt(max(volume_voxels3 / max(length_voxels, 1e-12), 0.0) / np.pi))
+        else:
+            raise ValueError(f"unknown tube_radius_mode: {tube_radius_mode}")
+        if not np.isfinite(raw_radius_vox) or raw_radius_vox <= 0:
+            raw_radius_vox = float(row.throat_radius_m) / voxel_size_m
+        radius_vox = raw_radius_vox * tube_radius_scale
+        if radius_vox < min_tube_radius_vox:
+            radius_vox = min_tube_radius_vox
+            clipped_to_min += 1
+        if max_tube_radius_vox is not None and radius_vox > max_tube_radius_vox:
+            radius_vox = max_tube_radius_vox
+            clipped_to_max += 1
+        raw_radius_voxels.append(float(raw_radius_vox))
+        visual_radius_voxels.append(float(radius_vox))
         segments.append([*p1.tolist(), *p2.tolist(), radius_vox])
 
     mins = coords_vox.min(axis=0)
     maxs = coords_vox.max(axis=0)
     center = (mins + maxs) / 2.0
     extent = float(np.max(maxs - mins))
+    raw_radius_array = np.asarray(raw_radius_voxels, dtype=float)
+    visual_radius_array = np.asarray(visual_radius_voxels, dtype=float)
     return {
         "pores": np.round(np.column_stack([coords_vox, radii_vox]), 6).tolist(),
         "segments": np.round(np.asarray(segments, dtype=float), 6).tolist() if segments else [],
@@ -103,6 +157,23 @@ def build_scene_payload(
             "sphere_radius_scale": float(sphere_radius_scale),
             "tube_radius_scale": float(tube_radius_scale),
             "min_tube_radius_vox": float(min_tube_radius_vox),
+            "max_tube_radius_vox": float(max_tube_radius_vox) if max_tube_radius_vox is not None else None,
+            "tube_radius_mode": tube_radius_mode,
+            "tube_radius_stats_vox": {
+                "raw_min": float(np.min(raw_radius_array)) if len(raw_radius_array) else None,
+                "raw_median": float(np.median(raw_radius_array)) if len(raw_radius_array) else None,
+                "raw_p95": float(np.percentile(raw_radius_array, 95)) if len(raw_radius_array) else None,
+                "raw_max": float(np.max(raw_radius_array)) if len(raw_radius_array) else None,
+                "visual_min": float(np.min(visual_radius_array)) if len(visual_radius_array) else None,
+                "visual_median": float(np.median(visual_radius_array)) if len(visual_radius_array) else None,
+                "visual_p95": float(np.percentile(visual_radius_array, 95)) if len(visual_radius_array) else None,
+                "visual_max": float(np.max(visual_radius_array)) if len(visual_radius_array) else None,
+                "visual_unique_rounded_0p001": int(len(np.unique(np.round(visual_radius_array, 3))))
+                if len(visual_radius_array)
+                else 0,
+                "clipped_to_min_count": int(clipped_to_min),
+                "clipped_to_max_count": int(clipped_to_max),
+            },
             "note": "Boundary throats with negative pore ids are omitted from the rendering.",
         },
     }
@@ -116,6 +187,9 @@ def load_scene_payload(
     sphere_radius_scale: float,
     tube_radius_scale: float,
     min_tube_radius_vox: float,
+    max_tube_radius_vox: float | None,
+    tube_radius_mode: str,
+    throat_diagnostics_path: Path | None,
     sphere_color: str,
     tube_color: str,
     elev_deg: float,
@@ -125,6 +199,7 @@ def load_scene_payload(
 ) -> dict:
     pores = pd.read_csv(pores_path)
     throats = pd.read_csv(throats_path)
+    throat_diagnostics = pd.read_csv(throat_diagnostics_path) if throat_diagnostics_path else None
     payload = build_scene_payload(
         pores,
         throats,
@@ -132,6 +207,9 @@ def load_scene_payload(
         sphere_radius_scale=sphere_radius_scale,
         tube_radius_scale=tube_radius_scale,
         min_tube_radius_vox=min_tube_radius_vox,
+        max_tube_radius_vox=max_tube_radius_vox,
+        tube_radius_mode=tube_radius_mode,
+        throat_diagnostics=throat_diagnostics,
         sphere_color=sphere_color,
         tube_color=tube_color,
         elev_deg=elev_deg,
@@ -141,6 +219,7 @@ def load_scene_payload(
     )
     payload["metadata"]["input_pores_csv"] = str(pores_path)
     payload["metadata"]["input_throats_csv"] = str(throats_path)
+    payload["metadata"]["input_throat_diagnostics_csv"] = str(throat_diagnostics_path) if throat_diagnostics_path else None
     return payload
 
 
@@ -466,6 +545,21 @@ def main() -> None:
     parser.add_argument("--sphere-radius-scale", type=float, default=1.05)
     parser.add_argument("--tube-radius-scale", type=float, default=0.70)
     parser.add_argument("--min-tube-radius-vox", type=float, default=0.55)
+    parser.add_argument("--max-tube-radius-vox", type=float)
+    parser.add_argument(
+        "--tube-radius-mode",
+        choices=["effective_radius", "diagnostic_unclamped_radius", "diagnostic_volume_length_area"],
+        default="effective_radius",
+        help=(
+            "Tube visual radius source. effective_radius uses throats.csv throat_radius_m; "
+            "diagnostic modes require --throat-diagnostics-csv and are useful when electrical "
+            "active-aperture radii should not be used as visual geometric tube widths."
+        ),
+    )
+    parser.add_argument(
+        "--throat-diagnostics-csv",
+        help="Optional pnextract contact-split diagnostics CSV used by diagnostic tube-radius modes.",
+    )
     parser.add_argument("--window-size", nargs=2, type=int, default=[1800, 1450])
     parser.add_argument("--elev", type=float, default=18.0)
     parser.add_argument("--azim", type=float, default=75.0)
@@ -480,6 +574,15 @@ def main() -> None:
     )
     parser.add_argument("--pore-value", type=int, default=0)
     parser.add_argument("--solid-value", type=int, default=255)
+    parser.add_argument(
+        "--paraview-out-dir",
+        help="Optional directory for a ParaView companion package exported with the same radius and color style.",
+    )
+    parser.add_argument("--paraview-prefix", help="Prefix for the ParaView companion package files.")
+    parser.add_argument("--paraview-write-baked", action="store_true", help="Deprecated; direct-open VTP is now written by default.")
+    parser.add_argument("--paraview-skip-direct-open", action="store_true", help="Skip the direct-open baked VTP file.")
+    parser.add_argument("--paraview-baked-sphere-resolution", type=int, default=12)
+    parser.add_argument("--paraview-baked-tube-sides", type=int, default=8)
     args = parser.parse_args()
 
     pores_path = Path(args.pores)
@@ -491,6 +594,9 @@ def main() -> None:
         sphere_radius_scale=args.sphere_radius_scale,
         tube_radius_scale=args.tube_radius_scale,
         min_tube_radius_vox=args.min_tube_radius_vox,
+        max_tube_radius_vox=args.max_tube_radius_vox,
+        tube_radius_mode=args.tube_radius_mode,
+        throat_diagnostics_path=Path(args.throat_diagnostics_csv) if args.throat_diagnostics_csv else None,
         sphere_color=args.sphere_color,
         tube_color=args.tube_color,
         elev_deg=args.elev,
@@ -534,6 +640,34 @@ def main() -> None:
         "html_export_dependency": "pyvista[jupyter] / trame-vtk",
         "porosity_from_voxel_count": porosity_stats,
     }
+    if args.paraview_out_dir:
+        paraview_exporter_path = Path(__file__).resolve().parent / "export_pnextract_paraview_style_package.py"
+        spec = importlib.util.spec_from_file_location("export_pnextract_paraview_style_package", paraview_exporter_path)
+        paraview_exporter = importlib.util.module_from_spec(spec)
+        if spec.loader is None:
+            raise RuntimeError(f"Could not load ParaView exporter: {paraview_exporter_path}")
+        spec.loader.exec_module(paraview_exporter)
+
+        paraview_prefix = args.paraview_prefix or out.stem
+        paraview_metadata = paraview_exporter.export_package(
+            pd.read_csv(pores_path),
+            pd.read_csv(throats_path),
+            out_dir=Path(args.paraview_out_dir),
+            prefix=paraview_prefix,
+            source_pores_csv=pores_path,
+            source_throats_csv=throats_path,
+            voxel_size_m=args.voxel_size_m,
+            pore_radius_scale=args.sphere_radius_scale,
+            throat_radius_scale=args.tube_radius_scale,
+            min_throat_radius_vox=args.min_tube_radius_vox,
+            max_throat_radius_vox=args.max_tube_radius_vox,
+            throat_radius_mode=args.tube_radius_mode,
+            throat_diagnostics_csv=Path(args.throat_diagnostics_csv) if args.throat_diagnostics_csv else None,
+            write_baked=not bool(args.paraview_skip_direct_open),
+            baked_sphere_resolution=args.paraview_baked_sphere_resolution,
+            baked_tube_sides=args.paraview_baked_tube_sides,
+        )
+        metadata["paraview_companion_package"] = paraview_metadata
     metadata_out = Path(args.metadata_out)
     metadata_out.parent.mkdir(parents=True, exist_ok=True)
     metadata_out.write_text(json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8")

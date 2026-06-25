@@ -41,6 +41,82 @@ VOXEL_SIZE_UM = 2.8
 NETWORK_PORE_COORD_COLUMNS = {"pore_center_x_m", "pore_center_y_m", "pore_center_z_m"}
 NETWORK_REQUIRED_PORE_COLUMNS = {"pore_id", "pore_radius_m", *NETWORK_PORE_COORD_COLUMNS}
 NETWORK_REQUIRED_THROAT_COLUMNS = {"pore1_id", "pore2_id", "throat_radius_m"}
+DIAGNOSTIC_MEMBRANE_COMPONENT_COLUMNS = {
+    "membrane_geometry_mode",
+    "passive_area_source",
+    "passive_length_source",
+    "passive_weight_source",
+    "passive_zdc_source",
+    "passive_branch_alpha",
+}
+DIAGNOSTIC_MEMBRANE_OPTIONAL_PROVENANCE_COLUMNS = (
+    "passive_branch_alpha_source",
+    "passive_transport_number_difference",
+    "passive_anion_transport_number_reference",
+    "active_anion_transport_number_inferred",
+    "passive_transport_number_difference_cap",
+    "passive_transport_number_capped_fraction",
+    "passive_transport_number_edl_limited_fraction",
+    "edl_debye_length_m",
+    "edl_thickness_multiplier",
+    "edl_selectivity",
+    "maximum_transport_number_difference",
+    "passive_branch_alpha_median",
+    "passive_branch_alpha_mean",
+    "passive_branch_alpha_min",
+    "passive_branch_alpha_max",
+    "edl_selection_rule",
+    "edl_selection_rmse_tolerance",
+    "edl_selected_peak_normalized_rmse",
+)
+MEMBRANE_REFERENCE_DIR = PROJECT_ROOT / "docs" / "references" / "niu2020_membrane_polarization_refs_20260617"
+
+
+def diagnostic_membrane_literature_basis() -> list[dict[str, str]]:
+    """Structured literature support for the active/passive diagnostic membrane branch."""
+
+    return [
+        {
+            "citation_key": "Marshall_Madden_1959",
+            "doi": "10.1190/1.1438659",
+            "model_role": "active/passive impedance foundation",
+            "supports": "Membrane polarization can be represented by ion-selective active zones and less selective passive zones with a DC impedance and frequency-dependent relaxation.",
+            "local_pdf": str(MEMBRANE_REFERENCE_DIR / "1959_marshall_madden_1959_10.1190_1.1438659.pdf"),
+            "local_text": str(MEMBRANE_REFERENCE_DIR / "extracted_text" / "1959_marshall_madden_1959_10.1190_1.1438659.txt"),
+        },
+        {
+            "citation_key": "Titov_Komarov_Tarasov_Levitski_2002",
+            "doi": "10.1016/S0926-9851(02)00168-4",
+            "model_role": "transport-number and geometry-factor chargeability",
+            "supports": "The membrane-polarization chargeability depends on active/passive transport-number contrast and the lengths and sections of passive and active zones.",
+            "local_pdf": str(MEMBRANE_REFERENCE_DIR / "2002_titov_komarov_tarasov_levitski_10.1016_S0926-9851(02)00168-4.pdf"),
+            "local_text": str(
+                MEMBRANE_REFERENCE_DIR
+                / "extracted_text"
+                / "2002_titov_komarov_tarasov_levitski_10.1016_S0926-9851(02)00168-4.txt"
+            ),
+        },
+        {
+            "citation_key": "Buecker_Hoerdt_2013b",
+            "doi": "10.1190/GEO2012-0548.1",
+            "model_role": "SNP/LNP two-time-scale interpretation",
+            "supports": "The Marshall-Madden impedance contains active and passive zone time constants; limiting SNP/LNP regimes can be controlled by narrow active-zone or wide passive-zone lengths.",
+            "local_pdf": str(MEMBRANE_REFERENCE_DIR / "2013_bucker_hordt_2013b_10.1190_geo2012-0548.1.pdf"),
+            "local_text": str(MEMBRANE_REFERENCE_DIR / "extracted_text" / "2013_bucker_hordt_2013b_10.1190_geo2012-0548.1.txt"),
+        },
+        {
+            "citation_key": "Buecker_FloresOrozco_Undorf_Kemna_2019",
+            "doi": "10.1029/2019JB017679",
+            "model_role": "Stern/diffuse-layer caution for pore constrictions",
+            "supports": "Pore-constriction membrane polarization can be affected by Stern- and diffuse-layer coupling, so the diagnostic branch should not be presented as a complete published Niu parameter.",
+            "local_pdf": str(MEMBRANE_REFERENCE_DIR / "2019_bucker_flores-orozco_undorf_kemna_10.1029_2019JB017679.pdf"),
+            "local_text": str(
+                MEMBRANE_REFERENCE_DIR
+                / "extracted_text"
+                / "2019_bucker_flores-orozco_undorf_kemna_10.1029_2019JB017679.txt"
+            ),
+        },
+    ]
 
 
 def load_pnextract_parameter_lines(path: Path) -> list[str]:
@@ -305,31 +381,262 @@ def run_command(command: list[str], *, cwd: Path) -> dict:
     }
 
 
+def write_diagnostic_membrane_model_summary(
+    *,
+    component_csv: Path,
+    fullgrid_summary_json: Path,
+    out: Path,
+) -> dict:
+    component = pd.read_csv(component_csv)
+    missing = DIAGNOSTIC_MEMBRANE_COMPONENT_COLUMNS.difference(component.columns)
+    if missing:
+        raise ValueError(f"diagnostic membrane component CSV is missing columns: {sorted(missing)}")
+    if component.empty:
+        raise ValueError(f"diagnostic membrane component CSV is empty: {component_csv}")
+
+    first = component.iloc[0]
+    fullgrid_summary = json.loads(fullgrid_summary_json.read_text(encoding="utf-8"))
+    metrics = fullgrid_summary.get("metrics", {}).get("volume_area_dual_length", {})
+    if not metrics:
+        metrics = {
+            key: value
+            for key, value in fullgrid_summary.items()
+            if key
+            in {
+                "common_frequency_count",
+                "peak_normalized_rmse",
+                "median_ratio",
+                "min_ratio",
+                "max_ratio",
+                "paper_peak_frequency_hz",
+                "candidate_peak_frequency_hz",
+                "candidate_peak_imag_s_m",
+                "paper_peak_imag_s_m",
+                "ratio_at_paper_peak",
+                "ratio_at_candidate_peak",
+                "all_solver_info_zero",
+                "max_relative_residual_norm",
+            }
+        }
+    summary = {
+        "status": "diagnostic_not_default_niu2020_parameter",
+        "component_spectrum_csv": str(component_csv),
+        "fullgrid_summary_json": str(fullgrid_summary_json),
+        "membrane_geometry_mode": str(first["membrane_geometry_mode"]),
+        "passive_area_source": str(first["passive_area_source"]),
+        "passive_length_source": str(first["passive_length_source"]),
+        "passive_weight_source": str(first["passive_weight_source"]),
+        "passive_zdc_source": str(first["passive_zdc_source"]),
+        "passive_branch_alpha": float(first["passive_branch_alpha"]),
+        "fullgrid_metrics": {
+            key: float(value)
+            if isinstance(value, (float, np.floating))
+            else int(value)
+            if isinstance(value, np.integer)
+            else bool(value)
+            if isinstance(value, (bool, np.bool_))
+            else value
+            for key, value in metrics.items()
+        },
+        "literature_basis": [
+            "Marshall-Madden active/passive membrane zones",
+            "Titov et al. active/passive transport-number and geometry factor",
+            "Buecker-Hoerdt SNP/LNP two-time-scale interpretation",
+        ],
+        "literature_basis_structured": diagnostic_membrane_literature_basis(),
+    }
+    for column in DIAGNOSTIC_MEMBRANE_OPTIONAL_PROVENANCE_COLUMNS:
+        if column in component.columns and not pd.isna(first[column]):
+            value = first[column]
+            if isinstance(value, (float, np.floating)):
+                summary[column] = float(value)
+            elif isinstance(value, (int, np.integer)):
+                summary[column] = int(value)
+            elif isinstance(value, (bool, np.bool_)):
+                summary[column] = bool(value)
+            else:
+                summary[column] = str(value)
+    edl_limited = "edl_limited" in str(summary["membrane_geometry_mode"])
+    summary["interpretation"] = (
+        "This membrane spectrum is a diagnostic active/passive two-length candidate. "
+        + (
+            "The best-EDL version parameterizes the passive branch with Titov-style transport-number "
+            "contrast and an EDL-limited selectivity cap. "
+            if edl_limited
+            else ""
+        )
+        + "It is not a hidden length_scale, not a hidden zdc_scale, and not a default Niu 2020 published parameter."
+    )
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(summary, indent=2, ensure_ascii=False, allow_nan=False), encoding="utf-8")
+    return summary
+
+
+def write_best_edl_membrane_parameter_config(
+    out: Path,
+    *,
+    diagnostic_summary: dict,
+    verification: dict | None = None,
+) -> dict:
+    """Write a Chinese, auditable config for the best-EDL diagnostic membrane model."""
+
+    verification = verification or {}
+    literature = diagnostic_summary.get("literature_basis_structured", [])
+    doi_lines = "\n".join(
+        f"# - {item.get('citation_key', 'reference')}: {item.get('doi')}" for item in literature if item.get("doi")
+    )
+    config = {
+        "status": diagnostic_summary.get("status"),
+        "membrane_geometry_mode": diagnostic_summary.get("membrane_geometry_mode"),
+        "passive_branch_alpha_source": diagnostic_summary.get("passive_branch_alpha_source"),
+        "passive_transport_number_edl_limited_fraction": diagnostic_summary.get(
+            "passive_transport_number_edl_limited_fraction"
+        ),
+        "edl_debye_length_m": diagnostic_summary.get("edl_debye_length_m"),
+        "edl_thickness_multiplier": diagnostic_summary.get("edl_thickness_multiplier"),
+        "edl_selectivity": diagnostic_summary.get("edl_selectivity"),
+        "maximum_transport_number_difference": diagnostic_summary.get("maximum_transport_number_difference"),
+        "edl_selection_rule": diagnostic_summary.get("edl_selection_rule"),
+        "edl_selection_rmse_tolerance": diagnostic_summary.get("edl_selection_rmse_tolerance"),
+        "edl_selected_peak_normalized_rmse": diagnostic_summary.get("edl_selected_peak_normalized_rmse"),
+        "component_spectrum_csv": diagnostic_summary.get("component_spectrum_csv"),
+        "fullgrid_summary_json": diagnostic_summary.get("fullgrid_summary_json"),
+        "verification_report_json": verification.get("report_json"),
+        "verification_passed": verification.get("passed"),
+        "verification_criteria": verification.get("criteria", {}),
+        "notes": {
+            "zh": (
+                "该配置记录 best-EDL 膜极化诊断参数。它不是 length_scale，不是 zdc_scale，"
+                "也不是 Niu 2020 正文公开给出的默认参数；它把文献支持的 active/passive "
+                "膜极化框架、Titov-style transport-number geometry factor 与 EDL-limited "
+                "selectivity cap 显式写入可复跑结果。"
+            )
+        },
+    }
+    text = f'''# Niu 2020 Berea best-EDL 膜极化诊断参数
+# 生成位置：{out}
+#
+# 目的：
+# - 记录当前最接近 Niu 2020 Figure 8 membrane component 的膜极化参数口径；
+# - 让每个关键参数都有中文解释、文献来源和 verifier 证据；
+# - 明确该模型不是 length_scale，不是 zdc_scale，也不是隐藏缩放。
+#
+# 物理来源简述：
+# - Marshall-Madden: active/passive ion-selective membrane impedance 框架；
+# - Titov et al.: active/passive transport-number contrast 与几何因子控制膜极化强度；
+# - Buecker-Hoerdt: SNP/LNP 双时间尺度说明 active/passive 长度都可能进入弛豫；
+# - Buecker et al. 2019: Stern/diffuse layer 作用提醒该分支仍应标为 diagnostic。
+#
+# 参考 DOI：
+{doi_lines}
+
+NIU2020_BEST_EDL_MEMBRANE_CONFIG = {json.dumps(config, indent=4, ensure_ascii=False, allow_nan=False)}
+'''
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(text, encoding="utf-8")
+    result = {"config_py": str(out), **config}
+    return result
+
+
 def write_manifest(result_dir: Path, records: dict) -> None:
     manifest = result_dir / "manifest.json"
     manifest.write_text(json.dumps(records, indent=2, ensure_ascii=False), encoding="utf-8")
-    md = result_dir / "README.md"
-    md.write_text(
-        "\n".join(
+    lines = [
+        "# Niu 2020 Berea Reproduction Result Package",
+        "",
+        "本目录集中保存本次复现的参数配置、SIP 对比图、Fiji/VTK 风格三维数字岩心可视化、孔隙网络可视化、Figure 4 风格孔径/孔喉分布图和 provenance。",
+        "",
+        "- `configs/`: 中文注释参数配置。",
+        "- `figures/`: 论文图风格 PNG/SVG/PDF。",
+        "- `segmented_core/`: 按 notebook 链路重映射的 `pore=0, solid=255` 二值 TIFF/RAW。",
+        "- `digital_rock/`: 基于二值体的 Fiji 3D Viewer 风格交互 HTML；后续数字岩心可视化只保留这种风格。",
+        "- `pore_network/`: 由 `run_segmented_core_pnextract_ballstick.py` 生成的 pnextract 输入、网络 CSV、交互 HTML、孔径/孔喉分布图。",
+        "- `source_data/`: 图件源数据。",
+        "- `provenance/`: 脚本运行记录。",
+        "",
+        "Policy: extracted pore/throat geometry and geometry-derived Zdc are not post-scaled. The pore network is generated with the original pnextract algorithm and its built-in default medial-surface parameters unless a run config explicitly records otherwise.",
+    ]
+    diagnostic = records.get("diagnostic_membrane_model")
+    if diagnostic:
+        lines.extend(
             [
-                "# Niu 2020 Berea Reproduction Result Package",
                 "",
-                "本目录集中保存本次复现的参数配置、SIP 对比图、Fiji/VTK 风格三维数字岩心可视化、孔隙网络可视化、Figure 4 风格孔径/孔喉分布图和 provenance。",
+                "## Diagnostic membrane model",
                 "",
-                "- `configs/`: 中文注释参数配置。",
-                "- `figures/`: 论文图风格 PNG/SVG/PDF。",
-                "- `segmented_core/`: 按 notebook 链路重映射的 `pore=0, solid=255` 二值 TIFF/RAW。",
-                "- `digital_rock/`: 基于二值体的 Fiji 3D Viewer 风格交互 HTML；后续数字岩心可视化只保留这种风格。",
-                "- `pore_network/`: 由 `run_segmented_core_pnextract_ballstick.py` 生成的 pnextract 输入、网络 CSV、交互 HTML、孔径/孔喉分布图。",
-                "- `source_data/`: 图件源数据。",
-                "- `provenance/`: 脚本运行记录。",
-                "",
-                "Policy: extracted pore/throat geometry and geometry-derived Zdc are not post-scaled. The pore network is generated with the original pnextract algorithm and its built-in default medial-surface parameters unless a run config explicitly records otherwise.",
+                (
+                    f"- 模式：`{diagnostic.get('membrane_geometry_mode')}`；"
+                    f"passive area source：`{diagnostic.get('passive_area_source')}`；"
+                    f"alpha：`{diagnostic.get('passive_branch_alpha')}`。"
+                ),
+                "- 该模型用于 active/passive 双长度膜极化诊断，不是 Niu 2020 已公开给出的默认参数，也不是隐藏的 `length_scale` 或 `zdc_scale`。",
             ]
         )
-        + "\n",
-        encoding="utf-8",
-    )
+        if "edl_limited" in str(diagnostic.get("membrane_geometry_mode", "")):
+            lines.append(
+                "- EDL-limited 口径：使用 Titov-style transport-number contrast，并用 Debye length 与有效 EDL 厚度限制每条喉道的迁移数差异。"
+            )
+            if diagnostic.get("edl_debye_length_m") is not None:
+                lines.append(
+                    f"- Debye length：`{diagnostic.get('edl_debye_length_m')}` m；"
+                    f"EDL thickness multiplier：`{diagnostic.get('edl_thickness_multiplier')}`；"
+                    f"EDL-limited throat fraction：`{diagnostic.get('passive_transport_number_edl_limited_fraction')}`。"
+                )
+    verification = records.get("best_edl_membrane_verification")
+    if verification:
+        criteria = verification.get("criteria", {})
+        lines.extend(
+            [
+                "",
+                "## Best-EDL membrane verification",
+                "",
+                f"- 自动审计报告：`{verification.get('report_json')}`。",
+                (
+                    "- 判据：膜分量峰频一致，"
+                    f"`peak_normalized_rmse <= {criteria.get('max_peak_normalized_rmse')}`，"
+                    f"`{criteria.get('min_ratio_at_paper_peak')} <= ratio_at_paper_peak <= {criteria.get('max_ratio_at_paper_peak')}`，"
+                    "full-grid sweep 收敛，且未使用 Figure8 paper Simulation 列作为本项目模拟结果。"
+                ),
+            ]
+        )
+    best_edl_config = records.get("best_edl_membrane_parameter_config")
+    if best_edl_config:
+        lines.extend(
+            [
+                "",
+                "## Best-EDL membrane parameter config",
+                "",
+                f"- 中文参数配置：`{best_edl_config.get('config_py')}`。",
+                f"- 模型口径：`{best_edl_config.get('membrane_geometry_mode')}`。",
+            ]
+        )
+    model_card = records.get("best_edl_membrane_model_card")
+    if model_card:
+        lines.extend(
+            [
+                "",
+                "## Best-EDL membrane model card",
+                "",
+                f"- 复核用模型卡：`{model_card}`。",
+                "- 该文件浓缩记录文献依据、参数含义、验证结果、方向平均诊断和已知限制。",
+            ]
+        )
+    package_verification = records.get("best_edl_membrane_package_verification")
+    if package_verification:
+        lines.extend(
+            [
+                "",
+                "## Best-EDL package verification",
+                "",
+                f"- 包级审计报告：`{package_verification.get('report_json')}`。",
+                (
+                    "- 审计范围："
+                    f"{package_verification.get('scope', 'Package-level audit for the diagnostic best-EDL membrane branch.')}"
+                ),
+                "- 该审计检查结果包中的曲线 summary、component verifier、中文参数、模型卡、机制图 provenance、manifest/README 是否互相一致。",
+            ]
+        )
+    md = result_dir / "README.md"
+    md.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def main() -> None:

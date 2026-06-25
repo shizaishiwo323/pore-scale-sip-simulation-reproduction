@@ -17,7 +17,7 @@ import tifffile
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_INPUT_TIFF = Path(
-    r"C:\Users\imgw\Documents\Codex\SIP模拟\sip模拟\data_inventory\ct_backed_samples_raw_copy_20260605\sample_16_Grainstone\CT_slices\1-CTseg\9-16small340.tif"
+    r"C:\Users\imgw\Documents\Codex\SIP模拟\sip模拟\results\sample16_grainstone_rev336_porosity_matched_20260617\rev_volume\sample16_grainstone_rev336_z328-663_y200-535_x008-343_solid255_pore0.tiff"
 )
 DEFAULT_OUTPUT_ROOT = PROJECT_ROOT / "results" / "pore_network"
 DEFAULT_PNEXTRACT_EXE = PROJECT_ROOT / "code" / "vendor" / "pnextract" / "bin" / "pnextract.exe"

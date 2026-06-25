@@ -54,12 +54,45 @@ def test_builds_separate_paraview_sources_with_radius_arrays():
         min_throat_radius_vox=0.55,
     )
 
-    assert counts == {"pores": 3, "throats_total": 3, "throats_rendered": 2}
+    assert counts["pores"] == 3
+    assert counts["throats_total"] == 3
+    assert counts["throats_rendered"] == 2
+    assert counts["throat_radius_mode"] == "effective_radius"
     assert pores_mesh.n_points == 3
     assert pores_mesh.n_verts == 3
     assert np.allclose(pores_mesh.point_data["pore_radius_vox"], [1.05, 2.1, 3.15])
     assert throats_mesh.n_lines == 2
     assert throats_mesh.cell_data["throat_radius_vox"].tolist() == [0.55, 1.4]
+
+
+def test_paraview_sources_can_use_diagnostic_cross_section_radii():
+    module = load_module()
+    pores, throats = sample_tables()
+    throats = throats.copy()
+    throats["throat_id"] = [10, 11, 12]
+    throats["throat_radius_m"] = [0.476e-6, 0.476e-6, 0.476e-6]
+    diagnostics = pd.DataFrame(
+        {
+            "split_throat_id": [10, 11, 12],
+            "length_voxels": [2.0, 2.0, 2.0],
+            "volume_voxels3": [np.pi * 0.5**2 * 2.0, np.pi * 2.0**2 * 2.0, np.pi * 1.0**2 * 2.0],
+        }
+    )
+
+    _pores_mesh, throats_mesh, counts = module.build_paraview_sources(
+        pores,
+        throats,
+        voxel_size_m=2.8e-6,
+        pore_radius_scale=1.0,
+        throat_radius_scale=1.0,
+        min_throat_radius_vox=0.01,
+        throat_radius_mode="diagnostic_volume_length_area",
+        throat_diagnostics=diagnostics,
+    )
+
+    assert throats_mesh.cell_data["throat_radius_vox"].tolist() == [0.5, 2.0]
+    assert counts["throat_radius_mode"] == "diagnostic_volume_length_area"
+    assert counts["throat_radius_stats_vox"]["visual_unique_rounded_0p001"] == 2
 
 
 def test_exports_vtp_sources_and_paraview_style_script(tmp_path):
@@ -96,7 +129,7 @@ def test_exports_vtp_sources_and_paraview_style_script(tmp_path):
     assert json.loads(Path(metadata["metadata_json"]).read_text(encoding="utf-8"))["renderer"] == "paraview-glyph-tube-style"
 
 
-def test_exports_single_baked_vtp_for_direct_paraview_open(tmp_path):
+def test_exports_single_direct_open_vtp_for_paraview(tmp_path):
     module = load_module()
     pores, throats = sample_tables()
 
@@ -116,7 +149,7 @@ def test_exports_single_baked_vtp_for_direct_paraview_open(tmp_path):
         baked_tube_sides=6,
     )
 
-    baked_path = Path(metadata["baked_single_file_vtu"])
+    baked_path = Path(metadata["direct_open_vtp"])
     assert baked_path.exists()
     baked = pv.read(baked_path)
     assert baked.n_points > 0
@@ -125,4 +158,5 @@ def test_exports_single_baked_vtp_for_direct_paraview_open(tmp_path):
     colors = {tuple(row) for row in baked.cell_data["style_rgb"].tolist()}
     assert (255, 0, 0) in colors
     assert (0, 56, 255) in colors
-    assert metadata["baked_single_file_note"].startswith("Open this one VTU directly")
+    assert metadata["direct_open_note"].startswith("Open this one VTP directly")
+    assert metadata["baked_single_file_vtu"] is None

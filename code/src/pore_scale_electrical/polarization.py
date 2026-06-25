@@ -166,8 +166,21 @@ def throat_zdc_from_geometry(
 ) -> np.ndarray:
     """Approximate dc throat resistance from pnextract throat geometry."""
 
-    length_m = np.asarray(length_m, dtype=float)
     area_m2 = throat_cross_section_area_from_radius_shape_factor(radius_m, shape_factor)
+    return throat_zdc_from_length_area(length_m, area_m2, water_conductivity_s_m)
+
+
+def throat_zdc_from_length_area(
+    length_m: np.ndarray,
+    area_m2: np.ndarray,
+    water_conductivity_s_m: float,
+) -> np.ndarray:
+    """Approximate dc throat resistance from electrical length and active area."""
+
+    length_m = np.asarray(length_m, dtype=float)
+    area_m2 = np.asarray(area_m2, dtype=float)
+    if np.any(area_m2 <= 0):
+        raise ValueError("active/electrical throat areas must be positive")
     conductance = water_conductivity_s_m * area_m2 / np.maximum(length_m, np.finfo(float).tiny)
     return 1.0 / np.maximum(conductance, np.finfo(float).tiny)
 
