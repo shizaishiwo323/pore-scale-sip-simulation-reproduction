@@ -39,6 +39,14 @@ def test_writes_chinese_parameter_config_inside_result_dir(tmp_path):
     assert "动态孔径" in text
     assert "水相电导率" in text
     assert "Section 4.2" in text
+    assert "true_residual_norm" in text
+    assert "gauge_mode = auto" in text
+    assert "frequency_match_mode = exact" in text
+    assert "complex128 checkpoint" in text
+    assert "complex128 trusted full-grid solve" in text
+    assert "fft_reference = pore" in text
+    assert "formal_acceptance_rtol = 1e-5" in text
+    assert "sigma_xx" in text
     assert "NIU2020_BEREA_CONFIG" in text
     assert "不要把 Figure8.xlsx 的 Simulation 列当成本项目模拟结果" in text
     assert text == module.CONFIG_SOURCE.read_text(encoding="utf-8")
@@ -352,6 +360,24 @@ def test_manifest_readme_mentions_diagnostic_membrane_model_when_recorded(tmp_pa
     assert "不是 Niu 2020 已公开给出的默认参数" in readme
 
 
+def test_manifest_readme_mentions_missing_formal_sweep_plan(tmp_path):
+    module = load_module()
+    records = {
+        "formal_sweep_reproduction_plan": {
+            "status": "formal_sweep_results_missing",
+            "plan_json": "provenance/formal_fullgrid_sweep_reproduction_plan.json",
+            "readme_md": "provenance/formal_fullgrid_sweep_reproduction_plan.md",
+        }
+    }
+
+    module.write_manifest(tmp_path, records)
+
+    readme = (tmp_path / "README.md").read_text(encoding="utf-8")
+    assert "Formal full-grid sweep status" in readme
+    assert "formal_sweep_results_missing" in readme
+    assert "formal_fullgrid_sweep_reproduction_plan.md" in readme
+
+
 def test_writes_best_edl_membrane_parameter_config_with_chinese_provenance(tmp_path):
     module = load_module()
     diagnostic_summary = {
@@ -408,3 +434,27 @@ def test_writes_best_edl_membrane_parameter_config_with_chinese_provenance(tmp_p
     assert "10.1190/GEO2012-0548.1" in text
     assert "verify_niu2020_best_edl_membrane_reproduction_report.json" in text
     assert "NIU2020_BEST_EDL_MEMBRANE_CONFIG" in text
+
+
+def test_writes_missing_sweep_reproduction_plan(tmp_path):
+    module = load_module()
+    missing = {
+        "all": tmp_path / "simulation_sweeps" / "all" / "sweep_results.csv",
+        "pore": tmp_path / "simulation_sweeps" / "pore" / "sweep_results.csv",
+    }
+
+    summary = module.write_missing_sweep_reproduction_plan(tmp_path, missing)
+
+    plan = Path(summary["plan_json"])
+    readme = Path(summary["readme_md"])
+    assert plan.exists()
+    assert readme.exists()
+    text = readme.read_text(encoding="utf-8")
+    assert "sweep_results.csv 缺失" in text
+    assert "--frequency-match-mode exact" in text
+    assert "--gauge-mode auto" in text
+    assert "--dtype complex128" in text
+    assert "--fft-reference pore" in text
+    assert "--rtol 1e-5" in text
+    assert "summarize_ac3d_directional_sweeps.py" in text
+    assert "verify_ac3d_precision_checkpoints.py" in text

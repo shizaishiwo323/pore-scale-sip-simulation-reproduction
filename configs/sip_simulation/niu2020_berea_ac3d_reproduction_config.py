@@ -94,6 +94,24 @@ class FrequencyConfig(NamedTuple):
     note: str
 
 
+class SolverVerificationConfig(NamedTuple):
+    """正式 full-grid sweep 的求解器可信度和 provenance 规则。"""
+
+    frequency_match_mode: str
+    gauge_mode: str
+    formal_acceptance_rtol: float
+    fft_reference: str
+    residual_columns: tuple[str, ...]
+    complex64_dtype: str
+    complex128_checkpoint_dtype: str
+    trusted_fullgrid_dtype: str
+    checkpoint_frequencies_hz: tuple[float, ...]
+    directions: tuple[str, ...]
+    directional_outputs: tuple[str, ...]
+    all_mechanism_independent_solve_required: bool
+    note: str
+
+
 class MechanismConfig(NamedTuple):
     """Section 5.3 单机制材料赋值定义。"""
 
@@ -123,6 +141,7 @@ class Niu2020BereaConfig(NamedTuple):
     materials: MaterialConfig
     polarization: PolarizationConfig
     frequencies: FrequencyConfig
+    solver_verification: SolverVerificationConfig
     mechanisms: MechanismConfig
     input_policy: InputPolicy
 
@@ -223,6 +242,51 @@ FREQUENCIES = FrequencyConfig(
 )
 
 
+# 正式求解器可信度规则：
+# - frequency_match_mode = exact：正式 sweep 的 requested_frequency_hz 必须在
+#   polarization spectra 表中精确存在。最近频率匹配只允许 diagnostic/interpolated
+#   运行，并必须在 metadata 中记录，避免 requested 和 used frequency 悄悄错开。
+# - gauge_mode = auto：interfacial/all 这类固相有介电项的场解通常退化为单全局
+#   gauge；pore-only/membrane-only 按 Section 5.3 要求 solid = 0，auto 会检测零导通
+#   体素并切换到 active-domain gauge：inactive solid rows 用恒等行固定，导电水相每个
+#   连通分量固定一个 anchor，避免多零空间污染 BiCGSTAB 收敛判断。
+# - true_residual_norm：正式收敛以 ||b - A x|| / ||b|| 的 true residual 为准；
+#   recursive_residual_norm 仅保留 BiCGSTAB 递推残差，用于诊断递推残差漂移。
+# - formal_acceptance_rtol = 1e-5：沿用本项目既有 full350 GPU-FFT 复现记录的
+#   验收阈值；但现在该阈值必须由 true_residual_norm 达到，不能只看递推残差。
+# - fft_reference = pore：沿用 Niu 2020 Berea full-grid 审计中已记录的稳定
+#   FFT-Poisson 参考电导率口径，而不是临时 mean-face 诊断默认值。
+# - complex128 checkpoint / complex128 trusted full-grid solve：complex64 仍可用于
+#   诊断和速度预扫；但 2026-06-25 的 full350 interfacial/x/1e3 Hz probe 显示
+#   complex64 在 true residual 下停留在约 1e-4，而 complex128 在同一物理参数、
+#   fft_reference=pore、rtol=1e-5 下以 184 次迭代通过。因此正式可信曲线优先使用
+#   complex128 trusted full-grid solve；只有当 complex64 同时通过 true residual
+#   和 complex128 对照时，才可作为正式主 sweep。
+# - 三方向：正式结果不只使用 x 方向；需要 sigma_xx、sigma_yy、sigma_zz、
+#   directional_mean 和 anisotropy_ratio，由 summarize_ac3d_directional_sweeps.py 汇总。
+# - all 机制必须把 pore spectrum + membrane spectrum + dielectric term 重新组装为
+#   phase conductivity 后独立跑 AC3D，不允许用 all - membrane + diagnostic_membrane
+#   这类有效电导代数拼接替代场解。
+SOLVER_VERIFICATION = SolverVerificationConfig(
+    frequency_match_mode="exact",
+    gauge_mode="auto",
+    formal_acceptance_rtol=1.0e-5,
+    fft_reference="pore",
+    residual_columns=("recursive_residual_norm", "true_residual_norm", "true_residual_passed"),
+    complex64_dtype="complex64",
+    complex128_checkpoint_dtype="complex128",
+    trusted_fullgrid_dtype="complex128",
+    checkpoint_frequencies_hz=(1e-3, 1e-2, 1e-1, 1.0, 1e3, 1e6, 1e9),
+    directions=("x", "y", "z"),
+    directional_outputs=("sigma_xx", "sigma_yy", "sigma_zz", "directional_mean", "anisotropy_ratio"),
+    all_mechanism_independent_solve_required=True,
+    note=(
+        "These are project verification rules added before treating a Niu 2020 reproduction as formal; "
+        "they are numerical-provenance requirements, not additional hidden physical calibration parameters."
+    ),
+)
+
+
 # Section 5.3 单机制拆分：
 # - interfacial / Maxwell-Wagner：只给水相和固相赋 dc conductivity 与
 #   high-frequency permittivity；不加入孔极化或膜极化。
@@ -274,6 +338,7 @@ NIU2020_BEREA_CONFIG = Niu2020BereaConfig(
     materials=MATERIALS,
     polarization=POLARIZATION,
     frequencies=FREQUENCIES,
+    solver_verification=SOLVER_VERIFICATION,
     mechanisms=MECHANISMS,
     input_policy=INPUT_POLICY,
 )

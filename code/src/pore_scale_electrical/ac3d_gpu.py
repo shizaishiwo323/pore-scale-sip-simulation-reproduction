@@ -9,6 +9,7 @@ from typing import Literal
 
 import numpy as np
 
+from pore_scale_electrical.ac3d_active_domain import active_component_anchor_indices
 from pore_scale_electrical.ac3d_solver import (
     AC3DIterativeResult,
     Direction,
@@ -29,6 +30,8 @@ except Exception:  # pragma: no cover
 ComplexDType = Literal["complex64", "complex128"] | np.dtype | type
 GPUPreconditioner = Literal["none", "jacobi", "fft"]
 FFTReferenceConductance = Literal["mean-face", "mean-abs", "pore"]
+GaugeMode = Literal["single-cell", "active-domain", "auto"]
+TRUE_RESIDUAL_FAILURE_INFO = -20
 
 
 _WEIGHTED_JACOBI_KERNEL = None
@@ -71,6 +74,14 @@ def cupy_available() -> bool:
 def require_cupy() -> None:
     if not cupy_available():
         raise RuntimeError("CuPy with a CUDA device is required for the GPU AC3D backend")
+
+
+def normalize_info_with_true_residual(info: int, true_residual_passed: bool) -> int:
+    """Keep recursive-only convergence from being reported as a successful solve."""
+
+    if int(info) == 0 and not bool(true_residual_passed):
+        return TRUE_RESIDUAL_FAILURE_INFO
+    return int(info)
 
 
 def parse_gpu_complex_dtype(dtype: ComplexDType) -> np.dtype:
@@ -150,7 +161,29 @@ def _accumulate_axis_flux_gpu(y: object, x: object, g_forward: object, axis: int
         raise ValueError("axis must be 0, 1, or 2")
 
 
-def matrix_free_matvec_faces_gpu(face_conductivities: tuple[object, object, object], vector: object) -> object:
+def _apply_gauge_rows_gpu(
+    flat: object,
+    vector: object,
+    *,
+    identity_mask: object | None,
+    gauge_indices: object | None,
+) -> None:
+    if identity_mask is None and gauge_indices is None:
+        flat[0] = vector[0]
+        return
+    if identity_mask is not None:
+        flat[identity_mask] = vector[identity_mask]
+    if gauge_indices is not None and int(gauge_indices.size) > 0:
+        flat[gauge_indices] = vector[gauge_indices]
+
+
+def matrix_free_matvec_faces_gpu(
+    face_conductivities: tuple[object, object, object],
+    vector: object,
+    *,
+    identity_mask: object | None = None,
+    gauge_indices: object | None = None,
+) -> object:
     """Apply the periodic AC3D operator on GPU using positive-face conductivities."""
 
     require_cupy()
@@ -161,7 +194,8 @@ def matrix_free_matvec_faces_gpu(face_conductivities: tuple[object, object, obje
     for axis, g_forward in enumerate(face_conductivities):
         _accumulate_axis_flux_gpu(y, x, cp.asarray(g_forward, dtype=dtype), axis)  # type: ignore[union-attr]
     flat = y.ravel()
-    flat[0] = cp.asarray(vector, dtype=dtype)[0]  # type: ignore[union-attr]
+    vector_flat = cp.asarray(vector, dtype=dtype)  # type: ignore[union-attr]
+    _apply_gauge_rows_gpu(flat, vector_flat, identity_mask=identity_mask, gauge_indices=gauge_indices)
     return flat
 
 
@@ -176,6 +210,8 @@ def matrix_free_rhs_faces_gpu(
     direction: Direction,
     field_strength_v_m: float = 1.0,
     voxel_size_m: float = 1.0,
+    identity_mask: object | None = None,
+    gauge_indices: object | None = None,
 ) -> object:
     """Right-hand side on GPU for precomputed positive-face conductivities."""
 
@@ -200,14 +236,19 @@ def matrix_free_rhs_faces_gpu(
         macro_divergence[:, :, -1] += drive[:, :, -1]
         macro_divergence[:, :, 0] -= drive[:, :, -1]
     rhs = -macro_divergence.ravel()
-    rhs[0] = 0.0
+    if identity_mask is None and gauge_indices is None:
+        rhs[0] = 0.0
+    else:
+        if identity_mask is not None:
+            rhs[identity_mask] = 0.0
+        if gauge_indices is not None and int(gauge_indices.size) > 0:
+            rhs[gauge_indices] = 0.0
     return rhs
 
 
-def jacobi_inverse_diagonal_faces_gpu(face_conductivities: tuple[object, object, object]) -> object:
-    """Jacobi inverse diagonal on GPU from positive-face conductivities."""
+def diagonal_faces_gpu(face_conductivities: tuple[object, object, object]) -> object:
+    """Return the positive-face finite-volume diagonal before gauge rows."""
 
-    require_cupy()
     shape = face_conductivities[0].shape
     dtype = cp.result_type(*(g.dtype for g in face_conductivities))  # type: ignore[union-attr]
     diagonal = cp.zeros(shape, dtype=dtype)  # type: ignore[union-attr]
@@ -228,12 +269,65 @@ def jacobi_inverse_diagonal_faces_gpu(face_conductivities: tuple[object, object,
             diagonal[:, :, 1:] += g[:, :, :-1]
             diagonal[:, :, -1] += g[:, :, -1]
             diagonal[:, :, 0] += g[:, :, -1]
-    flat = diagonal.ravel()
-    flat[0] = 1.0
+    return diagonal.ravel()
+
+
+def jacobi_inverse_diagonal_faces_gpu(
+    face_conductivities: tuple[object, object, object],
+    *,
+    identity_mask: object | None = None,
+    gauge_indices: object | None = None,
+) -> object:
+    """Jacobi inverse diagonal on GPU from positive-face conductivities."""
+
+    require_cupy()
+    flat = diagonal_faces_gpu(face_conductivities)
+    if identity_mask is None and gauge_indices is None:
+        flat[0] = 1.0
+    else:
+        if identity_mask is not None:
+            flat[identity_mask] = 1.0
+        if gauge_indices is not None and int(gauge_indices.size) > 0:
+            flat[gauge_indices] = 1.0
     inverse = cp.zeros_like(flat)  # type: ignore[union-attr]
     mask = cp.abs(flat) > np.finfo(float).tiny  # type: ignore[union-attr]
     inverse[mask] = 1.0 / flat[mask]
     return inverse
+
+
+def _wrap_preconditioner_with_gauge_rows(
+    preconditioner: Callable[[object], object],
+    *,
+    identity_mask: object | None,
+    gauge_indices: object | None,
+) -> Callable[[object], object]:
+    if identity_mask is None and gauge_indices is None:
+        return preconditioner
+
+    def apply(vector: object) -> object:
+        out = preconditioner(vector).copy()
+        if identity_mask is not None:
+            out[identity_mask] = vector[identity_mask]
+        if gauge_indices is not None and int(gauge_indices.size) > 0:
+            out[gauge_indices] = vector[gauge_indices]
+        return out
+
+    return apply
+
+
+def active_domain_gauge_from_faces_gpu(
+    face_conductivities: tuple[object, object, object],
+) -> tuple[object, object]:
+    """Build GPU masks that fix inactive cells and one anchor per active component."""
+
+    require_cupy()
+    diagonal = diagonal_faces_gpu(face_conductivities)
+    active_mask_gpu = cp.abs(diagonal) > np.finfo(float).tiny  # type: ignore[union-attr]
+    active_mask = cp.asnumpy(active_mask_gpu).reshape(face_conductivities[0].shape)  # type: ignore[union-attr]
+    anchors = active_component_anchor_indices(active_mask)
+    gauge_indices = cp.asarray(anchors, dtype=cp.int64)  # type: ignore[union-attr]
+    identity_mask = ~active_mask_gpu
+    return identity_mask, gauge_indices
 
 
 def poisson_reference_conductance_gpu(
@@ -1804,7 +1898,7 @@ def _gpu_bicgstab(
     iteration_callback: Callable[[int], None] | None,
     residual_every: int,
     residual_callback: Callable[[int, float], None] | None,
-) -> tuple[object, int, int, float, tuple[tuple[int, float], ...]]:
+) -> tuple[object, int, int, float, float, bool, tuple[tuple[int, float], ...]]:
     """Small BiCGSTAB implementation for CuPy arrays.
 
     CuPy 13 exposes CG/CGS/GMRES but not BiCGSTAB, so the prototype keeps the
@@ -1833,8 +1927,23 @@ def _gpu_bicgstab(
     def apply_preconditioner(vector: object) -> object:
         return vector if preconditioner is None else preconditioner(vector)
 
+    def compute_true_residual(candidate_x: object) -> tuple[object, float, float, bool]:
+        true_r = rhs - operator.matvec(candidate_x)
+        true_norm_abs = float(cp.linalg.norm(true_r).get())  # type: ignore[union-attr]
+        true_relative = true_norm_abs / rhs_norm
+        return true_r, true_norm_abs, true_relative, bool(true_norm_abs <= tolerance)
+
     if residual_norm_abs <= tolerance:
-        return x, 0, 0, relative_residual, ((0, relative_residual),)
+        true_residual = float(cp.linalg.norm(rhs - operator.matvec(x)).get()) / rhs_norm  # type: ignore[union-attr]
+        return (
+            x,
+            normalize_info_with_true_residual(0, bool(true_residual <= (tolerance / rhs_norm))),
+            0,
+            float(relative_residual),
+            float(true_residual),
+            bool(true_residual <= (tolerance / rhs_norm)),
+            ((0, float(relative_residual)),),
+        )
 
     info = int(maxiter)
     tiny = np.finfo(np.float32 if dtype == cp.complex64 else np.float64).tiny  # type: ignore[union-attr]
@@ -1857,15 +1966,21 @@ def _gpu_bicgstab(
         s_norm_abs = float(cp.linalg.norm(s).get())  # type: ignore[union-attr]
         if s_norm_abs <= tolerance:
             x = x + alpha * p_hat
-            relative_residual = s_norm_abs / rhs_norm
-            info = 0
+            true_r, residual_norm_abs, relative_residual, true_passed = compute_true_residual(x)
+            if true_passed:
+                info = 0
+            else:
+                r = true_r
             if residual_every > 0 and iterations % residual_every == 0:
                 history.append((iterations, relative_residual))
                 if residual_callback is not None:
                     residual_callback(iterations, relative_residual)
             if iteration_callback is not None:
                 iteration_callback(iterations)
-            break
+            if info == 0:
+                break
+            rho_old = rho_new
+            continue
         s_hat = apply_preconditioner(s)
         t = operator.matvec(s_hat)
         tt = cp.vdot(t, t)  # type: ignore[union-attr]
@@ -1878,14 +1993,22 @@ def _gpu_bicgstab(
         residual_norm_abs = float(cp.linalg.norm(r).get())  # type: ignore[union-attr]
         relative_residual = residual_norm_abs / rhs_norm
         if residual_every > 0 and iterations % residual_every == 0:
+            r, residual_norm_abs, relative_residual, true_passed_at_checkpoint = compute_true_residual(x)
             history.append((iterations, relative_residual))
             if residual_callback is not None:
                 residual_callback(iterations, relative_residual)
+            if true_passed_at_checkpoint:
+                info = 0
         if iteration_callback is not None:
             iteration_callback(iterations)
-        if residual_norm_abs <= tolerance:
-            info = 0
+        if info == 0:
             break
+        if residual_norm_abs <= tolerance:
+            true_r, residual_norm_abs, relative_residual, true_passed = compute_true_residual(x)
+            if true_passed:
+                info = 0
+                break
+            r = true_r
         if float(cp.abs(omega).get()) <= tiny:  # type: ignore[union-attr]
             info = -13
             break
@@ -1895,7 +2018,10 @@ def _gpu_bicgstab(
         history.append((iterations, relative_residual))
         if residual_callback is not None:
             residual_callback(iterations, relative_residual)
-    return x, int(info), int(iterations), float(relative_residual), tuple(history)
+    true_residual = float(cp.linalg.norm(rhs - operator.matvec(x)).get()) / rhs_norm  # type: ignore[union-attr]
+    true_residual_passed = true_residual <= (tolerance / rhs_norm)
+    info = normalize_info_with_true_residual(int(info), bool(true_residual_passed))
+    return x, int(info), int(iterations), float(relative_residual), float(true_residual), bool(true_residual_passed), tuple(history)
 
 
 def solve_ac3d_matrix_free_gpu_face_types(
@@ -1914,6 +2040,7 @@ def solve_ac3d_matrix_free_gpu_face_types(
     x0: np.ndarray | object | None = None,
     residual_every: int = 0,
     residual_callback: Callable[[int, float], None] | None = None,
+    gauge_mode: GaugeMode = "auto",
 ) -> AC3DIterativeResult:
     """Solve with GPU BiCGSTAB using compact two-phase face types."""
 
@@ -1924,25 +2051,57 @@ def solve_ac3d_matrix_free_gpu_face_types(
     axis = direction_to_axis(direction)
     face_conductivities = face_conductivity_arrays_from_types_gpu(face_data)
     n_cells = int(np.prod(face_data.shape))
-    rhs = matrix_free_rhs_faces_gpu(face_conductivities, axis, field_strength_v_m, voxel_size_m)
+    if gauge_mode not in ("single-cell", "active-domain", "auto"):
+        raise ValueError("gauge_mode must be single-cell, active-domain, or auto")
+    identity_mask = None
+    gauge_indices = None
+    if gauge_mode == "active-domain":
+        identity_mask, gauge_indices = active_domain_gauge_from_faces_gpu(face_conductivities)
+    elif gauge_mode == "auto":
+        diagonal = diagonal_faces_gpu(face_conductivities)
+        active_mask = cp.abs(diagonal) > np.finfo(float).tiny  # type: ignore[union-attr]
+        if not bool(cp.all(active_mask).get()):  # type: ignore[union-attr]
+            identity_mask, gauge_indices = active_domain_gauge_from_faces_gpu(face_conductivities)
+    rhs = matrix_free_rhs_faces_gpu(
+        face_conductivities,
+        axis,
+        field_strength_v_m,
+        voxel_size_m,
+        identity_mask=identity_mask,
+        gauge_indices=gauge_indices,
+    )
     operator = LinearOperator(  # type: ignore[operator]
         (n_cells, n_cells),
-        matvec=lambda vector: matrix_free_matvec_faces_gpu(face_conductivities, vector),
+        matvec=lambda vector: matrix_free_matvec_faces_gpu(
+            face_conductivities,
+            vector,
+            identity_mask=identity_mask,
+            gauge_indices=gauge_indices,
+        ),
         dtype=face_data.dtype,
     )
     preconditioner_apply: Callable[[object], object] | None = None
     fft_reference_value: complex | None = None
     if preconditioner_name == "jacobi":
-        inverse_diagonal = jacobi_inverse_diagonal_faces_gpu(face_conductivities)
+        inverse_diagonal = jacobi_inverse_diagonal_faces_gpu(
+            face_conductivities,
+            identity_mask=identity_mask,
+            gauge_indices=gauge_indices,
+        )
         preconditioner_apply = lambda vector: inverse_diagonal * vector
     elif preconditioner_name == "fft":
         preconditioner_apply, fft_reference_value = make_fft_poisson_preconditioner_gpu(face_data, fft_reference)
+        preconditioner_apply = _wrap_preconditioner_with_gauge_rows(
+            preconditioner_apply,
+            identity_mask=identity_mask,
+            gauge_indices=gauge_indices,
+        )
     elif preconditioner_name == "none":
         preconditioner_apply = None
     else:
         raise ValueError("preconditioner must be none, jacobi, or fft")
     initial_guess = None if x0 is None else cp.asarray(x0, dtype=face_data.dtype).ravel()  # type: ignore[union-attr]
-    solution, info, iterations, relative_residual, residual_history = _gpu_bicgstab(
+    solution, info, iterations, recursive_residual, true_residual, true_residual_passed, residual_history = _gpu_bicgstab(
         operator,
         rhs,
         x0=initial_guess,
@@ -1962,7 +2121,7 @@ def solve_ac3d_matrix_free_gpu_face_types(
         effective_conductivity_s_m=complex(effective),
         mean_current_density_a_m2=mean_current,
         field_strength_v_m=field_strength_v_m,
-        residual_norm=relative_residual,
+        residual_norm=true_residual,
         potential=potential,
         solver=(
             "gpu_bicgstab_fft_poisson_face_types"
@@ -1974,6 +2133,9 @@ def solve_ac3d_matrix_free_gpu_face_types(
         iterations=iterations,
         info=info,
         residual_history=residual_history,
+        recursive_residual_norm=recursive_residual,
+        true_residual_norm=true_residual,
+        true_residual_passed=true_residual_passed,
     )
 
 

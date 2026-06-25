@@ -66,6 +66,26 @@ def nearest_spectrum_row(spectra: pd.DataFrame, frequency_hz: float) -> pd.Serie
     return spectra.iloc[int(idx)]
 
 
+def select_spectrum_row(
+    spectra: pd.DataFrame,
+    frequency_hz: float,
+    *,
+    frequency_match_mode: str = "exact",
+) -> pd.Series:
+    available = spectra["frequency_hz"].to_numpy(dtype=float)
+    if frequency_match_mode == "exact":
+        matches = np.flatnonzero(np.isclose(available, frequency_hz, rtol=1.0e-12, atol=0.0))
+        if matches.size == 0:
+            raise ValueError(
+                f"formal frequency {frequency_hz:g} Hz does not exactly match the spectra table; "
+                "use --frequency-match-mode nearest only for diagnostic/interpolated runs."
+            )
+        return spectra.iloc[int(matches[0])]
+    if frequency_match_mode == "nearest":
+        return nearest_spectrum_row(spectra, frequency_hz)
+    raise ValueError("frequency_match_mode must be exact or nearest")
+
+
 def phase_conductivities_from_spectrum_row(
     spectrum_row: pd.Series,
     frequency_hz: float,
@@ -91,6 +111,7 @@ def frequency_tag(frequency_hz: float) -> str:
 
 
 def write_residual_history(path: Path, rows: list[dict[str, float | int]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(rows).to_csv(path, index=False)
 
 
@@ -106,6 +127,10 @@ def write_config(path: Path, config: dict[str, object]) -> None:
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def can_reuse_solution_as_warm_start(*, info: int, true_residual_passed: bool | None) -> bool:
+    return int(info) == 0 and bool(true_residual_passed)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--raw", default=str(ROOT / "论文数据" / "microCT_Berea.raw"))
@@ -118,6 +143,7 @@ def main() -> None:
     parser.add_argument("--spectra", default=str(ROOT / "outputs" / "polarization_spectra_from_pnextract.csv"))
     parser.add_argument("--frequencies", nargs="+", type=float, default=DEFAULT_FREQUENCIES)
     parser.add_argument("--frequency-order", choices=["ascending", "descending", "input"], default="ascending")
+    parser.add_argument("--frequency-match-mode", choices=["exact", "nearest"], default="exact")
     parser.add_argument("--direction", choices=["x", "y", "z"], default="x")
     parser.add_argument("--rtol", type=float, default=1.0e-5)
     parser.add_argument("--atol", type=float, default=0.0)
@@ -127,6 +153,7 @@ def main() -> None:
     parser.add_argument("--dtype", choices=["complex64", "complex128"], default="complex64")
     parser.add_argument("--preconditioner", choices=["none", "jacobi", "fft"], default="jacobi")
     parser.add_argument("--fft-reference", choices=["mean-face", "mean-abs", "pore"], default="mean-face")
+    parser.add_argument("--gauge-mode", choices=["single-cell", "active-domain", "auto"], default="auto")
     parser.add_argument("--save-solutions", action="store_true")
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--out-dir", default=str(ROOT / "outputs" / "ac3d_gpu_sweep"))
@@ -158,6 +185,7 @@ def main() -> None:
             "crop_start": crop_start,
             "crop_size": crop_size,
             "frequencies_requested_hz": frequencies,
+            "frequency_match_mode": args.frequency_match_mode,
             "direction": args.direction,
             "rtol": args.rtol,
             "atol": args.atol,
@@ -165,6 +193,7 @@ def main() -> None:
             "dtype": args.dtype,
             "preconditioner": args.preconditioner,
             "fft_reference": args.fft_reference,
+            "gauge_mode": args.gauge_mode,
             "residual_every": args.residual_every,
             "save_solutions": args.save_solutions,
             "gpu_memory_at_start": gpu_memory_info(),
@@ -184,7 +213,11 @@ def main() -> None:
     summary_path = out_dir / "sweep_results.csv"
 
     for index, requested_frequency in enumerate(frequencies):
-        spectrum_row = nearest_spectrum_row(spectra, requested_frequency)
+        spectrum_row = select_spectrum_row(
+            spectra,
+            requested_frequency,
+            frequency_match_mode=args.frequency_match_mode,
+        )
         used_frequency = float(spectrum_row["frequency_hz"])
         frequency_dir = out_dir / f"frequency_{index:03d}_{frequency_tag(used_frequency)}Hz"
         frequency_dir.mkdir(parents=True, exist_ok=True)
@@ -195,8 +228,13 @@ def main() -> None:
         if args.resume and result_path.exists():
             existing = json.loads(result_path.read_text(encoding="utf-8"))
             summary_rows.append(existing)
-            if solution_path.exists():
+            if solution_path.exists() and can_reuse_solution_as_warm_start(
+                info=int(existing.get("info", -1)),
+                true_residual_passed=existing.get("true_residual_passed"),
+            ):
                 previous_solution = np.load(solution_path).astype(dtype, copy=False)
+            else:
+                previous_solution = None
             pd.DataFrame(summary_rows).to_csv(summary_path, index=False)
             print(f"skipped existing {used_frequency:g} Hz", flush=True)
             continue
@@ -219,6 +257,7 @@ def main() -> None:
             write_residual_history(residual_history_path, residual_rows)
             print(f"{used_frequency:g}Hz krylov_iterations={iterations} elapsed_s={elapsed:.1f} relative_residual_norm={residual_norm:.6e}", flush=True)
 
+        used_warm_start = previous_solution is not None
         result = solve_ac3d_matrix_free_gpu_face_types(
             face_data,
             direction=args.direction,
@@ -234,21 +273,29 @@ def main() -> None:
             x0=previous_solution,
             residual_every=args.residual_every,
             residual_callback=report_residual if args.residual_every > 0 else None,
+            gauge_mode=args.gauge_mode,
         )
         synchronize_gpu()
         elapsed_total = time.perf_counter() - start_time
         memory_after = gpu_memory_info()
 
-        previous_solution = None if result.potential is None else np.asarray(result.potential, dtype=dtype)
+        potential_array = None if result.potential is None else np.asarray(result.potential, dtype=dtype)
+        warm_start_reusable = can_reuse_solution_as_warm_start(
+            info=result.info,
+            true_residual_passed=result.true_residual_passed,
+        )
+        previous_solution = potential_array if warm_start_reusable else None
         saved_solution_path = None
-        if args.save_solutions and previous_solution is not None:
-            np.save(solution_path, previous_solution)
+        if args.save_solutions and potential_array is not None:
+            np.save(solution_path, potential_array)
             saved_solution_path = str(solution_path)
 
         output = {
             "solver": result.solver,
             "requested_frequency_hz": requested_frequency,
             "frequency_hz": used_frequency,
+            "frequency_match_mode": args.frequency_match_mode,
+            "frequency_relative_difference": abs(used_frequency - requested_frequency) / max(abs(requested_frequency), np.finfo(float).eps),
             "direction": args.direction,
             "shape": shape,
             "crop_start": crop_start,
@@ -264,6 +311,9 @@ def main() -> None:
             "mean_current_real_a_m2": result.mean_current_density_a_m2.real,
             "mean_current_imag_a_m2": result.mean_current_density_a_m2.imag,
             "relative_residual_norm": result.residual_norm,
+            "recursive_residual_norm": result.recursive_residual_norm,
+            "true_residual_norm": result.true_residual_norm,
+            "true_residual_passed": result.true_residual_passed,
             "iterations": result.iterations,
             "info": result.info,
             "rtol": args.rtol,
@@ -271,7 +321,9 @@ def main() -> None:
             "maxiter": args.maxiter,
             "preconditioner": args.preconditioner,
             "fft_reference": args.fft_reference,
-            "used_warm_start": index > 0,
+            "gauge_mode": args.gauge_mode,
+            "used_warm_start": used_warm_start,
+            "warm_start_reusable": warm_start_reusable,
             "elapsed_total_s": elapsed_total,
             "elapsed_per_iteration_s": elapsed_total / max(result.iterations, 1),
             "cuda_total_gib": memory_after["cuda_total_bytes"] / 1024**3,

@@ -22,6 +22,13 @@ import tifffile
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 OUTER_LEGACY_ROOT = PROJECT_ROOT.parent
 DEFAULT_RESULT_DIR = PROJECT_ROOT / "results" / "niu2020_berea_reproduction_20260617_original_pnextract_defaults"
+DEFAULT_SWEEP_DIR = DEFAULT_RESULT_DIR / "simulation_sweeps"
+DEFAULT_FORMAL_SWEEP_PATHS = {
+    "all": DEFAULT_SWEEP_DIR / "niu2020_berea_full350_all_original_pnextract_fft_x" / "sweep_results.csv",
+    "pore": DEFAULT_SWEEP_DIR / "niu2020_berea_full350_pore_fft_x" / "sweep_results.csv",
+    "membrane": DEFAULT_SWEEP_DIR / "niu2020_berea_full350_membrane_original_pnextract_fft_x" / "sweep_results.csv",
+    "interfacial": DEFAULT_SWEEP_DIR / "niu2020_berea_full350_interfacial_precision_merged" / "sweep_results.csv",
+}
 DEFAULT_FIGURE5 = PROJECT_ROOT / "data" / "Niu 2020data" / "Figure5.xlsx"
 DEFAULT_TIFF = PROJECT_ROOT / "data" / "Niu 2020data" / "microCT_Berea.tiff"
 DEFAULT_RAW = PROJECT_ROOT / "data" / "Niu 2020data" / "microCT_Berea.raw"
@@ -295,6 +302,131 @@ def build_sip_plot_command(*, result_dir: Path, python_exe: Path) -> list[str]:
     ]
 
 
+def write_missing_sweep_reproduction_plan(result_dir: Path, missing_sweeps: dict[str, Path]) -> dict:
+    """Record why formal SIP curves were not regenerated and how to run them."""
+
+    provenance_dir = result_dir / "provenance"
+    provenance_dir.mkdir(parents=True, exist_ok=True)
+    plan_json = provenance_dir / "formal_fullgrid_sweep_reproduction_plan.json"
+    readme_md = provenance_dir / "formal_fullgrid_sweep_reproduction_plan.md"
+    checkpoint_frequencies = [1e-3, 1e-2, 1e-1, 1.0, 1e3, 1e6, 1e9]
+    directions = ["x", "y", "z"]
+    mechanisms = ["interfacial", "pore", "membrane", "all"]
+    command_templates: list[dict[str, object]] = []
+    for mechanism in mechanisms:
+        for direction in directions:
+            command_templates.append(
+                {
+                    "mechanism": mechanism,
+                    "direction": direction,
+                    "command": [
+                        "python",
+                        "code/scripts/sip_simulation/run_ac3d_matrix_free_gpu_sweep.py",
+                        "--raw",
+                        "data/Niu 2020data/microCT_Berea.raw",
+                        "--shape",
+                        "350",
+                        "350",
+                        "350",
+                        "--pore-label",
+                        "1",
+                        "--solid-label",
+                        "2",
+                        "--voxel-size-m",
+                        "2.8e-6",
+                        "--spectra",
+                        f"results/<run_name>/source_data/{mechanism}_phase_conductivity_spectrum.csv",
+                        "--frequency-match-mode",
+                        "exact",
+                        "--direction",
+                        direction,
+                        "--dtype",
+                        "complex128",
+                        "--preconditioner",
+                        "fft",
+                        "--fft-reference",
+                        "pore",
+                        "--gauge-mode",
+                        "auto",
+                        "--rtol",
+                        "1e-5",
+                        "--residual-every",
+                        "50",
+                        "--out-dir",
+                        f"results/<run_name>/simulation_sweeps/{mechanism}_{direction}_complex128",
+                    ],
+                }
+            )
+    checkpoint_commands = [
+        {
+            "frequency_hz": frequency,
+            "command": [
+                "python",
+                "code/scripts/sip_simulation/run_ac3d_matrix_free_gpu_single.py",
+                "--frequency",
+                f"{frequency:g}",
+                "--frequency-match-mode",
+                "exact",
+                "--dtype",
+                "complex128",
+                "--preconditioner",
+                "fft",
+                "--fft-reference",
+                "pore",
+                "--gauge-mode",
+                "auto",
+                "--rtol",
+                "1e-5",
+            ],
+        }
+        for frequency in checkpoint_frequencies
+    ]
+    plan = {
+        "status": "formal_sweep_results_missing",
+        "missing_sweeps": {key: str(path) for key, path in missing_sweeps.items()},
+        "required_mechanisms": mechanisms,
+        "required_directions": directions,
+        "checkpoint_frequencies_hz": checkpoint_frequencies,
+        "frequency_match_mode": "exact",
+        "gauge_mode": "auto",
+        "formal_acceptance_rtol": 1.0e-5,
+        "trusted_fullgrid_dtype": "complex128",
+        "fft_reference": "pore",
+        "residual_policy": "Use true_residual_norm and true_residual_passed; recursive_residual_norm is diagnostic.",
+        "all_mechanism_policy": "all must be an independent AC3D field solve from all phase conductivities, not algebraic effective-conductivity splicing.",
+        "directional_summary_tool": "code/scripts/sip_simulation/summarize_ac3d_directional_sweeps.py",
+        "precision_checkpoint_tool": "code/scripts/sip_simulation/verify_ac3d_precision_checkpoints.py",
+        "command_templates": command_templates,
+        "complex128_checkpoint_commands": checkpoint_commands,
+    }
+    plan_json.write_text(json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8")
+    lines = [
+        "# Formal full-grid sweep reproduction plan",
+        "",
+        "当前结果包未声称完成正式 Niu 2020 full-grid 机制曲线复现：以下 `sweep_results.csv` 缺失。",
+        "",
+    ]
+    for key, path in missing_sweeps.items():
+        lines.append(f"- `{key}`: `{path}` sweep_results.csv 缺失")
+    lines.extend(
+        [
+            "",
+            "正式运行要求：",
+            "- `--frequency-match-mode exact`，禁止 silent nearest-frequency 匹配。",
+            "- `--gauge-mode auto`，pore-only/membrane-only 的 `solid = 0` 由 active-domain gauge 处理。",
+            "- `--dtype complex128 --fft-reference pore --rtol 1e-5` 作为可信 full-grid sweep 口径；complex64 只在通过 true residual 和 complex128 对照后才可作为正式曲线。",
+            "- 每个频点写出 `recursive_residual_norm`、`true_residual_norm`、`true_residual_passed`。",
+            "- `all` 机制必须独立 AC3D 场求解，不允许有效电导代数拼接。",
+            "- x/y/z 三方向运行后用 `summarize_ac3d_directional_sweeps.py` 输出 `sigma_xx/sigma_yy/sigma_zz`、directional mean 和 anisotropy ratio。",
+            "- 关键频点用 `complex128 checkpoint` 复核，并由 `verify_ac3d_precision_checkpoints.py` 输出 complex64 vs complex128 相对误差。",
+            "",
+            f"机器可读计划：`{plan_json}`",
+        ]
+    )
+    readme_md.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return {"status": plan["status"], "plan_json": str(plan_json), "readme_md": str(readme_md)}
+
+
 def network_has_renderable_coordinates(pores_csv: Path, throats_csv: Path) -> bool:
     """Return True when the pnextract tables include physical pore centers."""
     try:
@@ -556,6 +688,19 @@ def write_manifest(result_dir: Path, records: dict) -> None:
         "",
         "Policy: extracted pore/throat geometry and geometry-derived Zdc are not post-scaled. The pore network is generated with the original pnextract algorithm and its built-in default medial-surface parameters unless a run config explicitly records otherwise.",
     ]
+    formal_plan = records.get("formal_sweep_reproduction_plan")
+    if formal_plan:
+        lines.extend(
+            [
+                "",
+                "## Formal full-grid sweep status",
+                "",
+                f"- 状态：`{formal_plan.get('status')}`。",
+                f"- 详细说明：`{formal_plan.get('readme_md')}`。",
+                f"- 机器可读命令计划：`{formal_plan.get('plan_json')}`。",
+                "- 因此本结果包只记录参数、几何派生产物和正式 full-grid sweep 的待运行计划；不把论文工作簿 simulation 列冒充为本项目模拟曲线。",
+            ]
+        )
     diagnostic = records.get("diagnostic_membrane_model")
     if diagnostic:
         lines.extend(
@@ -672,7 +817,12 @@ def main() -> None:
     )
 
     command_records = []
-    command_records.append(run_command(build_sip_plot_command(result_dir=result_dir, python_exe=python_exe), cwd=PROJECT_ROOT))
+    missing_sweeps = {key: path for key, path in DEFAULT_FORMAL_SWEEP_PATHS.items() if not path.exists()}
+    formal_sweep_plan = None
+    if missing_sweeps:
+        formal_sweep_plan = write_missing_sweep_reproduction_plan(result_dir, missing_sweeps)
+    else:
+        command_records.append(run_command(build_sip_plot_command(result_dir=result_dir, python_exe=python_exe), cwd=PROJECT_ROOT))
     if not args.skip_visualizations:
         for command in build_visualization_commands(result_dir=result_dir, python_exe=python_exe, binary=binary_summary):
             command_records.append(run_command(command, cwd=PROJECT_ROOT))
@@ -689,6 +839,7 @@ def main() -> None:
         "figure4_distribution": figure4_summary,
         "notebook_reference": "notebooks/seged_DRP_and_PNM.ipynb: remap TIFF -> binary 0/255, render Fiji/VTK HTML, then run pnextract wrapper.",
         "network_html_status": network_html_status,
+        "formal_sweep_reproduction_plan": formal_sweep_plan,
         "commands": command_records,
     }
     (result_dir / "provenance").mkdir(parents=True, exist_ok=True)

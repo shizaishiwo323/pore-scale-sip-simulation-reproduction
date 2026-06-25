@@ -53,6 +53,22 @@ def nearest_spectrum_row(path: Path, frequency_hz: float) -> pd.Series:
     return spectra.iloc[int(idx)]
 
 
+def select_spectrum_row(path: Path, frequency_hz: float, *, frequency_match_mode: str = "exact") -> pd.Series:
+    spectra = pd.read_csv(path)
+    available = spectra["frequency_hz"].to_numpy(dtype=float)
+    if frequency_match_mode == "exact":
+        matches = np.flatnonzero(np.isclose(available, frequency_hz, rtol=1.0e-12, atol=0.0))
+        if matches.size == 0:
+            raise ValueError(
+                f"formal frequency {frequency_hz:g} Hz does not exactly match the spectra table; "
+                "use --frequency-match-mode nearest only for diagnostic/interpolated runs."
+            )
+        return spectra.iloc[int(matches[0])]
+    if frequency_match_mode == "nearest":
+        return nearest_spectrum_row(path, frequency_hz)
+    raise ValueError("frequency_match_mode must be exact or nearest")
+
+
 def phase_conductivities_from_spectrum_row(
     spectrum_row: pd.Series,
     frequency_hz: float,
@@ -104,6 +120,7 @@ def main() -> None:
     parser.add_argument("--voxel-size-m", type=float, default=2.8e-6)
     parser.add_argument("--spectra", default=str(ROOT / "outputs" / "polarization_spectra_from_pnextract.csv"))
     parser.add_argument("--frequency", type=float, default=1.0)
+    parser.add_argument("--frequency-match-mode", choices=["exact", "nearest"], default="exact")
     parser.add_argument("--direction", choices=["x", "y", "z"], default="x")
     parser.add_argument("--rtol", type=float, default=1.0e-5)
     parser.add_argument("--atol", type=float, default=0.0)
@@ -113,6 +130,7 @@ def main() -> None:
     parser.add_argument("--dtype", choices=["complex64", "complex128"], default="complex64")
     parser.add_argument("--preconditioner", choices=["none", "jacobi", "fft"], default="jacobi")
     parser.add_argument("--fft-reference", choices=["mean-face", "mean-abs", "pore"], default="mean-face")
+    parser.add_argument("--gauge-mode", choices=["single-cell", "active-domain", "auto"], default="auto")
     parser.add_argument("--x0")
     parser.add_argument("--save-solution", action="store_true")
     parser.add_argument("--solution-path")
@@ -136,7 +154,7 @@ def main() -> None:
     result_path = out_dir / "matrix_free_gpu_single_result.json"
 
     params = PolarizationParameters()
-    spectrum_row = nearest_spectrum_row(Path(args.spectra), args.frequency)
+    spectrum_row = select_spectrum_row(Path(args.spectra), args.frequency, frequency_match_mode=args.frequency_match_mode)
     used_frequency = float(spectrum_row["frequency_hz"])
     water_sigma, solid_sigma = phase_conductivities_from_spectrum_row(spectrum_row, used_frequency, params)
 
@@ -177,6 +195,7 @@ def main() -> None:
         x0=x0,
         residual_every=args.residual_every,
         residual_callback=report_residual if args.residual_every > 0 else None,
+        gauge_mode=args.gauge_mode,
     )
     synchronize_gpu()
     solve_elapsed = time.perf_counter() - solve_start
@@ -199,15 +218,21 @@ def main() -> None:
         "dtype": args.dtype,
         "requested_frequency_hz": args.frequency,
         "frequency_hz": used_frequency,
+        "frequency_match_mode": args.frequency_match_mode,
+        "frequency_relative_difference": abs(used_frequency - args.frequency) / max(abs(args.frequency), np.finfo(float).eps),
         "direction": args.direction,
         "rtol": args.rtol,
         "atol": args.atol,
         "maxiter": args.maxiter,
         "preconditioner": args.preconditioner,
         "fft_reference": args.fft_reference,
+        "gauge_mode": args.gauge_mode,
         "iterations": result.iterations,
         "info": result.info,
         "relative_residual_norm": result.residual_norm,
+        "recursive_residual_norm": result.recursive_residual_norm,
+        "true_residual_norm": result.true_residual_norm,
+        "true_residual_passed": result.true_residual_passed,
         "water_sigma_real_s_m": water_sigma.real,
         "water_sigma_imag_s_m": water_sigma.imag,
         "solid_sigma_real_s_m": solid_sigma.real,

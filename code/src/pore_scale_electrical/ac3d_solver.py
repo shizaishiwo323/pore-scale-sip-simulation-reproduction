@@ -57,6 +57,9 @@ class AC3DIterativeResult:
     iterations: int
     info: int
     residual_history: tuple[tuple[int, float], ...] = ()
+    recursive_residual_norm: float | None = None
+    true_residual_norm: float | None = None
+    true_residual_passed: bool | None = None
 
 
 @dataclass(frozen=True)
