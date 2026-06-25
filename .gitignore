@@ -27,6 +27,23 @@ environment/open_pnm_tools/
 # Local vendor build artifacts and archives
 code/vendor/**/build/local/
 code/vendor/**/bin.7z
+code/vendor/**/*.exe
+code/vendor/**/*.dll
+code/vendor/**/*.lib
+code/vendor/**/*.obj
+code/vendor/**/*.pdf
+
+# Local literature/reference PDFs and downloaded manuscript files
+docs/references/*.pdf
+docs/references/*.docx
+docs/references/**/*.pdf
+docs/references/**/*.docx
+docs/literature_review/**/*.pdf
+docs/literature_review/**/papers/**/*.pdf
+docs/validation/*.pdf
+docs/validation/*.docx
+docs/validation/**/*.pdf
+docs/validation/**/*.docx
 
 # Local data inventories and regenerated outputs
 data_inventory/
