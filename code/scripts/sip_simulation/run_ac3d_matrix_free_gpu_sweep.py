@@ -43,7 +43,14 @@ def parse_int3(values: list[str] | None, name: str) -> tuple[int, int, int] | No
 
 
 def read_volume(raw_path: Path, shape: tuple[int, int, int], crop_start: tuple[int, int, int] | None, crop_size: tuple[int, int, int] | None) -> np.ndarray:
-    volume = np.memmap(raw_path, dtype="<u2", mode="r", shape=shape, order="C")
+    if raw_path.suffix.lower() in {".tif", ".tiff"}:
+        import tifffile
+
+        volume = tifffile.imread(raw_path)
+        if tuple(int(v) for v in volume.shape) != tuple(shape):
+            raise ValueError(f"TIFF volume shape {tuple(volume.shape)} does not match --shape {shape}")
+    else:
+        volume = np.memmap(raw_path, dtype="<u2", mode="r", shape=shape, order="C")
     if crop_start is None or crop_size is None:
         return np.asarray(volume)
     stop = tuple(s + n for s, n in zip(crop_start, crop_size))

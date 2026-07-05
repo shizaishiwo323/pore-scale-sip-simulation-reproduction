@@ -9,7 +9,7 @@ from typing import Literal
 
 import numpy as np
 
-from pore_scale_electrical.ac3d_active_domain import active_component_anchor_indices
+from pore_scale_electrical.ac3d_active_domain import periodic_active_component_anchor_indices
 from pore_scale_electrical.ac3d_solver import (
     AC3DIterativeResult,
     Direction,
@@ -324,7 +324,7 @@ def active_domain_gauge_from_faces_gpu(
     diagonal = diagonal_faces_gpu(face_conductivities)
     active_mask_gpu = cp.abs(diagonal) > np.finfo(float).tiny  # type: ignore[union-attr]
     active_mask = cp.asnumpy(active_mask_gpu).reshape(face_conductivities[0].shape)  # type: ignore[union-attr]
-    anchors = active_component_anchor_indices(active_mask)
+    anchors = periodic_active_component_anchor_indices(active_mask)
     gauge_indices = cp.asarray(anchors, dtype=cp.int64)  # type: ignore[union-attr]
     identity_mask = ~active_mask_gpu
     return identity_mask, gauge_indices

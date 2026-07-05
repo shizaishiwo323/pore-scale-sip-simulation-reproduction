@@ -378,6 +378,29 @@ def test_manifest_readme_mentions_missing_formal_sweep_plan(tmp_path):
     assert "formal_fullgrid_sweep_reproduction_plan.md" in readme
 
 
+def test_manifest_readme_mentions_dynamic_pore_size_when_recorded(tmp_path):
+    module = load_module()
+    records = {
+        "dynamic_pore_size": {
+            "lambda_iso_m": 4.2e-6,
+            "lambda_x_m": 4.0e-6,
+            "lambda_y_m": 4.1e-6,
+            "lambda_z_m": 4.5e-6,
+            "source": "project_extracted_microct_laplace_field",
+            "manifest": "dynamic_pore_size/dynamic_pore_size.json",
+        }
+    }
+
+    module.write_manifest(tmp_path, records)
+
+    manifest = json.loads((tmp_path / "manifest.json").read_text(encoding="utf-8"))
+    readme = (tmp_path / "README.md").read_text(encoding="utf-8")
+    assert manifest["dynamic_pore_size"]["manifest"] == "dynamic_pore_size/dynamic_pore_size.json"
+    assert "Dynamic pore size" in readme
+    assert "project_extracted_microct_laplace_field" in readme
+    assert "dynamic_pore_size/dynamic_pore_size.json" in readme
+
+
 def test_writes_best_edl_membrane_parameter_config_with_chinese_provenance(tmp_path):
     module = load_module()
     diagnostic_summary = {

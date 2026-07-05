@@ -683,11 +683,33 @@ def write_manifest(result_dir: Path, records: dict) -> None:
         "- `segmented_core/`: 按 notebook 链路重映射的 `pore=0, solid=255` 二值 TIFF/RAW。",
         "- `digital_rock/`: 基于二值体的 Fiji 3D Viewer 风格交互 HTML；后续数字岩心可视化只保留这种风格。",
         "- `pore_network/`: 由 `run_segmented_core_pnextract_ballstick.py` 生成的 pnextract 输入、网络 CSV、交互 HTML、孔径/孔喉分布图。",
+        "- `dynamic_pore_size/`: project-extracted 动态孔径 manifest、方向积分和 provenance（若本次已生成或登记）。",
         "- `source_data/`: 图件源数据。",
         "- `provenance/`: 脚本运行记录。",
         "",
         "Policy: extracted pore/throat geometry and geometry-derived Zdc are not post-scaled. The pore network is generated with the original pnextract algorithm and its built-in default medial-surface parameters unless a run config explicitly records otherwise.",
     ]
+    dynamic_pore_size = records.get("dynamic_pore_size")
+    if dynamic_pore_size:
+        lines.extend(
+            [
+                "",
+                "## Dynamic pore size",
+                "",
+                f"- 状态：`{dynamic_pore_size.get('status', 'recorded')}`。",
+                f"- 来源：`{dynamic_pore_size.get('source')}`。",
+                f"- manifest：`{dynamic_pore_size.get('manifest')}`。",
+            ]
+        )
+        if dynamic_pore_size.get("lambda_iso_m") is not None:
+            lines.append(f"- `lambda_iso_m = {dynamic_pore_size.get('lambda_iso_m')}` m。")
+        if dynamic_pore_size.get("lambda_x_m") is not None:
+            lines.append(
+                "- 方向值："
+                f"`lambda_x_m={dynamic_pore_size.get('lambda_x_m')}`, "
+                f"`lambda_y_m={dynamic_pore_size.get('lambda_y_m')}`, "
+                f"`lambda_z_m={dynamic_pore_size.get('lambda_z_m')}` m。"
+            )
     formal_plan = records.get("formal_sweep_reproduction_plan")
     if formal_plan:
         lines.extend(
@@ -784,6 +806,59 @@ def write_manifest(result_dir: Path, records: dict) -> None:
     md.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def register_dynamic_pore_size_manifest(result_dir: Path, manifest_path: Path | None) -> dict:
+    dynamic_dir = result_dir / "dynamic_pore_size"
+    dynamic_dir.mkdir(parents=True, exist_ok=True)
+    if manifest_path is None:
+        readme = dynamic_dir / "dynamic_pore_size_not_generated.md"
+        readme.write_text(
+            "\n".join(
+                [
+                    "# Dynamic pore size not generated",
+                    "",
+                    "本次结果包构建未运行 `compute_dynamic_pore_size.py`，因此不声明正式 project-extracted Lambda。",
+                    "后续应先生成 `dynamic_pore_size/dynamic_pore_size.json`，再用 project-extracted 模式生成 pore/membrane/all spectra。",
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        return {
+            "status": "not_generated_by_builder",
+            "source": "missing_project_extracted_microct_laplace_field",
+            "manifest": str(readme.relative_to(result_dir)),
+            "reason": "compute_dynamic_pore_size.py was not run or not provided via --dynamic-pore-size-manifest",
+        }
+
+    manifest_path = manifest_path.resolve()
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    target_manifest = dynamic_dir / "dynamic_pore_size.json"
+    if manifest_path != target_manifest.resolve():
+        shutil.copy2(manifest_path, target_manifest)
+    for sibling_name in ("directional_integrals.csv", "config.yml", "input_manifest.json"):
+        sibling = manifest_path.parent / sibling_name
+        if sibling.exists():
+            target = dynamic_dir / sibling_name
+            if sibling.resolve() != target.resolve():
+                shutil.copy2(sibling, target)
+    provenance = manifest_path.parent / "provenance" / "dynamic_pore_size_provenance.md"
+    if provenance.exists():
+        target_provenance_dir = dynamic_dir / "provenance"
+        target_provenance_dir.mkdir(exist_ok=True)
+        target = target_provenance_dir / "dynamic_pore_size_provenance.md"
+        if provenance.resolve() != target.resolve():
+            shutil.copy2(provenance, target)
+    return {
+        "status": "recorded",
+        "lambda_iso_m": manifest.get("lambda_iso_m"),
+        "lambda_x_m": manifest.get("lambda_x_m"),
+        "lambda_y_m": manifest.get("lambda_y_m"),
+        "lambda_z_m": manifest.get("lambda_z_m"),
+        "source": "project_extracted_microct_laplace_field",
+        "manifest": str(target_manifest.relative_to(result_dir)),
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--result-dir", default=str(DEFAULT_RESULT_DIR))
@@ -791,6 +866,7 @@ def main() -> None:
     parser.add_argument("--legacy-network-dir", default=str(DEFAULT_LEGACY_NETWORK_DIR))
     parser.add_argument("--skip-visualizations", action="store_true")
     parser.add_argument("--skip-network-html", action="store_true")
+    parser.add_argument("--dynamic-pore-size-manifest")
     args = parser.parse_args()
 
     result_dir = Path(args.result_dir)
@@ -815,6 +891,10 @@ def main() -> None:
         result_dir / "pore_network" / "niu2020_figure4_pore_node_throat_distribution.png",
         result_dir / "source_data" / "niu2020_figure4_pore_node_throat_distribution_source_data.csv",
     )
+    dynamic_pore_size_summary = register_dynamic_pore_size_manifest(
+        result_dir,
+        Path(args.dynamic_pore_size_manifest) if args.dynamic_pore_size_manifest else None,
+    )
 
     command_records = []
     missing_sweeps = {key: path for key, path in DEFAULT_FORMAL_SWEEP_PATHS.items() if not path.exists()}
@@ -837,6 +917,7 @@ def main() -> None:
         "chinese_parameter_config": str(config_out),
         "binary_remap": binary_summary,
         "figure4_distribution": figure4_summary,
+        "dynamic_pore_size": dynamic_pore_size_summary,
         "notebook_reference": "notebooks/seged_DRP_and_PNM.ipynb: remap TIFF -> binary 0/255, render Fiji/VTK HTML, then run pnextract wrapper.",
         "network_html_status": network_html_status,
         "formal_sweep_reproduction_plan": formal_sweep_plan,

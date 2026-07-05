@@ -10,6 +10,7 @@ import json
 import re
 import sys
 import xml.etree.ElementTree as ET
+from dataclasses import replace
 from pathlib import Path
 from zipfile import ZipFile
 
@@ -43,6 +44,45 @@ ALLOWED_MEMBRANE_WEIGHT_MODES = (
     "count",
 )
 ALLOWED_MEMBRANE_ZDC_LENGTH_MODES = ("throat", "center_to_center", "conduit")
+PAPER_REFERENCE_DYNAMIC_PORE_SIZE_M = 2.7e-6
+
+
+def resolve_polarization_parameters(
+    parameter_mode: str,
+    dynamic_pore_size_manifest: Path | str | None,
+) -> tuple[PolarizationParameters, dict]:
+    if parameter_mode == "niu2020-paper":
+        params = replace(PolarizationParameters(), dynamic_pore_size_m=PAPER_REFERENCE_DYNAMIC_PORE_SIZE_M)
+        return (
+            params,
+            {
+                "dynamic_pore_size_m": params.dynamic_pore_size_m,
+                "dynamic_pore_size_source": "niu2020_table1",
+                "dynamic_pore_size_manifest": None,
+                "paper_reference_dynamic_pore_size_m": PAPER_REFERENCE_DYNAMIC_PORE_SIZE_M,
+                "paper_reference_used_as_project_value": True,
+            },
+        )
+    if parameter_mode != "project-extracted":
+        raise ValueError("parameter_mode must be niu2020-paper or project-extracted")
+    if dynamic_pore_size_manifest is None:
+        raise ValueError("project-extracted spectra require dynamic pore size manifest")
+    manifest_path = Path(dynamic_pore_size_manifest)
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    lambda_iso_m = float(manifest["lambda_iso_m"])
+    if lambda_iso_m <= 0:
+        raise ValueError("dynamic pore size manifest lambda_iso_m must be positive")
+    params = replace(PolarizationParameters(), dynamic_pore_size_m=lambda_iso_m)
+    return (
+        params,
+        {
+            "dynamic_pore_size_m": lambda_iso_m,
+            "dynamic_pore_size_source": "project_extracted_microct_laplace_field",
+            "dynamic_pore_size_manifest": str(manifest_path),
+            "paper_reference_dynamic_pore_size_m": float(manifest.get("paper_reference_lambda_m", PAPER_REFERENCE_DYNAMIC_PORE_SIZE_M)),
+            "paper_reference_used_as_project_value": False,
+        },
+    )
 
 
 def canonical_membrane_weight_mode(mode: str) -> str:
@@ -244,6 +284,7 @@ def compute_spectra(
     membrane_zdc_scale: float = 1.0,
     membrane_weight_mode: str = "volume",
     membrane_zdc_length_mode: str = "throat",
+    dynamic_pore_size_metadata: dict | None = None,
 ) -> tuple[pd.DataFrame, dict]:
     if pore_radius_scale <= 0:
         raise ValueError("pore_radius_scale must be positive")
@@ -431,6 +472,8 @@ def compute_spectra(
         "pnextract_include_boundary_throats": throats.attrs.get("pnextract_include_boundary_throats"),
         "parameters": params.__dict__,
     }
+    if dynamic_pore_size_metadata is not None:
+        metadata.update(dynamic_pore_size_metadata)
     return out, metadata
 
 
@@ -441,6 +484,12 @@ def main() -> None:
     parser.add_argument("--network-dir", default=str(ROOT / "outputs" / "figure5_pnextract_comparison" / "network_parsed"))
     parser.add_argument("--out", required=True)
     parser.add_argument("--metadata-out")
+    parser.add_argument(
+        "--parameter-mode",
+        choices=["niu2020-paper", "project-extracted"],
+        default="niu2020-paper",
+    )
+    parser.add_argument("--dynamic-pore-size-manifest")
     parser.add_argument(
         "--include-boundary-throats",
         action="store_true",
@@ -486,7 +535,10 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    params = PolarizationParameters()
+    params, dynamic_pore_size_metadata = resolve_polarization_parameters(
+        args.parameter_mode,
+        Path(args.dynamic_pore_size_manifest) if args.dynamic_pore_size_manifest else None,
+    )
     if args.source == "figure5":
         pores, throats = load_figure5(Path(args.figure5))
     else:
@@ -507,6 +559,7 @@ def main() -> None:
         membrane_zdc_scale=args.membrane_zdc_scale,
         membrane_weight_mode=args.membrane_weight_mode,
         membrane_zdc_length_mode=args.membrane_zdc_length_mode,
+        dynamic_pore_size_metadata=dynamic_pore_size_metadata,
     )
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)

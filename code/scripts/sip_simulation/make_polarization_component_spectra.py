@@ -16,6 +16,8 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from pore_scale_electrical.polarization import PolarizationParameters  # noqa: E402
 
+from compute_polarization_spectra import resolve_polarization_parameters  # noqa: E402
+
 
 DIAGNOSTIC_MEMBRANE_PROVENANCE_COLUMNS = [
     "membrane_geometry_mode",
@@ -43,6 +45,13 @@ DIAGNOSTIC_MEMBRANE_PROVENANCE_COLUMNS = [
     "edl_selection_rmse_tolerance",
     "edl_selected_peak_normalized_rmse",
 ]
+
+
+def resolve_component_parameters(
+    parameter_mode: str,
+    dynamic_pore_size_manifest: Path | str | None,
+) -> tuple[PolarizationParameters, dict]:
+    return resolve_polarization_parameters(parameter_mode, dynamic_pore_size_manifest)
 
 
 def make_component_spectrum(
@@ -182,10 +191,19 @@ def main(argv: list[str] | None = None) -> None:
         default=None,
         help="Optional diagnostic membrane component CSV used to create an all_diagnostic_volume_area spectrum.",
     )
+    parser.add_argument(
+        "--parameter-mode",
+        choices=["niu2020-paper", "project-extracted"],
+        default="niu2020-paper",
+    )
+    parser.add_argument("--dynamic-pore-size-manifest")
     args = parser.parse_args(argv)
 
     base = pd.read_csv(args.input)
-    params = PolarizationParameters()
+    params, dynamic_pore_size_metadata = resolve_component_parameters(
+        args.parameter_mode,
+        Path(args.dynamic_pore_size_manifest) if args.dynamic_pore_size_manifest else None,
+    )
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     metadata = {
@@ -201,6 +219,7 @@ def main(argv: list[str] | None = None) -> None:
             "all": "paper mode: water dc conductivity and permittivity plus pore and membrane increments; solid phase has high-frequency permittivity",
         },
     }
+    metadata.update(dynamic_pore_size_metadata)
     for component in args.components:
         spectrum = make_component_spectrum(base, component, params, args.mode)
         path = out_dir / f"polarization_spectra_{component}.csv"
