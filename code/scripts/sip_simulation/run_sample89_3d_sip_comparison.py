@@ -301,6 +301,7 @@ def run_component_sweep(
     sor_omega: float,
     max_new_results: int | None = None,
     accept_residual_le: float | None = None,
+    disable_warm_start: bool = False,
 ) -> pd.DataFrame:
     dtype = parse_gpu_complex_dtype(dtype_name)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -325,6 +326,18 @@ def run_component_sweep(
         if resume and result_path.exists():
             existing = json.loads(result_path.read_text(encoding="utf-8"))
             existing["mechanism"] = mechanism
+            if not residual_history_path.exists():
+                pd.DataFrame(
+                    [
+                        {
+                            "iteration": int(existing["iterations"]),
+                            "elapsed_s": float(existing["elapsed_total_s"]),
+                            "relative_residual_norm": float(existing["relative_residual_norm"]),
+                        }
+                    ]
+                ).to_csv(residual_history_path, index=False)
+                existing["residual_history_path"] = str(residual_history_path)
+                write_json(result_path, existing)
             rows.append(existing)
             pd.DataFrame(rows).to_csv(summary_path, index=False)
             print(f"[{mechanism}] skipped existing {used_frequency:g} Hz", flush=True)
@@ -429,7 +442,7 @@ def run_component_sweep(
                 use_jacobi=preconditioner == "jacobi",
                 preconditioner=preconditioner,
                 fft_reference=fft_reference,
-                return_potential=True,
+                return_potential=not disable_warm_start,
                 iteration_callback=report_progress,
                 x0=previous_solution,
                 residual_every=residual_every,
@@ -437,9 +450,19 @@ def run_component_sweep(
             )
         synchronize_gpu()
         elapsed_total = time.perf_counter() - start_time
+        if not residual_rows or int(residual_rows[-1]["iteration"]) != int(result.iterations):
+            residual_rows.append(
+                {
+                    "iteration": int(result.iterations),
+                    "elapsed_s": elapsed_total,
+                    "relative_residual_norm": float(result.residual_norm),
+                }
+            )
+            pd.DataFrame(residual_rows).to_csv(residual_history_path, index=False)
         memory_after = gpu_memory_info()
         if (
             solver_backend not in {"gpu-jacobi-lowmem", "gpu-rb-sor-lowmem", "gpu-cocg-lowmem", "gpu-bicgstab-compact"}
+            and not disable_warm_start
             and result.potential is not None
             and can_reuse_solution_as_warm_start(info=result.info, residual_norm=result.residual_norm, rtol=rtol)
         ):
@@ -479,7 +502,11 @@ def run_component_sweep(
             "maxiter": maxiter,
             "preconditioner": preconditioner,
             "fft_reference": fft_reference,
-            "used_warm_start": solver_backend not in {"gpu-jacobi-lowmem", "gpu-rb-sor-lowmem", "gpu-cocg-lowmem", "gpu-bicgstab-compact"} and index > 0,
+            "used_warm_start": (
+                not disable_warm_start
+                and solver_backend not in {"gpu-jacobi-lowmem", "gpu-rb-sor-lowmem", "gpu-cocg-lowmem", "gpu-bicgstab-compact"}
+                and index > 0
+            ),
             "elapsed_total_s": elapsed_total,
             "cuda_total_gib": memory_after["cuda_total_bytes"] / 1024**3,
             "cuda_free_before_gib": memory_before["cuda_free_bytes"] / 1024**3,
@@ -697,20 +724,21 @@ def widen_log10_ylim(ax: plt.Axes, values: list[np.ndarray], *, min_span: float 
 
 def plot_comparison(experiment: pd.DataFrame, simulation: pd.DataFrame, output_png: Path, *, sample_label: str, experiment_label: str) -> None:
     exp_real_col, exp_imag_col, exp_label = experiment_plot_columns(experiment, experiment_label)
-    experiment_mask = experiment[exp_imag_col].to_numpy(dtype=float) > 0.0
-    experiment_plot = experiment.loc[experiment_mask].copy()
+    experiment_imag_plot = experiment.loc[experiment[exp_imag_col].to_numpy(dtype=float) > 0.0].copy()
     plt.rcParams.update(
         {
-            "font.family": "DejaVu Serif",
+            "font.family": "sans-serif",
+            "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans", "sans-serif"],
+            "font.size": 7,
             "axes.linewidth": 0.8,
             "xtick.direction": "in",
             "ytick.direction": "in",
         }
     )
-    fig, axes = plt.subplots(1, 2, figsize=(8.4, 3.3), constrained_layout=True)
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.4), constrained_layout=True)
 
-    exp_real_x, exp_real_y = positive_series(experiment_plot, "frequency_hz", exp_real_col)
-    exp_imag_x, exp_imag_y = positive_series(experiment_plot, "frequency_hz", exp_imag_col)
+    exp_real_x, exp_real_y = positive_series(experiment, "frequency_hz", exp_real_col)
+    exp_imag_x, exp_imag_y = positive_series(experiment_imag_plot, "frequency_hz", exp_imag_col)
     for mechanism in ("all", "maxwell", "pore", "membrane"):
         frame = simulation[simulation["mechanism"] == mechanism].sort_values("frequency_hz")
         if frame.empty:
@@ -750,7 +778,7 @@ def plot_comparison(experiment: pd.DataFrame, simulation: pd.DataFrame, output_p
         color="#111111",
         markersize=3.2,
         zorder=5,
-        label=f"{exp_label}, imag > 0",
+        label=exp_label,
     )
     axes[1].loglog(
         exp_imag_x,
@@ -759,26 +787,28 @@ def plot_comparison(experiment: pd.DataFrame, simulation: pd.DataFrame, output_p
         color="#111111",
         markersize=3.2,
         zorder=5,
-        label=f"{exp_label}, imag > 0",
+        label=rf"{exp_label}, $\sigma''>0$",
     )
 
     axes[0].set_xlabel("Frequency (Hz)")
     axes[0].set_ylabel(r"$\sigma'$ (S/m)")
     axes[1].set_xlabel("Frequency (Hz)")
     axes[1].set_ylabel(r"$\sigma''$ (S/m)")
+    frequency_limits = (float(experiment["frequency_hz"].min()), float(experiment["frequency_hz"].max()))
     for ax in axes:
-        ax.set_xlim(1.0e-4, 1.0e5)
+        ax.set_xlim(*frequency_limits)
     axes[0].set_ylim(1.0e-4, 1.0e-1)
     axes[1].set_ylim(1.0e-7, 1.0e-3)
-    for label, ax in zip(["(a)", "(b)"], axes):
+    experiment_legend_labels = [exp_label, rf"{exp_label}, $\sigma''>0$"]
+    for label, ax in zip(["a", "b"], axes):
         ax.grid(True, which="both", alpha=0.18, linewidth=0.55)
         handles, labels = ax.get_legend_handles_labels()
-        order = [labels.index(item) for item in [f"{exp_label}, imag > 0", "Maxwell", "Pore", "Membrane", "Total"] if item in labels]
+        order = [labels.index(item) for item in experiment_legend_labels + ["Maxwell", "Pore", "Membrane", "Total"] if item in labels]
         ax.legend([handles[i] for i in order], [labels[i] for i in order], fontsize=7, frameon=False)
-        ax.text(-0.13, 1.04, label, transform=ax.transAxes, fontsize=13, fontweight="bold", va="bottom")
-    fig.suptitle(f"{sample_label}", fontsize=10, y=1.04)
+        ax.text(-0.12, 1.02, label, transform=ax.transAxes, fontsize=8, fontweight="bold", va="bottom")
+    fig.suptitle(f"{sample_label}", fontsize=8, y=1.01)
     output_png.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(output_png, dpi=240)
+    fig.savefig(output_png, dpi=300, bbox_inches="tight", facecolor="white")
     plt.close(fig)
 
 
@@ -869,6 +899,15 @@ def parse_args() -> argparse.Namespace:
         help="Mechanism spectra that should include the solid-phase effective real conductivity.",
     )
     parser.add_argument("--frequencies", nargs="+", type=float)
+    parser.add_argument(
+        "--frequency-selection-mode",
+        choices=["nearest-experiment", "exact"],
+        default="nearest-experiment",
+        help=(
+            "nearest-experiment snaps requested frequencies to measured PSIP points; "
+            "exact solves the requested frequencies while retaining the full experiment for comparison."
+        ),
+    )
     parser.add_argument("--direction", choices=["x", "y", "z"], default="x")
     parser.add_argument("--pore-label", type=int, default=0)
     parser.add_argument("--solid-label", type=int, default=1)
@@ -911,6 +950,11 @@ def parse_args() -> argparse.Namespace:
         help="Stop each requested mechanism after this many newly computed frequencies. Existing resumed frequencies do not count.",
     )
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument(
+        "--disable-warm-start",
+        action="store_true",
+        help="Do not return the full potential field to host memory between frequencies; reduces memory use.",
+    )
     parser.add_argument("--out-dir", default=str(ROOT / "results" / "sample89_3d_sip_lkc89_v1"))
     return parser.parse_args()
 
@@ -922,19 +966,28 @@ def main() -> None:
 
     out_dir = Path(args.out_dir)
     spectra_dir = out_dir / "spectra"
-    sweeps_dir = out_dir / "sweeps"
+    sweeps_dir = out_dir / "simulation_sweeps"
     figures_dir = out_dir / "figures"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     experiment = parse_psip_csv(Path(args.experiment_csv))
-    if args.frequencies:
+    if args.frequencies and args.frequency_selection_mode == "nearest-experiment":
         requested = np.asarray(args.frequencies, dtype=float)
         keep_rows = []
         for frequency in requested:
             idx = int(np.abs(np.log(experiment["frequency_hz"].to_numpy(dtype=float)) - np.log(frequency)).argmin())
             keep_rows.append(experiment.iloc[idx])
         experiment = pd.DataFrame(keep_rows).drop_duplicates(subset=["frequency_hz"]).sort_values("frequency_hz").reset_index(drop=True)
-    frequencies = experiment["frequency_hz"].to_numpy(dtype=float)
+    frequencies = (
+        np.asarray(args.frequencies, dtype=float)
+        if args.frequencies and args.frequency_selection_mode == "exact"
+        else experiment["frequency_hz"].to_numpy(dtype=float)
+    )
+    if np.any(~np.isfinite(frequencies)) or np.any(frequencies <= 0):
+        raise ValueError("simulation frequencies must be finite and positive")
+    if len(np.unique(frequencies)) != len(frequencies):
+        raise ValueError("simulation frequencies must be unique")
+    frequencies = np.sort(frequencies)
     experiment_absolute = add_bulk_conductivity_from_psip_impedance(
         experiment,
         current_resistor_ohm=args.current_resistor_ohm,
@@ -1018,6 +1071,7 @@ def main() -> None:
                 sor_omega=args.sor_omega,
                 max_new_results=args.max_new_results,
                 accept_residual_le=args.accept_residual_le,
+                disable_warm_start=args.disable_warm_start,
             )
             sweep_frames.append(frame)
 
@@ -1069,8 +1123,12 @@ def main() -> None:
         },
         "network_dir": str(Path(args.network_dir)),
         "experiment_csv": str(Path(args.experiment_csv)),
-        "experiment_frequency_range_hz": [float(frequencies.min()), float(frequencies.max())],
-        "n_experiment_frequencies": int(len(frequencies)),
+        "experiment_frequency_range_hz": [float(experiment["frequency_hz"].min()), float(experiment["frequency_hz"].max())],
+        "n_experiment_frequencies": int(len(experiment)),
+        "simulation_frequency_range_hz": [float(frequencies.min()), float(frequencies.max())],
+        "simulation_frequencies_hz": [float(value) for value in frequencies],
+        "n_simulation_frequencies": int(len(frequencies)),
+        "frequency_selection_mode": args.frequency_selection_mode,
         "components": args.components,
         "component_meaning": mechanism_meaning_for_mode(args.field_solve_mode),
         "experiment_scaling": {

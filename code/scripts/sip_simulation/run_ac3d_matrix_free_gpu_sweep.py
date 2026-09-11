@@ -275,7 +275,7 @@ def main() -> None:
             use_jacobi=args.preconditioner == "jacobi",
             preconditioner=args.preconditioner,
             fft_reference=args.fft_reference,
-            return_potential=True,
+            return_potential=args.save_solutions,
             iteration_callback=report_progress,
             x0=previous_solution,
             residual_every=args.residual_every,

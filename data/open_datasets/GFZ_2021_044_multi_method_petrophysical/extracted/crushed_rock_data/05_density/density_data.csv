@@ -1,0 +1,32 @@
+﻿rock;particle size class;density [g/cm³];remarks
+;;;;;;;;;;
+Jurakalk JK;plug;2.703
+Jurakalk JK;JK2;2.707
+Jurakalk JK;JK8;2.729
+;;;;;;;;;;
+Madiger Kalk MK;plug;2.717
+Madiger Kalk MK;MK2;2.704
+Madiger Kalk MK;MK8;2.719
+;;;;;;;;;;
+Schaumkalk SK;plug;2.723
+Schaumkalk SK;SK2;2.717
+Schaumkalk SK;SK8;2.760
+;;;;;;;;;;
+Wellenkalk WK;plug;2.746
+Wellenkalk WK;plug;2.757;repeat measurement (no re-heating)
+Wellenkalk WK;WK2;2.707
+Wellenkalk WK;WK2;2.720;repeat measurement (re-heated)
+Wellenkalk WK;WK8;2.715
+;;;;;;;;;;
+Cotta Sanstone ST;plug;2.656
+Cotta Sanstone ST;ST2;2.639
+Cotta Sanstone ST;ST2;2.665;repeat measurement (re-heated)
+Cotta Sanstone ST;ST7;2.666
+;;;;;;;;;;
+;;;;;;;;;;
+rock;mean density [g/cm³];standard deviation [g/cm³]
+Jurakalk;2.71;0.014
+Madiger Kalk MK;2.71;0.009
+Schaumkalk SK;2.73;0.023
+Wellenkalk WK;2.73;0.021
+Cotta Sanstone ST;2.66;0.012

@@ -19,10 +19,16 @@ environment/open_pnm_tools/
 *.h5
 *.tif
 *.tiff
+data/open_datasets/**/*.zip
+data/open_datasets/**/*.nc
+data/open_datasets/**/*.pdf
 *.ilp
 *.dwg
 *.dxf
 *.bak
+Thumbs.db
+%SystemDrive%/
+pnextract/
 
 # Local vendor build artifacts and archives
 code/vendor/**/build/local/

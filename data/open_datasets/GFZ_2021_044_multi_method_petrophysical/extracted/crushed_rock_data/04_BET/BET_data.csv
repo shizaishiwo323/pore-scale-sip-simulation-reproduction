@@ -1,0 +1,46 @@
+﻿rock;particle size class;Sm analysis 1 [m²/g];Sm analysis 2 [m²/g];Sm mean [m²/g];variation [m²/g]
+Jurakalk;JK plug;0.380;0.420;0.40;0.02
+Jurakalk;JK1;0.400;0.370;0.39;0.02
+Jurakalk;JK2;0.430;0.410;0.42;0.01
+Jurakalk;JK3;0.550;0.660;0.61;0.06
+Jurakalk;JK4;0.580;0.880;0.73;0.15
+Jurakalk;JK5;1.030;0.800;0.92;0.12
+Jurakalk;JK6;1.520;1.370;1.45;0.08
+Jurakalk;JK7;2.160;2.320;2.24;0.08
+Jurakalk;JK8;2.320;1.860;2.09;0.23
+Schaumkalk;SK plug;1.000;0.675;0.84;0.16
+Schaumkalk;SK1;0.925;0.845;0.89;0.04
+Schaumkalk;SK2;0.727;0.853;0.79;0.06
+Schaumkalk;SK3;1.150;1.320;1.24;0.09
+Schaumkalk;SK4;1.030;1.230;1.13;0.10
+Schaumkalk;SK5;1.110;1.320;1.22;0.11
+Schaumkalk;SK6;1.700;1.840;1.77;0.07
+Schaumkalk;SK7;2.110;2.230;2.17;0.06
+Schaumkalk;SK8;2.430;2.580;2.51;0.08
+Madiger Kalk;MK plug;1.200;0.640;0.92;0.28
+Madiger Kalk;MK1;1.711;1.596;1.65;0.06
+Madiger Kalk;MK2;1.600;1.607;1.60;0.00
+Madiger Kalk;MK3;1.848;1.898;1.87;0.02
+Madiger Kalk;MK4;2.075;1.984;2.03;0.05
+Madiger Kalk;MK5;2.244;2.308;2.28;0.03
+Madiger Kalk;MK6;3.058;2.742;2.90;0.16
+Madiger Kalk;MK7;3.606;3.533;3.57;0.04
+Madiger Kalk;MK8;3.741;3.792;3.77;0.03
+Wellenkalk;WK plug;2.600;2.314;2.46;0.14
+Wellenkalk;WK1;2.400;2.680;2.54;0.14
+Wellenkalk;WK2;4.240;3.770;4.01;0.24
+Wellenkalk;WK3;4.450;4.620;4.54;0.09
+Wellenkalk;WK4;4.800;4.800;4.80;0.00
+Wellenkalk;WK5;5.330;5.250;5.29;0.04
+Wellenkalk;WK6;6.510;6.360;6.44;0.07
+Wellenkalk;WK7;6.290;6.100;6.20;0.10
+Wellenkalk;WK8;5.850;5.920;5.89;0.04
+Cotta Sandstone;ST plug;0.957;0.896;0.93;0.03
+Cotta Sandstone;ST1;0.777;0.850;0.81;0.04
+Cotta Sandstone;ST2;0.916;0.832;0.87;0.04
+Cotta Sandstone;ST3;0.704;0.609;0.66;0.05
+Cotta Sandstone;ST4;0.552;0.756;0.65;0.10
+Cotta Sandstone;ST5;0.863;0.553;0.71;0.16
+Cotta Sandstone;ST6;0.790;0.671;0.73;0.06
+Cotta Sandstone;ST7;0.531;0.731;0.63;0.10
+Cotta Sandstone;ST8;1.561;1.061;1.31;0.25
