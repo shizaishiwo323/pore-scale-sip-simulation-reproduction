@@ -1,0 +1,10 @@
+{
+  "snapshot_date": "2026-10-12",
+  "path_base": "repository root",
+  "hash_algorithm": "SHA-256",
+  "file_count": 4169,
+  "total_bytes": 15590286710,
+  "local_inputs_manifest_sha256": "f55feb5630addc50f28bdb3b6f8bfbc4f914457b40e1b03ea1e1dd65d4cf8a31",
+  "scope": "Locally present data files not previously tracked by Git; existing tracked inputs remain in the repository. Solver result directories are excluded from publication.",
+  "raw_inputs_modified": false
+}

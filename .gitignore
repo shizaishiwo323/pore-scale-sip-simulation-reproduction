@@ -28,7 +28,6 @@ data/open_datasets/**/*.pdf
 *.bak
 Thumbs.db
 %SystemDrive%/
-pnextract/
 
 # Local vendor build artifacts and archives
 code/vendor/**/build/local/
@@ -62,3 +61,16 @@ tmp/
 figures/segmented_cores/
 figures/carbonates_sip/
 figures/berea_pore_network/*.html
+
+# Standalone pnextract source and runtime are versioned; caches stay local.
+/pnextract/**/__pycache__/
+/pnextract/**/build/
+
+# Local input bundles: paths, sizes and SHA-256 are in docs/data_sources/.
+/data/ct_backed_samples_raw_copy_20260605/
+/data/复现rembert模拟/
+/data/Niu 2020data/niu2020avizo/
+/data/Niu 2020data/*.pdf
+/data/Niu 2020data/*.docx
+/data/Niu 2020data/niu result.png
+/data/Niu 2020data/尺寸分布.png

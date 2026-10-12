@@ -1,5 +1,11 @@
 # GPU AC3D Berea Reproduction Package
 
+## main 当前发布范围（2026-10-12）
+
+main 已集成 `codex/niu2020-reproduction-hardening` 和本地最新核心求解器、极化模型、几何反演及样品脚本，保留原有提交历史。独立 `pnextract/` 源码和 Windows 运行文件一并提供。
+
+原始大数据保留本地；路径、大小与 SHA-256 见 [本地输入清单](docs/data_sources/README.md)。`results/`、`outputs/` 和 notebook 运行输出不纳入此次发布，文中结果路径用于本地复跑和历史结果查阅。代码测试 63 项通过；脚本测试 149 项通过、9 项既有失败，详情见 [集成与验证记录](docs/notes/main_integration_20261012.md)。
+
 整理日期：2026-05-27
 
 本目录是从原始复现仓库中抽取出的干净结果包，目的是把 GPU 加速求解、FFT-Poisson 预条件、扫频 warm start、机制拆分图 8 和关键计划文档集中到一个结构化位置，便于后续写论文、复核结果或继续开发。
