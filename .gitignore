@@ -55,12 +55,17 @@ data_inventory/
 outputs/
 results/
 tmp/
+temp/
+scratch/
+*.log
+*.tmp
+*.temp
+/data/dissolution_results*/
 
 # Local scratch notebooks
 临时*.ipynb
-figures/segmented_cores/
-figures/carbonates_sip/
-figures/berea_pore_network/*.html
+/临时*.md
+/figures/
 
 # Standalone pnextract source and runtime are versioned; caches stay local.
 /pnextract/**/__pycache__/
