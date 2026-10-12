@@ -10,6 +10,8 @@
 
 另纳入独立 pnextract 源码与运行文件、本地输入校验清单和发布范围说明。原始输入、既有求解结果保留在本地；本地原有缺失的输入未作为删除提交。发布的 notebook 清空执行计数和运行输出，保留代码、说明与图像附件。
 
+三个 pnextract 执行文件采用 Git LFS；仅重新整理尚未发布的资料提交，已经推送的开发分支与核心代码历史保持不变。检出运行文件需使用 `git lfs pull`，实际哈希及二进制来源限制见 `docs/data_sources/pnextract_runtime_sha256.json`。
+
 ## 验证
 
 Python 使用 conda `ml`，设置 `PYTHONNOUSERSITE=1`。

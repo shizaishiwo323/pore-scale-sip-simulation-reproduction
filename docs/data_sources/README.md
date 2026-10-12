@@ -18,3 +18,5 @@
 求解器产生的 `results/`、`outputs/`、缓存和 notebook 运行输出不随本次 main 发布。notebook 的代码与说明仍保留。独立 `pnextract/` 源码和 Windows 运行文件已经纳入仓库；其 194 个与 `code/vendor/pnextract/` 对应的源码文件在统一换行符后内容一致。
 
 当前运行文件的实际 SHA-256 见 `pnextract_runtime_sha256.json`。其中 `pnextract.exe` 与随附上游校验文档中的哈希不同；上传的是本机已有运行文件，未重新编译，也未独立验证源码与该二进制完全对应。上游校验文档保持原样，实际文件应以本次记录的哈希核对。
+
+三个 `pnextract/bin/*.exe` 使用 Git LFS 保存，共 18,391,630 字节；普通 Git 树中保存 LFS 指针。检出运行文件前执行 `git lfs install` 和 `git lfs pull`。这不涉及本地原始 CT 或其他输入资料。
