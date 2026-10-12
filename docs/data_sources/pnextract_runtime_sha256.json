@@ -1,0 +1,24 @@
+{
+  "snapshot_date": "2026-10-12",
+  "files": [
+    {
+      "path": "pnextract/bin/pnextract.exe",
+      "bytes": 6296302,
+      "sha256": "272f2d6889b234d9b6651f260f727d177c06cc127388be0542142bb3aeb2351f",
+      "matches_bundled_upstream_checksum": false
+    },
+    {
+      "path": "pnextract/bin/pnflow.exe",
+      "bytes": 6095344,
+      "sha256": "e24bdadf7cab857372d260c7d5e014bae02525c8f6d6309fb2d9990b16554eb2",
+      "matches_bundled_upstream_checksum": true
+    },
+    {
+      "path": "pnextract/bin/voxelImageProcess.exe",
+      "bytes": 5999984,
+      "sha256": "7f445d74b756c9106a60d750acd1a2a87031fa2b6392bfbedabfa2a68e0727ed",
+      "matches_bundled_upstream_checksum": true
+    }
+  ],
+  "note": "pnextract.exe is the existing local runtime and differs from the bundled upstream checksum. No rebuild was performed; source-to-binary equivalence is not independently verified. The upstream checksum document is preserved unchanged."
+}
