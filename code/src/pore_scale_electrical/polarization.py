@@ -94,6 +94,8 @@ def elementary_membrane_impedance(
     length_m: np.ndarray,
     zdc_ohm: np.ndarray,
     params: PolarizationParameters = PolarizationParameters(),
+    *,
+    polarizability: np.ndarray | float | None = None,
 ) -> np.ndarray:
     """Equation 19 for each pore-throat length and dc resistance."""
 
@@ -108,7 +110,13 @@ def elementary_membrane_impedance(
         s = root[small]
         frac[small] = 1.0 - s + (2.0 / 3.0) * s**2 - (1.0 / 3.0) * s**3
     frac = np.where(np.isfinite(frac), frac, 1.0)
-    bracket = 1.0 - params.membrane_polarizability * (1.0 - frac)
+    eta = params.membrane_polarizability if polarizability is None else polarizability
+    eta = np.asarray(eta, dtype=float)
+    if eta.ndim > 1 or (eta.ndim == 1 and eta.size != zdc.shape[1]):
+        raise ValueError("polarizability must be scalar or match the number of pore throats")
+    if np.any((eta < 0.0) | (eta >= 1.0)):
+        raise ValueError("polarizability must satisfy 0 <= eta < 1")
+    bracket = 1.0 - eta.reshape(1, -1) * (1.0 - frac) if eta.ndim else 1.0 - eta * (1.0 - frac)
     return zdc * bracket
 
 
@@ -117,11 +125,15 @@ def elementary_membrane_conductance_perturbation(
     length_m: np.ndarray,
     zdc_ohm: np.ndarray,
     params: PolarizationParameters = PolarizationParameters(),
+    *,
+    polarizability: np.ndarray | float | None = None,
 ) -> np.ndarray:
     """Equations 19 and 21 for each pore throat."""
 
     zdc = np.asarray(zdc_ohm, dtype=float)[None, :]
-    z_star = elementary_membrane_impedance(frequency_hz, length_m, zdc_ohm, params)
+    z_star = elementary_membrane_impedance(
+        frequency_hz, length_m, zdc_ohm, params, polarizability=polarizability
+    )
     return 1.0 / z_star - 1.0 / zdc
 
 
@@ -131,11 +143,15 @@ def membrane_polarization_conductance(
     weights: np.ndarray,
     zdc_ohm: np.ndarray,
     params: PolarizationParameters = PolarizationParameters(),
+    *,
+    polarizability: np.ndarray | float | None = None,
 ) -> np.ndarray:
     """Equations 10, 19, and 21 as a weighted sum over pore throats."""
 
     weights = normalize_weights(weights)
-    elementary = elementary_membrane_conductance_perturbation(frequency_hz, length_m, zdc_ohm, params)
+    elementary = elementary_membrane_conductance_perturbation(
+        frequency_hz, length_m, zdc_ohm, params, polarizability=polarizability
+    )
     return elementary @ weights
 
 

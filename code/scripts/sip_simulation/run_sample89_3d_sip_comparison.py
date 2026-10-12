@@ -310,6 +310,10 @@ def run_component_sweep(
     del cpu_face_types
 
     spectra = pd.read_csv(spectra_path)
+    pore_system = None
+    if solver_backend == 'gpu-active-pore-csr':
+        from pore_scale_electrical.ac3d_pore_gpu import build_pore_system, solve_pore_system
+        pore_system = build_pore_system(labels, pore_label, direction)
     previous_solution: np.ndarray | None = None
     rows: list[dict[str, object]] = []
     summary_path = out_dir / "sweep_results.csv"
@@ -377,7 +381,13 @@ def run_component_sweep(
             if residual_every > 0:
                 pd.DataFrame(residual_rows).to_csv(residual_history_path, index=False)
 
-        if solver_backend == "gpu-bicgstab-compact":
+        if solver_backend == 'gpu-active-pore-csr':
+            if solid_sigma != 0 or dtype != np.dtype(np.complex128) or atol != 0:
+                raise ValueError('Active pore CSR requires zero solid, complex128 and atol=0')
+            result = solve_pore_system(pore_system, water_sigma, voxel_size_m, rtol, maxiter,
+                x0=previous_solution, residual_every=residual_every,
+                residual_callback=report_residual, iteration_callback=report_progress)
+        elif solver_backend == "gpu-bicgstab-compact":
             result = solve_ac3d_bicgstab_compact_gpu_face_types(
                 face_data,
                 direction=direction,
@@ -868,7 +878,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-prefix", default="sample89_3d_sip")
     parser.add_argument(
         "--field-solve-mode",
-        choices=["gpu-ac3d", "gpu-jacobi-lowmem", "gpu-rb-sor-lowmem", "gpu-cocg-lowmem", "gpu-bicgstab-compact", "pnm-formation-factor"],
+        choices=["gpu-ac3d", "gpu-active-pore-csr", "gpu-jacobi-lowmem", "gpu-rb-sor-lowmem", "gpu-cocg-lowmem", "gpu-bicgstab-compact", "pnm-formation-factor"],
         default="gpu-ac3d",
         help="gpu-ac3d runs the full field solve; pnm-formation-factor only upscales full-resolution PNM spectra by measured F.",
     )

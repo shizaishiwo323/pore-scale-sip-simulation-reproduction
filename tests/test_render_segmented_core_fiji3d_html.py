@@ -192,43 +192,31 @@ def test_fiji3d_clip_controls_are_injected_with_axis_slider_and_apply(tmp_path):
     assert "number.addEventListener('input', applyClip" not in html
 
 
-def test_fiji3d_main_exports_html_with_slice_and_phase_controls(tmp_path, monkeypatch):
+def test_fiji3d_main_exports_direct_volume_html_with_controls(tmp_path, monkeypatch):
     module = load_module()
     out = tmp_path / "fiji3d.html"
     metadata_out = tmp_path / "fiji3d_metadata.json"
 
-    class FakePlotter:
-        def close(self):
-            pass
-
-    def fake_export_html(_plotter, html_path):
+    def fake_export_html(_volume, html_path, **_kwargs):
         Path(html_path).write_text("<html><body><div id=\"app\"></div></body></html>", encoding="utf-8")
-
-    def fake_build_fiji3d_plotter(*_args, **_kwargs):
-        return (
-            FakePlotter(),
-            object(),
-            {
-                "rendering_style": "fiji_3d_viewer_like_volume",
-                "rendering_modes": ["fiji_style_label_volume"],
-                "volume_points": 512,
-                "mesh_points": 0,
-                "slice_controls": {
-                    "enabled": True,
-                    "axes": ["x", "y", "z"],
-                    "realtime": False,
-                    "mode": "vtk_volume_clipping_plane",
-                    "applies_to": "vtk_volume_mapper_clipping_planes",
-                },
-                "component_controls": module.fiji3d_component_specs([0, 255], visible_mode="pore"),
+        return {
+            "rendering_style": "fiji_3d_viewer_like_volume",
+            "rendering_modes": ["fiji_style_label_volume"],
+            "effective_downsample": 1,
+            "volume_points": 512,
+            "mesh_points": 0,
+            "slice_controls": {
+                "enabled": True,
+                "axes": ["x", "y", "z"],
+                "realtime": False,
+                "mode": "vtk_volume_clipping_plane",
+                "applies_to": "vtk_volume_mapper_clipping_planes",
             },
-        )
+            "component_controls": module.fiji3d_component_specs([0, 255], visible_mode="pore"),
+        }
 
     monkeypatch.setattr(module, "load_tiff_volume", lambda _path: tiny_segmented_volume())
-    monkeypatch.setattr(module, "build_fiji3d_plotter", fake_build_fiji3d_plotter)
-    monkeypatch.setattr(module, "export_html", fake_export_html)
-    monkeypatch.setattr(module, "ensure_vtk_global_alias", lambda _path: None)
-    monkeypatch.setattr(module, "inject_vtk_wheel_zoom_support", lambda _path: None)
+    monkeypatch.setattr(module, "export_fiji3d_vtkjs_html", fake_export_html)
     monkeypatch.setattr(module, "inject_porosity_overlay", lambda _path, _stats: None)
     monkeypatch.setattr(
         sys,
@@ -253,11 +241,9 @@ def test_fiji3d_main_exports_html_with_slice_and_phase_controls(tmp_path, monkey
     metadata = json.loads(metadata_out.read_text(encoding="utf-8"))
     assert "segmented-core-fiji3d-slice-controls" in html
     assert "segmented-core-fiji3d-controls" in html
-    assert "segmented-core-fiji3d-slice-apply" in html
-    assert "segmented-core-fiji3d-apply" in html
     assert "window.segmentedCoreApplyFiji3DClip" in html
     assert "segmentedCoreApplyFiji3DControls" in html
-    assert "window.segmentedCoreGetVolumePayload" in html
+    assert metadata["rendering_style"] == "fiji_3d_viewer_like_volume"
     assert metadata["slice_controls"]["enabled"] is True
     assert metadata["slice_controls"]["realtime"] is False
     assert metadata["slice_controls"]["mode"] == "vtk_volume_clipping_plane"

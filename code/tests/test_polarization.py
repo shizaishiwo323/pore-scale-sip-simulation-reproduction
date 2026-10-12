@@ -33,6 +33,17 @@ def test_membrane_polarization_low_and_high_frequency_limits():
     assert abs(values[-1].imag) < 1e-8
 
 
+def test_membrane_polarization_accepts_one_polarizability_per_throat():
+    params = PolarizationParameters(membrane_polarizability=0.5, diffusion_coefficient_m2_s=1.0e-9)
+    eta = np.array([0.0, 0.01])
+    values = membrane_polarization_conductance(
+        np.array([1.0e12]), np.array([5.0e-6, 5.0e-6]), np.ones(2), np.ones(2), params,
+        polarizability=eta,
+    )
+
+    assert np.isclose(values[0].real, 0.5 * eta[1] / (1.0 - eta[1]), rtol=1e-5)
+
+
 def test_upscale_conductance_to_water_conductivity():
     params = PolarizationParameters(dynamic_pore_size_m=2.0e-6)
     assert upscale_conductance_to_water_conductivity(np.array([3.0e-9]), params)[0] == 3.0e-3

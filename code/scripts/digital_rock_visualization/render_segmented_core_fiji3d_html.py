@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Export a Fiji 3D Viewer-like interactive HTML volume rendering."""
+"""Export a Fiji 3D Viewer-like interactive HTML label-volume rendering."""
 
 from __future__ import annotations
 
 import argparse
+import base64
 import html
 import json
+import struct
 import sys
+import urllib.request
 from pathlib import Path
 
 import numpy as np
@@ -23,10 +26,7 @@ from render_segmented_core_html import (  # noqa: E402
     DEFAULT_VOXEL_OPACITY,
     binary_volume_stats,
     component_label,
-    ensure_vtk_global_alias,
-    export_html,
     inject_porosity_overlay,
-    inject_vtk_wheel_zoom_support,
     load_tiff_volume,
     make_plotter,
 )
@@ -46,6 +46,9 @@ DEFAULT_METADATA = (
     / "sample_89_Grainstone_89seged_fiji3d_viewer_style_volume_interactive_metadata.json"
 )
 FIJI3D_PLUGIN_REFERENCE = Path.home() / "Fiji.app" / "plugins" / "3D_Viewer-5.0.0.jar"
+VTKJS_URL = "https://cdn.jsdelivr.net/npm/vtk.js@37.2.0/vtk.js"
+VTKJS_VERSION = "37.2.0"
+_VTKJS_BUNDLE: str | None = None
 
 
 def fiji3d_label_volume(
@@ -387,6 +390,189 @@ def build_fiji3d_plotter(
         "component_controls": component_specs,
     }
     return plotter, volume_actor, metadata
+
+
+def _load_vtkjs_bundle() -> str:
+    global _VTKJS_BUNDLE
+    if _VTKJS_BUNDLE is None:
+        with urllib.request.urlopen(VTKJS_URL, timeout=60) as response:
+            _VTKJS_BUNDLE = response.read().decode("utf-8")
+        if "vtkFullScreenRenderWindow" not in _VTKJS_BUNDLE:
+            raise RuntimeError(f"Downloaded vtk.js {VTKJS_VERSION} bundle is invalid")
+    return _VTKJS_BUNDLE
+
+
+def _choose_html_downsample(
+    shape_zyx: tuple[int, int, int],
+    *,
+    requested: int,
+    bundle_bytes: int,
+    max_html_bytes: int,
+) -> int:
+    downsample = max(1, int(requested))
+    while True:
+        sampled_shape = tuple((int(size) + downsample - 1) // downsample for size in shape_zyx)
+        voxel_count = int(np.prod(sampled_shape, dtype=np.int64))
+        base64_bytes = 4 * ((voxel_count + 2) // 3)
+        if bundle_bytes + base64_bytes + 300_000 < max_html_bytes:
+            return downsample
+        downsample += 1
+
+
+def export_fiji3d_vtkjs_html(
+    volume: np.ndarray,
+    html_path: Path,
+    *,
+    component_specs: list[dict],
+    downsample: int,
+    voxel_spacing_um: tuple[float, float, float],
+    interpolation: str,
+    hide_bounds: bool,
+    max_html_bytes: int,
+    precompressed_gzip: Path | None = None,
+) -> dict:
+    vtkjs = _load_vtkjs_bundle()
+    compressed = None
+    if precompressed_gzip is not None and int(downsample) == 1:
+        compressed = precompressed_gzip.read_bytes()
+        if struct.unpack("<I", compressed[-4:])[0] != int(volume.size):
+            raise ValueError("--precompressed-gzip does not match the full-resolution volume size")
+        if len(vtkjs.encode("utf-8")) + 4 * ((len(compressed) + 2) // 3) + 300_000 >= max_html_bytes:
+            compressed = None
+    effective_downsample = 1 if compressed is not None else _choose_html_downsample(
+        tuple(int(v) for v in volume.shape), requested=downsample,
+        bundle_bytes=len(vtkjs.encode("utf-8")), max_html_bytes=max_html_bytes,
+    )
+    sampled_zyx = volume[::effective_downsample, ::effective_downsample, ::effective_downsample].astype(np.uint8, copy=False)
+    nz, ny, nx = (int(v) for v in sampled_zyx.shape)
+    spacing = [float(value) * effective_downsample for value in voxel_spacing_um]
+    encoded = base64.b64encode(compressed if compressed is not None else sampled_zyx.tobytes(order="C")).decode("ascii")
+    payload_encoding = "gzip" if compressed is not None else "raw"
+    specs_json = json.dumps(component_specs, ensure_ascii=False)
+    bounds_script = "" if hide_bounds else """
+    const cubeAxesFactory = vtk.Rendering.Core.vtkCubeAxesActor;
+    if (cubeAxesFactory) {
+      const cubeAxes = cubeAxesFactory.newInstance();
+      cubeAxes.setCamera(renderer.getActiveCamera());
+      cubeAxes.setDataBounds(image.getBounds());
+      renderer.addActor(cubeAxes);
+    }
+"""
+    html_path.parent.mkdir(parents=True, exist_ok=True)
+    html_path.write_text(
+        f"""<!doctype html>
+<html><head><meta charset="utf-8"><title>Fiji 3D Viewer style digital rock</title>
+<style>html,body,#vtk-view{{margin:0;width:100%;height:100%;overflow:hidden;background:#fff}}#vtk-status{{position:fixed;left:18px;bottom:18px;z-index:10001;padding:7px 10px;border-radius:6px;background:rgba(255,255,255,.9);font:12px Arial;color:#333}}</style>
+</head><body><div id="vtk-view"></div><div id="vtk-status">Loading label volume...</div>
+<script>{vtkjs}</script>
+<script id="segmented-core-fiji3d-volume">
+(async function() {{
+  const root = document.getElementById('vtk-view');
+  const status = document.getElementById('vtk-status');
+  try {{
+    const binary = atob('{encoded}');
+    let values = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) values[i] = binary.charCodeAt(i);
+    if ('{payload_encoding}' === 'gzip') {{
+      const stream = new Blob([values]).stream().pipeThrough(new DecompressionStream('gzip'));
+      values = new Uint8Array(await new Response(stream).arrayBuffer());
+    }}
+    const fullScreen = vtk.Rendering.Misc.vtkFullScreenRenderWindow.newInstance({{
+      rootContainer: root,
+      background: [1, 1, 1],
+      containerStyle: {{ height: '100%', width: '100%', position: 'absolute' }},
+    }});
+    const renderer = fullScreen.getRenderer();
+    const renderWindow = fullScreen.getRenderWindow();
+    const image = vtk.Common.DataModel.vtkImageData.newInstance();
+    image.setDimensions({nx}, {ny}, {nz});
+    image.setSpacing({spacing[0]}, {spacing[1]}, {spacing[2]});
+    image.getPointData().setScalars(vtk.Common.Core.vtkDataArray.newInstance({{
+      name: 'segmentation_value', values: values, numberOfComponents: 1,
+    }}));
+    const mapper = vtk.Rendering.Core.vtkVolumeMapper.newInstance();
+    mapper.setSampleDistance({max(spacing) * 0.55});
+    mapper.setInputData(image);
+    const volume = vtk.Rendering.Core.vtkVolume.newInstance();
+    volume.setMapper(mapper);
+    const rgbTransfer = vtk.Rendering.Core.vtkColorTransferFunction.newInstance();
+    const opacityTransfer = vtk.Common.DataModel.vtkPiecewiseFunction.newInstance();
+    const specs = {specs_json};
+    specs.forEach((spec) => {{
+      const hex = spec.color.replace('#', '');
+      const rgb = [parseInt(hex.slice(0,2),16)/255, parseInt(hex.slice(2,4),16)/255, parseInt(hex.slice(4,6),16)/255];
+      const value = Number(spec.value);
+      rgbTransfer.addRGBPoint(value, rgb[0], rgb[1], rgb[2]);
+      if (value > 0) opacityTransfer.addPoint(value - 0.5, 0);
+      opacityTransfer.addPoint(value, spec.visible ? Number(spec.opacity) : 0);
+      opacityTransfer.addPoint(value + 0.5, 0);
+    }});
+    const property = volume.getProperty();
+    property.setRGBTransferFunction(0, rgbTransfer);
+    property.setScalarOpacity(0, opacityTransfer);
+    property.setShade(true);
+    property.setAmbient(0.34);
+    property.setDiffuse(0.72);
+    property.setSpecular(0.18);
+    property.setInterpolationType({0 if interpolation == 'nearest' else 1});
+    renderer.addVolume(volume);
+    {bounds_script}
+    renderer.resetCamera();
+    const camera = renderer.getActiveCamera();
+    camera.azimuth(-30);
+    camera.elevation(20);
+    camera.zoom(1.08);
+    renderer.resetCameraClippingRange();
+    renderWindow.render();
+    window.segmentedCoreRenderWindow = renderWindow;
+    window.segmentedCoreVolumes = [volume];
+    window.segmentedCoreRenderScene = function() {{ renderer.resetCameraClippingRange(); renderWindow.render(); }};
+    window.segmentedCoreGetVolumePayload = function() {{
+      return {{ volume: volume, mapper: mapper, image: image, dims: image.getDimensions(), bounds: image.getBounds(), renderWindow: renderWindow }};
+    }};
+    window.global = window.global || {{}};
+    window.global.renderWindow = renderWindow;
+    status.textContent = 'Fiji-style label volume ready';
+    window.setTimeout(function() {{ status.remove(); }}, 1400);
+  }} catch (error) {{
+    status.textContent = 'Render error: ' + error.message;
+    console.error(error);
+  }}
+}})();
+</script></body></html>""",
+        encoding="utf-8",
+    )
+    size_bytes = html_path.stat().st_size
+    if size_bytes >= max_html_bytes:
+        raise RuntimeError(f"HTML size {size_bytes} bytes exceeds limit {max_html_bytes} bytes")
+    return {
+        "rendering_style": "fiji_3d_viewer_like_volume",
+        "rendering_modes": ["fiji_style_label_volume"],
+        "fiji_3d_viewer_modes_referenced": ["VOLUME", "ORTHO", "SURFACE", "MULTIORTHO"],
+        "fiji_3d_viewer_features_referenced": ["setThreshold", "setTransparency", "setColor", "saturatedVolumeRendering"],
+        "vtkjs_version": VTKJS_VERSION,
+        "vtkjs_scene_restore": "direct_image_data_with_active_point_scalars",
+        "requested_downsample": int(downsample),
+        "effective_downsample": effective_downsample,
+        "payload_encoding": payload_encoding,
+        "payload_bytes_embedded": int(len(compressed) if compressed is not None else sampled_zyx.size),
+        "sampled_shape_zyx": [nz, ny, nx],
+        "volume_points": int(sampled_zyx.size),
+        "volume_cells": int(max(nx - 1, 0) * max(ny - 1, 0) * max(nz - 1, 0)),
+        "mesh_points": 0,
+        "mesh_cells": 0,
+        "volume_sample_distance_um": float(max(spacing) * 0.55),
+        "volume_interpolation": interpolation,
+        "html_size_bytes_before_controls": size_bytes,
+        "slice_controls": {
+            "enabled": True,
+            "axes": ["x", "y", "z"],
+            "realtime": False,
+            "mode": "vtk_volume_clipping_plane",
+            "applies_to": "vtk_volume_mapper_clipping_planes",
+        },
+        "component_controls": component_specs,
+    }
 
 
 def _fiji3d_slice_panel_css_top() -> int:
@@ -820,6 +1006,8 @@ def main() -> None:
     parser.add_argument("--initial-visible", choices=["pore", "solid", "all", "first"], default="pore")
     parser.add_argument("--interpolation", choices=["linear", "nearest"], default="linear")
     parser.add_argument("--hide-bounds", action="store_true")
+    parser.add_argument("--max-html-mb", type=float, default=49.0)
+    parser.add_argument("--precompressed-gzip")
     args = parser.parse_args()
 
     input_path = Path(args.input)
@@ -828,35 +1016,35 @@ def main() -> None:
     component_values = args.components if args.components is not None else [item["value"] for item in stats["components"]]
     component_specs = fiji3d_component_specs(component_values, visible_mode=args.initial_visible)
 
-    plotter, _volume_actor, render_metadata = build_fiji3d_plotter(
+    out = Path(args.out)
+    render_metadata = export_fiji3d_vtkjs_html(
         volume,
+        out,
         component_specs=component_specs,
         downsample=args.downsample,
         voxel_spacing_um=(args.voxel_size_um, args.voxel_size_um, args.voxel_size_um),
-        window_size=tuple(args.window_size),
-        hide_bounds=bool(args.hide_bounds),
         interpolation=args.interpolation,
+        hide_bounds=bool(args.hide_bounds),
+        max_html_bytes=int(args.max_html_mb * 1024 * 1024),
+        precompressed_gzip=Path(args.precompressed_gzip) if args.precompressed_gzip else None,
     )
-    out = Path(args.out)
-    try:
-        export_html(plotter, out)
-    finally:
-        plotter.close()
-    ensure_vtk_global_alias(out)
-    inject_vtk_wheel_zoom_support(out)
     inject_porosity_overlay(out, stats)
     inject_fiji3d_slice_controls(out, component_specs)
     inject_fiji3d_controls(out, component_specs)
+    final_html_size_bytes = out.stat().st_size
+    if final_html_size_bytes >= int(args.max_html_mb * 1024 * 1024):
+        raise RuntimeError(f"Final HTML exceeds --max-html-mb: {final_html_size_bytes} bytes")
 
     metadata = {
         "input_tiff": str(input_path),
         "output_html": str(out),
-        "renderer": "pyvista/vtk fiji-3d-viewer-like label volume single-file html",
+        "renderer": "vtk.js direct Fiji-3D-Viewer-like label volume single-file html",
         "fiji_3d_viewer_plugin_reference": str(FIJI3D_PLUGIN_REFERENCE),
         "segmentation_convention": {"solid": int(args.solid_value), "pore": int(stats["pore_value"])},
         "component_values": [int(v) for v in component_values],
         "initial_visible": args.initial_visible,
-        "downsample": int(args.downsample),
+        "downsample": int(render_metadata["effective_downsample"]),
+        "html_size_bytes": final_html_size_bytes,
         "pixel_size_y_um": float(args.voxel_size_um),
         "voxel_spacing_um_xyz": [float(args.voxel_size_um), float(args.voxel_size_um), float(args.voxel_size_um)],
         "voxel_size_note": "Using supplied pixel_size_y_um as isotropic voxel spacing for x/y/z unless separate axis spacings are provided later.",

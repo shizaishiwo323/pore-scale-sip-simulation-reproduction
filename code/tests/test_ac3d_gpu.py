@@ -88,6 +88,21 @@ def test_gpu_solver_active_domain_gauge_handles_zero_solid_rows():
     assert gpu.true_residual_norm < 1e-8
 
 
+def test_zero_solid_preserves_tiny_water_phase_angle():
+    rng = np.random.default_rng(19)
+    labels = rng.choice(np.array([1, 2], dtype=np.uint16), size=(8, 8, 8), p=[0.65, 0.35])
+    water = 0.043 + 1e-14j
+    result = solve_ac3d_matrix_free_gpu_face_types(
+        face_type_conductivity_gpu(labels, 1, 2, water, 0j),
+        rtol=1e-8, maxiter=1000, preconditioner='fft', fft_reference='pore',
+    )
+    assert result.true_residual_passed
+    sigma = result.effective_conductivity_s_m
+    assert sigma.real > 0
+    assert np.isclose(sigma.imag / sigma.real, water.imag / water.real, rtol=1e-12, atol=0)
+    assert np.max(np.abs(result.potential.imag)) == 0
+
+
 def test_gpu_bicgstab_continues_after_recursive_residual_false_convergence():
     rng = np.random.default_rng(1)
     labels = rng.choice(np.array([1, 2], dtype=np.uint16), size=(4, 4, 4), p=[0.5, 0.5])
@@ -271,3 +286,44 @@ def test_gpu_compact_bicgstab_solver_matches_direct_small_grid():
     assert gpu.info == 0
     assert gpu.residual_norm < 1e-6
     assert np.isclose(gpu.effective_conductivity_s_m, direct.effective_conductivity_s_m, rtol=1e-5, atol=1e-7)
+def test_nonwinding_initial_field_satisfies_gpu_system_and_preserves_winding():
+    from pore_scale_electrical.ac3d_active_domain import nonwinding_initial_potential
+    # Components crossing a periodic seam, an interior island, and an isolated cell.
+    labels = np.full((7, 8, 9), 2, dtype=np.uint8)
+    labels[1:3, 1:3, [0, 1, 7, 8]] = 1
+    labels[4:6, 4:6, 3:6] = 1
+    labels[3, 7, 4] = 1
+    for axis, direction in enumerate(['x', 'y', 'z']):
+        guess = nonwinding_initial_potential(labels == 1, axis, 0.002)
+        assert guess is not None
+        face_data = face_type_conductivity_gpu(labels, 1, 2, 0.12 + 0.03j, 0j, dtype=np.complex128)
+        result = solve_ac3d_matrix_free_gpu_face_types(face_data, direction=direction, voxel_size_m=0.002, rtol=1e-10, maxiter=10)
+        assert result.info == 0 and result.residual_norm < 1e-10
+        assert abs(result.effective_conductivity_s_m) < 1e-12
+    labels[3, 3, :] = 1
+    assert nonwinding_initial_potential(labels == 1, 2, 0.002) is None
+    partial = nonwinding_initial_potential(labels == 1, 2, 0.002, allow_partial=True)
+    assert partial is not None and np.all(partial[3, 3, :] == 0)
+    face_data = face_type_conductivity_gpu(labels, 1, 2, 0.12 + 0.03j, 0j, dtype=np.complex128)
+    result = solve_ac3d_matrix_free_gpu_face_types(face_data, direction='z', voxel_size_m=0.002, rtol=1e-10, maxiter=50)
+    assert result.info == 0 and result.residual_norm < 1e-10
+    assert np.isclose(result.effective_conductivity_s_m, (0.12+0.03j)*9/labels.size, rtol=1e-10)
+def test_fft_and_jacobi_agree_for_nonuniform_winding_pore_channel():
+    from pore_scale_electrical.ac3d_pore_gpu import build_pore_system, solve_pore_system
+    labels = np.full((12, 8, 8), 2, dtype=np.uint8)
+    labels[:, 2:4, 2:4] = 1
+    labels[2:8, 1:6, 1:6] = 1
+    answers = []
+    for preconditioner in ['jacobi', 'fft']:
+        faces = face_type_conductivity_gpu(labels, 1, 2, 0.12+0.03j, 0j, dtype=np.complex128)
+        result = solve_ac3d_matrix_free_gpu_face_types(faces, direction='x', rtol=1e-10, maxiter=1000, preconditioner=preconditioner)
+        assert result.info == 0 and result.residual_norm < 1e-10
+        answers.append(result.effective_conductivity_s_m)
+    assert np.isclose(*answers, rtol=1e-8) and answers[0].real > 0
+    system = build_pore_system(labels, 1, 'x')
+    compact = solve_pore_system(system, 0.12+0.03j, 1., 1e-10, 1000)
+    assert compact.info == 0 and np.isclose(compact.effective_conductivity_s_m, answers[0], rtol=1e-8)
+    # Verify the reduced solution against the independent full GPU operator.
+    faces = face_type_conductivity_gpu(labels, 1, 2, 0.12+0.03j, 0j, dtype=np.complex128)
+    checked = solve_ac3d_matrix_free_gpu_face_types(faces, direction='x', x0=compact.potential, rtol=1e-9, maxiter=1)
+    assert checked.info == 0 and checked.iterations == 0

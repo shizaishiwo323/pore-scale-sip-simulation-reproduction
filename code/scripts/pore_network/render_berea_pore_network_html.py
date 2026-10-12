@@ -240,24 +240,32 @@ def make_spheres(pores_xyzr: np.ndarray, sphere_resolution: int) -> pv.PolyData:
 
 
 def make_tubes(segments: np.ndarray, tube_resolution: int) -> pv.PolyData:
-    cylinders: list[pv.PolyData] = []
-    for x1, y1, z1, x2, y2, z2, radius in segments:
-        p1 = np.array([x1, y1, z1], dtype=float)
-        p2 = np.array([x2, y2, z2], dtype=float)
-        vector = p2 - p1
-        length = float(np.linalg.norm(vector))
-        if length <= 1e-9:
-            continue
-        cylinders.append(
-            pv.Cylinder(
-                center=(p1 + p2) / 2.0,
-                direction=vector / length,
-                radius=float(radius),
-                height=length,
-                resolution=tube_resolution,
-            )
+    if not len(segments):
+        return pv.PolyData()
+
+    lengths = np.linalg.norm(segments[:, 3:6] - segments[:, :3], axis=1)
+    valid = segments[lengths > 1e-9]
+    if not len(valid):
+        return pv.PolyData()
+
+    points = np.empty((len(valid) * 2, 3), dtype=float)
+    points[0::2] = valid[:, :3]
+    points[1::2] = valid[:, 3:6]
+    lines = np.column_stack(
+        (
+            np.full(len(valid), 2, dtype=np.int64),
+            np.arange(0, len(valid) * 2, 2, dtype=np.int64),
+            np.arange(1, len(valid) * 2, 2, dtype=np.int64),
         )
-    return pv.MultiBlock(cylinders).combine() if cylinders else pv.PolyData()
+    )
+    centerlines = pv.PolyData(points, lines=lines)
+    centerlines["tube_radius"] = np.repeat(valid[:, 6], 2)
+    return centerlines.tube(
+        scalars="tube_radius",
+        absolute=True,
+        capping=True,
+        n_sides=tube_resolution,
+    )
 
 
 def make_plotter(window_size: tuple[int, int]) -> pv.Plotter:
@@ -632,6 +640,9 @@ def main() -> None:
     metadata = {
         "output_html": str(out),
         "renderer": "pyvista/vtk single-file html",
+        "mesh_generation": "vectorized vtk tube filter",
+        "sphere_resolution": args.sphere_resolution,
+        "tube_resolution": args.tube_resolution,
         "material_parameters": MATERIALS,
         **payload["metadata"],
         **payload["counts"],

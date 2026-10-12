@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Literal
 
 import numpy as np
 
-from pore_scale_electrical.ac3d_active_domain import periodic_active_component_anchor_indices
+from pore_scale_electrical.ac3d_active_domain import periodic_active_component_anchor_indices, nonwinding_initial_potential
 from pore_scale_electrical.ac3d_solver import (
     AC3DIterativeResult,
     Direction,
@@ -2045,6 +2045,17 @@ def solve_ac3d_matrix_free_gpu_face_types(
     """Solve with GPU BiCGSTAB using compact two-phase face types."""
 
     require_cupy()
+    # A uniform conducting phase with insulating solid has a real potential:
+    # cancel its common complex factor to avoid contaminating tiny phase angles.
+    conductivity_scale = complex(1.0)
+    values = cp.asnumpy(face_data.conductance_values)
+    normalized_real_phase = face_data.dtype == np.dtype(np.complex128) and values[0] != 0 and np.all(values[1:] == 0)
+    if normalized_real_phase:
+        conductivity_scale = complex(values[0])
+        face_data = replace(face_data, conductance_values=cp.asarray([1, 0, 0], dtype=face_data.dtype))
+        atol = atol / abs(conductivity_scale)
+        if x0 is not None:
+            x0 = cp.asarray(x0).real.astype(face_data.dtype)
     preconditioner_name: GPUPreconditioner = "jacobi" if preconditioner is None and use_jacobi else "none"
     if preconditioner is not None:
         preconditioner_name = preconditioner
@@ -2062,6 +2073,11 @@ def solve_ac3d_matrix_free_gpu_face_types(
         active_mask = cp.abs(diagonal) > np.finfo(float).tiny  # type: ignore[union-attr]
         if not bool(cp.all(active_mask).get()):  # type: ignore[union-attr]
             identity_mask, gauge_indices = active_domain_gauge_from_faces_gpu(face_conductivities)
+    if normalized_real_phase and x0 is None and identity_mask is not None:
+        x0 = nonwinding_initial_potential(
+            cp.asnumpy(~identity_mask).reshape(face_data.shape), axis,
+            field_strength_v_m * voxel_size_m, allow_partial=True,
+        )
     rhs = matrix_free_rhs_faces_gpu(
         face_conductivities,
         axis,
@@ -2100,6 +2116,9 @@ def solve_ac3d_matrix_free_gpu_face_types(
         preconditioner_apply = None
     else:
         raise ValueError("preconditioner must be none, jacobi, or fft")
+    if normalized_real_phase and preconditioner_apply is not None:
+        complex_preconditioner = preconditioner_apply
+        preconditioner_apply = lambda vector: complex_preconditioner(vector).real.astype(face_data.dtype)
     initial_guess = None if x0 is None else cp.asarray(x0, dtype=face_data.dtype).ravel()  # type: ignore[union-attr]
     solution, info, iterations, recursive_residual, true_residual, true_residual_passed, residual_history = _gpu_bicgstab(
         operator,
@@ -2114,6 +2133,7 @@ def solve_ac3d_matrix_free_gpu_face_types(
         residual_callback=residual_callback,
     )
     mean_current = mean_current_density_faces_gpu(face_conductivities, solution, axis, field_strength_v_m, voxel_size_m)
+    mean_current *= conductivity_scale
     effective = mean_current / field_strength_v_m
     potential = cp.asnumpy(solution.reshape(face_data.shape)) if return_potential else None  # type: ignore[union-attr]
     return AC3DIterativeResult(

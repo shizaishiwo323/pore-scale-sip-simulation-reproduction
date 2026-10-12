@@ -1,5 +1,12 @@
 # AGENTS.md
 
+## 当前本机环境（2026-09-12 更新，优先于下文历史路径）
+
+- 当前项目根目录：`E:\python\jupyter\codex\sip模拟`。
+- 用户指定后续代码统一在 conda `ml` 中运行：`C:\Users\13404\.conda\envs\ml\python.exe`。
+- 运行时设置 `PYTHONNOUSERSITE=1`，避免用户级 Python 包覆盖 ml 环境中的依赖。
+- pnextract 使用当前项目的 `pnextract/` 目录；原始数据保留不变。
+
 本文件是 `sip模拟/` 项目的 agent 协作说明。当前外层仓库目录是 `C:\Users\imgw\Documents\Codex\SIP模拟`，真正的整理后项目根目录是：
 
 ```text
@@ -167,7 +174,7 @@ Figure 7/8 机制分离必须遵守 Section 5.3 的“only consider one polariza
 - 默认使用原版 `code/vendor/pnextract/bin/pnextract.exe` 重新提取孔隙网络；该可执行文件应由 `C:\Users\imgw\Documents\Codex\SIP模拟\pnextract` 原有源码重编译得到。
 - Niu 2020 Berea 的默认 PNM 提取不再追加 `minRPore` 或 `medialSurfaceSettings` 校准行，使用 pnextract 内置默认参数。兼容参数文件 `code/vendor/pnextract/config/niu2020_contact_split_conserve_pnextract_lines.txt` 目前只保留说明注释，不包含会被追加到 `.mhd` 的参数行。
 - 如果未来做诊断性参数扫描，必须在结果目录、metadata 和 provenance 中明确标为 diagnostic / sensitivity，不得把诊断参数写成默认算法参数。
-- 旧的缩放因子诊断路线已经废弃，不得作为正式复现依据。
+- 旧的缩放因子诊断路线已经废弃，不得作为正式复现依据。样品16另行采用下文“固定有效弛豫长度方案”，独立指定弛豫尺度并保留原始几何与 `Zdc`；该扩展不替代 Niu 2020 Berea 正式复现的几何输入规则。
 
 推荐入口：
 
@@ -243,6 +250,44 @@ Figure 7/8 机制分离必须遵守 Section 5.3 的“only consider one polariza
 - 使用真正 log-log 坐标绘制原始正值，不要先 `log10` 再线性绘图，除非图名和轴标签明确写成诊断图。
 - 实验虚部非正点只在 log 图中过滤，并在 metadata 或图例说明过滤规则。
 - sample16 正式机制对比图必须使用 `LKC-16.csv` 实验频率点；实验频带外扩展只能标为 diagnostic / extrapolated。
+
+### 样品16固定有效弛豫长度方案（2026-09-13）
+
+后续继续样品16当前膜极化方案时，沿用以下设置；若用户要求 Niu 原始几何路线或其他参数，应明确切换并记录。此方案属于实验约束的有效尺度扩展，不是从 CT 提取到的亚微米喉长，也不是 Niu 原始几何输入方式的严格复现。不要自动将样品16的标定值推广到其他样品。
+
+- 保留 Niu 2020 所采用的 Titov 膜极化阻抗公式，独立指定所有参与计算的内部孔喉的有效弛豫长度 `L_relax = 0.3 μm = 3e-7 m`。
+- 当前膜极化率 `eta = 0.002442810092526288`（约 `0.244%`），扩散系数 `D = 1.3e-9 m²/s`；水电导率 `sigma_w = 0.12 S/m`。继续本方案时保留这些值，任何重新标定均另存参数和结果。
+- `0.3 μm` 来自 `0.3 / 0.5 / 1.0 μm` 候选与样品16实验的比较；`eta` 是在既有几何、电学背景及所选长度下，通过综合响应进行的条件标定。它们不是 Niu 论文原始参数，也不是独立验证得到的唯一最优解。原始 Niu 路线使用提取喉长并取 `eta = 0.01`。
+
+长度在计算中的分工必须保持清楚：
+
+```text
+原始几何路线：L_relax,j = L_geom,j = throat_length_m[j]
+固定有效长度：L_relax,j = 3e-7 m
+弛豫时间：    tau_m,j = L_relax,j² / (4 D)
+直流阻抗：    Zdc,j = L_geom,j / (sigma_w A_j)
+```
+
+- `L_relax` 控制弛豫时间和频谱位置；本方案把原来不同喉长对应的弛豫时间分布替换为统一尺度。`eta` 控制膜阻抗的极化强度，不能当作对最终图线随意相乘的幅值系数。
+- `L_geom` 仍为 pnextract 根据 CT 和算法估算的几何喉长。禁止把 `throat_length_m` 覆盖为 `0.3 μm`，或同步缩放孔径、面积、几何喉长、体积权重和 `Zdc`。
+- 在结果包的网络副本中新增 `membrane_relaxation_length_m` 保存固定长度，新增 `membrane_zdc_length_m` 保存原始几何喉长。原始网络列及只读输入保持不变；几何分布图仍统计原始几何，不能将固定有效尺度画成 CT 提取的喉长分布。
+
+机制计算与绘图约定：
+
+- 独立膜机制：水相为 `sigma_w + Delta sigma_membrane*`，固相严格为 `0`；不加入孔极化或高频介电背景。其实部包含水相直流背景，不能将整个实部称为极化增量。
+- 独立孔机制同样取固相为 `0`。当前样品16的 Maxwell 与 all 沿用固相等效直流电导 `0.0024 S/m` 及介电背景；该诊断性背景须记录，不应混同于 Niu 正式 all 的固相设定。
+- all 必须将各机制加入相电导率后重新求解电场，不能直接相加独立机制的体有效电导率。
+- `all - all_without_membrane` 只能标为“给定背景下的膜增量”，不能标为“独立膜机制”；最新叠加图采用独立机制曲线与联合求解的 all、实验一起对比。
+- 沿用当前7频点对比时，使用 `LKC-16.csv` 的子集 `[0.1, 0.704961, 6.343811, 44.72136, 315.267933, 2837.038291, 20000.0] Hz`。保留实际 GPU 点与连续局部模型曲线的区别；连续模型峰位不代表额外的 GPU 频点。
+- 已有结果使用 `400×333×333`、`3.84 μm` 体素、`downsample=2`、y 方向的诊断网格，不能宣称 full-grid 验证。输出继续保留配置、逐频残差、收敛状态、源数据及 provenance；复用结果时核对网格、方向、频率、相电导率和参数，注明复用而非新计算。
+
+复跑入口与结果参考：
+
+- 长度候选及条件标定：`code/scripts/sip_simulation/run_sample16_effective_membrane_length_gpu7.py`；结果 `results/sample16_effective_membrane_length_gpu7_20260913/`。
+- 固定 `0.3 μm` 独立膜机制：`code/scripts/sip_simulation/run_sample16_membrane_only_gpu7.py`；结果 `results/sample16_membrane_only_L030_gpu7_20260913/`。
+- 机制及实验叠加：`code/scripts/sip_simulation/plot_sample16_L030_mechanisms.py`；图件 `results/sample16_membrane_only_L030_gpu7_20260913/figures/mechanism_overlay_L030.png`，数据来源与检查见同包 `provenance/mechanism_overlay.json`。
+
+### 样品89输入与通用三维可视化
 
 样品 89 当前主要输入：
 
