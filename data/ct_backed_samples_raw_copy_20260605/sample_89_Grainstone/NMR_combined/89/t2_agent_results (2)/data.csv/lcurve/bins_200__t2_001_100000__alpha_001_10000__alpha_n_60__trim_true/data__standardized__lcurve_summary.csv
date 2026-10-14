@@ -1,0 +1,2 @@
+﻿signal_name,best_regularization,best_index,best_residual_norm,best_roughness_norm,best_slope_reciprocal,used_range_filter,raw_points,trimmed_points,lcurve_figure
+col_2,476.39380104013406,46,3.7775166648086285,0.004010111567628961,0.25575983118298284,True,1000,1000,C:\Users\imgw\Documents\Codex\T2agent\runs\c3eedea3055140c78b3a1be4f357686c\tasks\data.csv\lcurve\bins_200__t2_001_100000__alpha_001_10000__alpha_n_60__trim_true\data__standardized__lcurve_figures\col_2__lcurve.png

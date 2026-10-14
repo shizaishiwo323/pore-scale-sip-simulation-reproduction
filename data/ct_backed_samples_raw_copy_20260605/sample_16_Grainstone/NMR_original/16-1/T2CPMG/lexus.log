@@ -1,0 +1,38 @@
+ lexus::M::Start inversion
+ lexus::M::With pruning
+ lexus_TargSE::Comment::Iterating from weight  1.00000     to get sigwant = 0.51
+ 0041E-01
+ lxBRD_w::M:: Solving with  weight =    1.000000
+ lxBRD_w::Comment::Iter =    1 error =    159.30     tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    1
+ lxBRD_w::Comment::Iter =    2 error =   0.55055E-02 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    2
+ lxBRD_w::Comment::Iter =    3 error =   0.67470E-03 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    3
+ lxBRD_w::Comment::Iter =    4 error =   0.36818E-01 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    4
+ lxBRD_w::Comment::Iter =    5 error =   0.77268E-03 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    5
+ lxBRD_w::Comment::Iter =    6 error =    0.0000     tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    6
+ lexus_TargSE::I::iw= 1w= 1.00000     wwant= 1.53266     wnew= 1.53266     signo
+ w=0.500653E-01 conv=-.378525E-01
+ lxBRD_w::M:: Solving with  weight =    1.532664
+ lxBRD_w::Comment::Iter =    1 error =    159.07     tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    1
+ lxBRD_w::Comment::Iter =    2 error =   0.27405E-02 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    2
+ lxBRD_w::Comment::Iter =    3 error =   0.25627E-03 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    3
+ lxBRD_w::Comment::Iter =    4 error =   0.13778E-01 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    4
+ lxBRD_w::Comment::Iter =    5 error =   0.23087E-02 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    5
+ lxBRD_w::Comment::Iter =    6 error =   0.16348E-03 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    6
+ lxBRD_w::Comment::Iter =    7 error =    0.0000     tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    7
+ lexus_TargSE::I::iw= 2w= 1.53266     wwant= 1.54449     wnew= 1.54449     signo
+ w=0.509843E-01 conv=-.775227E-03
+ lexus_TargSE::I::Weight iteration succesful after  2iterations
+ lexus::M::Successful inversion, status =   0

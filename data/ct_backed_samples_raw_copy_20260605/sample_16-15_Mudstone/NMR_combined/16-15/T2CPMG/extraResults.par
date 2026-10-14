@@ -1,0 +1,9 @@
+nmrPorosity = 6.6
+fitMethod = "(LH/LH)"
+bkgPhaseMethod = "useAutoPhase"
+t2PhaseValue = -105.837
+autoPhaseMethod = "minsd"
+expTime = "02:37"
+curSNR = 94.9
+curScan = 12
+dateNTime = "2-Jun-16, 01:47"

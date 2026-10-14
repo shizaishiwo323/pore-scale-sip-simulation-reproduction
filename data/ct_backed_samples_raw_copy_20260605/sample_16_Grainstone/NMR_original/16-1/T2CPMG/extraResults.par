@@ -1,0 +1,9 @@
+nmrPorosity = 26.0
+fitMethod = "(Lexus/LH)"
+bkgPhaseMethod = "useAutoPhase"
+t2PhaseValue = -101.31
+autoPhaseMethod = "minsd"
+expTime = "00:52"
+curSNR = 75.3
+curScan = 4
+dateNTime = "28-Mar-16, 19:22"

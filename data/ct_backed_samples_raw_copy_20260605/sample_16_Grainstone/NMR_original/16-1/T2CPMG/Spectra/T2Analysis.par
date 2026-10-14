@@ -1,0 +1,15 @@
+rsig = 1.02
+nrPntsLexus = 200
+algorithm = "urf"
+tolerance = 1e-6
+weight = 1
+target = "noise"
+alpha_loop_steps = 20
+alpha_loop_end = 1000
+alpha_loop_start = 0.01
+nrPnts = 200
+alpha = 4.28
+x_steps = 100
+x_maximum = 12000
+x_minimum = 0.01
+fitMode = "Lexus"

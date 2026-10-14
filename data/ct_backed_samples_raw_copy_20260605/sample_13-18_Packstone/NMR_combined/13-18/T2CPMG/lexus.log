@@ -1,0 +1,60 @@
+ lexus::M::Start inversion
+ lexus::M::With pruning
+ lexus_TargSE::Comment::Iterating from weight  1.00000     to get sigwant = 0.79
+ 6438E-01
+ lxBRD_w::M:: Solving with  weight =    1.000000
+ lxBRD_w::Comment::Iter =    1 error =    154.43     tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    1
+ lxBRD_w::Comment::Iter =    2 error =   0.36365E-03 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    2
+ lxBRD_w::Comment::Iter =    3 error =   0.31947E-05 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    3
+ lxBRD_w::Comment::Iter =    4 error =   0.49544E-04 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    4
+ lxBRD_w::Comment::Iter =    5 error =   0.32084E-05 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    5
+ lxBRD_w::Comment::Iter =    6 error =   0.80925E-07 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    6
+ lexus_TargSE::I::iw= 1w= 1.00000     wwant= 267.526     wnew= 10.0000     signo
+ w=0.536183E-01 conv=-1.20637
+ lxBRD_w::M:: Solving with  weight =    10.00000
+ lxBRD_w::Comment::Iter =    1 error =    153.97     tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    1
+ lxBRD_w::Comment::Iter =    2 error =   0.51474E-05 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    2
+ lxBRD_w::Comment::Iter =    3 error =   0.27159E-05 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    3
+ lxBRD_w::Comment::Iter =    4 error =   0.98961E-06 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    4
+ lexus_TargSE::I::iw= 2w= 10.0000     wwant= 777.732     wnew= 100.000     signo
+ w=0.540370E-01 conv=-1.17231
+ lxBRD_w::M:: Solving with  weight =    100.0000
+ lxBRD_w::Comment::Iter =    1 error =    153.96     tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    1
+ lxBRD_w::Comment::Iter =    2 error =   0.34885E-06 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    2
+ lexus_TargSE::I::iw= 3w= 100.000     wwant= 281.658     wnew= 281.658     signo
+ w=0.611013E-01 conv=-.699041
+ lxBRD_w::M:: Solving with  weight =    281.6576
+ lxBRD_w::Comment::Iter =    1 error =    153.96     tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    1
+ lxBRD_w::Comment::Iter =    2 error =   0.10360E-06 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    2
+ lexus_TargSE::I::iw= 4w= 281.658     wwant= 231.410     wnew= 231.410     signo
+ w=0.882922E-01 conv=0.186308
+ lxBRD_w::M:: Solving with  weight =    231.4097
+ lxBRD_w::Comment::Iter =    1 error =    153.96     tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    1
+ lxBRD_w::Comment::Iter =    2 error =   0.13094E-06 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    2
+ lexus_TargSE::I::iw= 5w= 231.410     wwant= 228.359     wnew= 228.359     signo
+ w=0.801327E-01 conv=0.121634E-01
+ lxBRD_w::M:: Solving with  weight =    228.3587
+ lxBRD_w::Comment::Iter =    1 error =    153.96     tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    1
+ lxBRD_w::Comment::Iter =    2 error =   0.13303E-06 tol =   0.10000E-05
+ lxBRD_w::Comment::Iterations  =    2
+ lexus_TargSE::I::iw= 6w= 228.359     wwant= 228.355     wnew= 228.355     signo
+ w=0.796444E-01 conv=0.150711E-04
+ lexus_TargSE::I::Weight iteration succesful after  6iterations
+ lexus::M::Successful inversion, status =   0

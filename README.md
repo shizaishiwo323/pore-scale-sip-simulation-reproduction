@@ -1,12 +1,12 @@
 # GPU AC3D Berea Reproduction Package
 
-## main 当前发布范围（2026-10-12）
+## main 当前发布范围（2026-10-14）
 
 main 已集成 `codex/niu2020-reproduction-hardening` 和本地最新核心求解器、极化模型、几何反演及样品脚本，保留原有提交历史。独立 `pnextract/` 源码和 Windows 运行文件一并提供。
 
-`pnextract/bin/*.exe` 使用 Git LFS；克隆后运行 `git lfs install` 和 `git lfs pull` 取得执行文件。
+`pnextract/bin/*.exe` 和 `data/` 中的 CT/体数据大文件使用 Git LFS；克隆后运行 `git lfs install` 和 `git lfs pull` 取得完整文件。
 
-原始大数据保留本地；路径、大小与 SHA-256 见 [本地输入清单](docs/data_sources/README.md)。`results/`、`outputs/` 和 notebook 运行输出不纳入此次发布，文中结果路径用于本地复跑和历史结果查阅。代码测试 63 项通过；脚本测试 149 项通过、9 项既有失败，详情见 [集成与验证记录](docs/notes/main_integration_20261012.md)。
+项目输入数据随 `main` 发布；路径、大小与 SHA-256 见 [输入数据清单](docs/data_sources/README.md)。`results/`、`outputs/`、`data/dissolution_results*/` 和 notebook 运行输出不纳入此次发布，文中结果路径用于本地复跑和历史结果查阅。2026-10-12 的代码测试记录见 [集成与验证记录](docs/notes/main_integration_20261012.md)。
 
 整理日期：2026-05-27
 

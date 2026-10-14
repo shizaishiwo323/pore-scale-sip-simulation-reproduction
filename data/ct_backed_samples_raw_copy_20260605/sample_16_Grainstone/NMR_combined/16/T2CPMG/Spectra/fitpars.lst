@@ -1,0 +1,4 @@
+fitMethod = "LH"
+E0 = 4.5275
+E0Err = 0.0153059
+logMean = 660.807
