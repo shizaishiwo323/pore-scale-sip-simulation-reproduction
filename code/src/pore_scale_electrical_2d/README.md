@@ -43,13 +43,29 @@ div( sigma*(x, omega) (E0 - grad u) ) = 0,      sigma_eff = <J> / E0
 uniform 则把按体积加权的 `C*` 均匀加到所有水相。显式几何中电流受限于窄喉道时，两者结果差别很大，
 必须在结果中说明采用哪一种。
 
+## 动态孔径 Λ 的计算（2026-10-24 修正）
+
+- `dynamic_pore_size_2d_curve`（推荐）：壁面积分沿解析给出的光滑孔壁计算——在孔壁内侧 2、4 个网格处插值切向电场，
+  线性外推到壁面。对方形排列圆盘的 Rayleigh 精确解，a/h ≥ 80 时误差 ≤ 0.2%（a/h = 40 时 1.4%）。
+  理想孔链由 `TwoPoreChain2D.wall_curves()` 提供壁面点；`run_ideal_two_pore_channel_sip2d.py` 已改用此函数。
+- `dynamic_pore_size_2d`（旧）：在阶梯状网格面上积分，斜壁处有不随加密消失的偏差（圆盘阵列 Λ 偏大 34–39%），
+  只保留作对照（结果表中的 `dynamic_pore_size_staircase_m` 列）。
+- 已知局限：喉口处孔壁与喉壁成尖角，电场在角点奇异。孔体区域的 Λ_k 主要来自喉口附近的一小段孔壁，在 0.125 µm 网格上
+  不收敛；短喉道（L = 2 µm）的全局 Λ 在喉口加密到 0.025 µm 时降低 3–16% 且继续减小，长喉道（L/w ≥ 30）不超过 1.6%。
+  喉道反演中 δ、β 与 Λ 在同一网格上标定，结论（20/20 耦合判断）对加密不敏感。
+  基准与检验见 `code/scripts/sip_simulation/benchmark_ac2d_rayleigh_stern.py` 与
+  `results/benchmark_ac2d_rayleigh_stern_20261023/README_zh.md`。
+
 ## 其他模块
 
-- `geometry.py`：二维动态孔径 `dynamic_pore_size_2d`（全局或单区域；壁面切向场积分）、
+- `geometry.py`：二维动态孔径 `dynamic_pore_size_2d_curve`（光滑壁面，推荐）与 `dynamic_pore_size_2d`（阶梯网格面，旧）、
   非均匀网格 `graded_axis`、理想几何 `TwoPoreChain2D`（大孔–狭长喉道–小孔周期链）。
 - `debye.py`：非负 Debye 分解（二阶差分 Tikhonov 平滑；可选 `i w eps_inf` 列吸收高频介电尾部），
   与 `code/scripts/sip_simulation/plot_sample16_sip_pore_distribution.py::fit_debye_distribution` 同一形式；
-  半径换算 `r = sqrt(2 tau D+)`。
+  半径换算 `r = sqrt(2 tau D+)`。`relaxation_decomposition` 可同时拟合多种核（`debye` 孔极化、`titov` 膜极化、
+  `warburg` = Cole–Cole c = 0.5），每种核各自平滑、各自换算长度（孔半径 `r = sqrt(2 D tau)`，喉长 `L = sqrt(4 D tau_m)`）。
+  **注意**：Titov 膜极化谱可以被一串 Debye 项几乎完美拟合（测试 `test_titov_membrane_shape_is_not_identifiable_from_debye_terms`），
+  所以只凭谱形无法判断机制；混合核分解需要谱以外的先验信息。
 
 ## 使用
 

@@ -45,6 +45,7 @@ from pore_scale_electrical_2d import (  # noqa: E402
     conductivity_map,
     debye_decomposition,
     dynamic_pore_size_2d,
+    dynamic_pore_size_2d_curve,
     membrane_increments,
     phase_values,
     pore_increments,
@@ -99,18 +100,25 @@ def dc_field_analysis(chain: TwoPoreChain2D, grid: Grid2D, labels: np.ndarray, s
     result = solve_ac2d_periodic(sigma, grid)
     fields = cell_fields(result, sigma, grid)
     exact = chain.analytic_properties()
+    # Lambda on the true (analytic) walls; the staircase-face value is kept only for comparison
+    # (it overestimates Lambda on curved walls, see benchmark_ac2d_rayleigh_stern.py).
+    wall = chain.wall_curves(spacing_m=float(grid.dx_m.min()) / 4.0)
+    curve = dynamic_pore_size_2d_curve(result, sigma, grid, *wall, region_map=labels)
     rows = []
-    global_lambda = dynamic_pore_size_2d(pore, fields, grid)
-    rows.append({"region": "all_pore_space", "label": 0, **_lambda_row(global_lambda), "analytic_inscribed_radius_m": np.nan})
+    global_lambda = curve[0]
+    staircase = dynamic_pore_size_2d(pore, fields, grid)
+    rows.append({"region": "all_pore_space", "label": 0, **_lambda_row(global_lambda),
+                 "dynamic_pore_size_staircase_m": staircase.dynamic_pore_size_m, "analytic_inscribed_radius_m": np.nan})
     regional = {}
     for label, name in REGION_NAMES.items():
-        lam = dynamic_pore_size_2d(pore, fields, grid, labels == label)
+        lam = curve[label]
         regional[label] = lam
         rows.append(
             {
                 "region": name,
                 "label": label,
                 **_lambda_row(lam),
+                "dynamic_pore_size_staircase_m": dynamic_pore_size_2d(pore, fields, grid, labels == label).dynamic_pore_size_m,
                 "analytic_area_m2": exact[label]["area_m2"],
                 "analytic_wall_length_m": exact[label]["wall_length_m"],
                 "analytic_geometric_size_m": exact[label]["geometric_size_m"],
@@ -166,6 +174,7 @@ def run_sweeps(config, params, regions, labels, grid, frequencies, global_lambda
             pore_mode=mode,
             region_areas_m2=areas,
             global_dynamic_pore_size_m=global_lambda.dynamic_pore_size_m,
+            psd_kinds=tuple(config["polarization"]["uniform_psd_kinds"]) if config["polarization"].get("uniform_psd_kinds") else None,
         )
         for mode in ("regional", "uniform")
     }
@@ -415,12 +424,11 @@ AGENTS.md 要求的三维数字岩心 HTML 与 pnextract 孔隙网络 HTML 不�
 
 ## 参数口径
 
-- 孔（Stern）极化 D+ = {manifest['parameters']['stern_diffusion_m2_s']:.3g} m2/s：用户指定（与 Debye 半径换算同值）；
-  Niu 2020 原文为 1.3e-9 m2/s。
-- 膜极化 D = {manifest['parameters']['membrane_diffusion_m2_s']:.3g} m2/s、eta = {manifest['parameters']['membrane_polarizability']}、
-  Sigma_S = {manifest['parameters']['surface_conductance_s']:.3g} S、sigma_w = {manifest['parameters']['water_conductivity_s_m']} S/m：Niu 2020。
-- 几何尺寸、网格与频带：本次理想几何的设计选择。
-- `*_regional`：各区域独立 Eq.12 增量（二维显式几何主结果）；`*_uniform_niu`：Niu 三维原式的全局均匀增量（对照）。
+- 孔（Stern）极化 D = {manifest['parameters']['stern_diffusion_m2_s']:.3g} m2/s；膜极化 D = {manifest['parameters']['membrane_diffusion_m2_s']:.3g} m2/s；
+  eta = {manifest['parameters']['membrane_polarizability']}；Sigma_S = {manifest['parameters']['surface_conductance_s']:.3g} S；
+  sigma_w = {manifest['parameters']['water_conductivity_s_m']} S/m。每个参数的来源见 `configs/` 中配置文件的中文注释。
+- `pore_mode = regional`：各区域独立 Eq.12 增量；`pore_mode = uniform`：Niu 三维原式的全局均匀增量
+  （参与孔径分布的区域类型：{manifest['parameters'].get('uniform_psd_kinds') or '全部 Stern 极化区域'}）。
 """
     (out_dir / "provenance" / "README_zh.md").write_text(text, encoding="utf-8")
 
@@ -432,6 +440,7 @@ def main() -> None:
     parser.add_argument("--geometry-json", type=Path, default=None, help="override geometry (keys as in CONFIG['geometry'])")
     parser.add_argument("--workers", type=int, default=None)
     parser.add_argument("--smoke", action="store_true", help="coarse grid, 1 point/decade; output marked as smoke")
+    parser.add_argument("--skip-figures", action="store_true", help="write data only; figures are made by a separate plotting script")
     args = parser.parse_args()
 
     config = load_config(args.config)
@@ -443,7 +452,7 @@ def main() -> None:
         config["grid"]["coarse_step_m"] = 0.25e-6
         config["sweep"]["points_per_decade"] = 1
     out_dir = args.output_dir.resolve()
-    for sub in ("configs", "simulation_sweeps", "source_data", "figures", "provenance"):
+    for sub in ("configs", "simulation_sweeps", "source_data", "provenance") + (() if args.skip_figures else ("figures",)):
         (out_dir / sub).mkdir(parents=True, exist_ok=True)
     shutil.copy2(args.config, out_dir / "configs" / args.config.name)
     (out_dir / "configs" / "resolved_config.json").write_text(json.dumps(config, indent=2), encoding="utf-8")
@@ -482,7 +491,8 @@ def main() -> None:
     frames = run_sweeps(config, params, regions, labels, grid, frequencies, global_lambda, out_dir)
     sweep_seconds = time.perf_counter() - t1
     debye = run_debye(frames, config, out_dir)
-    make_figures(out_dir, chain, grid, labels, fields, frames, debye, lambda_table, config)
+    if not args.skip_figures:
+        make_figures(out_dir, chain, grid, labels, fields, frames, debye, lambda_table, config)
 
     script = Path(__file__).resolve()
     manifest = {

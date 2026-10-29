@@ -17,8 +17,10 @@ from pore_scale_electrical_2d import (
     phase_values,
     pore_increments,
     radius_from_relaxation_time,
+    relaxation_decomposition,
     solve_ac2d_periodic,
 )
+from pore_scale_electrical_2d.debye import titov_kernel
 from pore_scale_electrical_2d.polarization import stern_conductance, titov_bracket
 
 
@@ -64,6 +66,29 @@ def test_straight_channel_in_insulator_is_exact_and_has_lambda_equal_width():
     lam = dynamic_pore_size_2d(sigma != 0, fields, grid)
     assert np.isclose(lam.dynamic_pore_size_m, 1e-6, rtol=1e-10)
     assert np.isclose(lam.geometric_size_m, 1e-6, rtol=1e-10)
+
+
+def test_curve_lambda_matches_rayleigh_for_square_disk_array():
+    # Insulating disks (area fraction 0.3) in water. Exact JKS Lambda / a = 1.49728 from the
+    # Rayleigh multipole solution (benchmark_ac2d_rayleigh_stern.py); the staircase-face
+    # estimate is about +38 % at this resolution.
+    from pore_scale_electrical_2d import dynamic_pore_size_2d_curve
+
+    a = 0.2e-6
+    cell = a * np.sqrt(np.pi / 0.3)
+    n = 128
+    centres = (np.arange(n) + 0.5) * cell / n - 0.5 * cell
+    water = np.hypot(centres[None, :], centres[:, None]) >= a
+    grid = Grid2D.uniform(n, n, cell / n)
+    sigma = np.where(water, 0.043, 0.0)
+    result = solve_ac2d_periodic(sigma, grid)
+    theta = (np.arange(2000) + 0.5) * 2 * np.pi / 2000
+    normals = np.c_[np.cos(theta), np.sin(theta)]
+    points = 0.5 * cell + a * normals
+    lam = dynamic_pore_size_2d_curve(result, sigma, grid, points, normals, np.full(2000, 2 * np.pi * a / 2000))[0]
+    assert np.isclose(lam.dynamic_pore_size_m / a, 1.49728, rtol=0.02)
+    staircase = dynamic_pore_size_2d(water, cell_fields(result, sigma, grid), grid)
+    assert staircase.dynamic_pore_size_m / a > 1.3 * 1.49728
 
 
 def test_isolated_inclusion_carries_no_dc_current():
@@ -175,3 +200,28 @@ def test_graded_axis_and_two_pore_chain_geometry():
     result = solve_ac2d_periodic(np.where(labels > 0, 0.043, 0.0), grid)
     assert result.n_components == 1
     assert result.effective_conductivity_s_m.real > 0
+
+
+def test_titov_kernel_is_linearized_membrane_increment():
+    freq = np.logspace(-3, 4, 29)
+    params = SIP2DParameters(membrane_diffusion_m2_s=1.3e-9, membrane_polarizability=1e-5)
+    tau_m = (15e-6) ** 2 / (4 * 1.3e-9)
+    exact = membrane_increments(freq, {1: RegionSpec(1, "t", "throat", 0.5e-6, 1e-6, 15e-6)}, params)[1]
+    linear = params.water_conductivity_s_m * params.membrane_polarizability * titov_kernel(2 * np.pi * freq, np.array([tau_m]))[:, 0]
+    assert np.allclose(exact, linear, rtol=1e-4, atol=1e-16)
+
+
+def test_titov_membrane_shape_is_not_identifiable_from_debye_terms():
+    """A Titov spectrum is reproduced by Debye terms alone: spectral shape cannot separate mechanisms."""
+
+    freq = np.logspace(-3, 4, 71)
+    omega = 2 * np.pi * freq
+    tau_m = 0.04
+    sigma = 2e-3 + 2e-5 * titov_kernel(omega, np.array([tau_m]))[:, 0]
+    grid = np.logspace(-6, 3, 91)
+    debye_only = relaxation_decomposition(freq, sigma, {"pore": (grid, "debye")}, 0.0)
+    assert debye_only.imag_rmse_s_m < 1e-2 * np.max(sigma.imag)
+    titov_only = relaxation_decomposition(freq, sigma, {"membrane": (grid, "titov")}, 0.0)
+    amp = titov_only.amplitudes_s_m["membrane"]
+    assert np.isclose(amp.sum(), 2e-5, rtol=0.02)
+    assert abs(np.average(np.log10(grid), weights=amp) - np.log10(tau_m)) < 0.05

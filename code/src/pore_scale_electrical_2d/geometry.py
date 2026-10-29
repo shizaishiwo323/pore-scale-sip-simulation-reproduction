@@ -7,7 +7,7 @@ from typing import ClassVar
 
 import numpy as np
 
-from .solver import Grid2D
+from .solver import AC2DPeriodicResult, Grid2D, cell_fields
 
 
 @dataclass(frozen=True)
@@ -72,6 +72,101 @@ def dynamic_pore_size_2d(
         pore_area_m2=pore_area,
         geometric_size_m=2.0 * pore_area / wall_length,
     )
+
+
+def dynamic_pore_size_2d_curve(
+    result: AC2DPeriodicResult,
+    conductivity_s_m: np.ndarray,
+    grid: Grid2D,
+    wall_points_m: np.ndarray,
+    wall_normals: np.ndarray,
+    wall_lengths_m: np.ndarray,
+    wall_regions: np.ndarray | None = None,
+    region_map: np.ndarray | None = None,
+    offsets_in_cells: tuple[float, float] = (2.0, 4.0),
+) -> dict[int, DynamicPoreSize2D]:
+    """Niu's dynamic pore size with the wall integral taken on the true (smooth) wall.
+
+    ``dynamic_pore_size_2d`` samples the tangential field on the staircase
+    faces of a voxelized wall; for oblique walls that sample is corrupted
+    within about one cell of the wall and the bias does not vanish with
+    refinement (+34 % Lambda for a square array of disks, see
+    ``code/scripts/sip_simulation/benchmark_ac2d_rayleigh_stern.py``).
+    Here ``|E_t|^2`` is evaluated at two distances ``s1 < s2`` inside the pore
+    along the wall normal (``s = offset * h_n``, ``h_n`` the cell size along the
+    normal), from bilinear interpolation of the correction potential, and
+    extrapolated linearly to ``s = 0``.
+
+    ``wall_points_m`` (k, 2) are (x, y) points on the wall, ``wall_normals``
+    (k, 2) unit normals pointing into the pore, ``wall_lengths_m`` (k,) the arc
+    length each point represents. ``wall_regions`` (k,) and ``region_map``
+    (region labels, 0 = solid) give regional values; key 0 is the whole pore
+    space. Only fields along x (``result.direction == "x"``) are supported.
+    """
+
+    from scipy.interpolate import RegularGridInterpolator
+
+    if result.direction != "x":
+        raise ValueError("expects an x-direction solve")
+    pts = np.asarray(wall_points_m, dtype=float)
+    nrm = np.asarray(wall_normals, dtype=float)
+    dl = np.asarray(wall_lengths_m, dtype=float)
+    tan = np.c_[-nrm[:, 1], nrm[:, 0]]
+    lx, ly = grid.length_x_m, grid.length_y_m
+    xc, yc = grid.x_centers_m, grid.y_centers_m
+    u = np.where(result.active_mask, result.potential, np.nan + 0.0j)
+    u_pad = np.pad(u, 1, mode="wrap")
+    interp = RegularGridInterpolator(
+        (np.r_[yc[-1] - ly, yc, yc[0] + ly], np.r_[xc[-1] - lx, xc, xc[0] + lx]),
+        u_pad, method="linear", bounds_error=False, fill_value=np.nan,
+    )
+
+    def local_steps(points):
+        i = np.clip(np.searchsorted(grid.x_edges_m, np.mod(points[:, 0], lx)) - 1, 0, grid.nx - 1)
+        j = np.clip(np.searchsorted(grid.y_edges_m, np.mod(points[:, 1], ly)) - 1, 0, grid.ny - 1)
+        return grid.dx_m[i], grid.dy_m[j]
+
+    def potential(points):
+        return interp(np.c_[np.mod(points[:, 1], ly), np.mod(points[:, 0], lx)])
+
+    dx_w, dy_w = local_steps(pts)
+    h_normal = np.abs(nrm[:, 0]) * dx_w + np.abs(nrm[:, 1]) * dy_w
+    h_tangent = np.abs(tan[:, 0]) * dx_w + np.abs(tan[:, 1]) * dy_w
+    e0 = result.field_strength_v_m
+    samples = []
+    for offset in offsets_in_cells:
+        p = pts + (offset * h_normal)[:, None] * nrm
+        du = potential(p + h_tangent[:, None] * tan) - potential(p - h_tangent[:, None] * tan)
+        et = e0 * tan[:, 0] - du / (2.0 * h_tangent)
+        samples.append(np.abs(et) ** 2)
+    if np.any(~np.isfinite(samples[0])) or np.any(~np.isfinite(samples[1])):
+        bad = int(np.sum(~np.isfinite(samples[0]) | ~np.isfinite(samples[1])))
+        raise ValueError(f"{bad} wall samples fall outside the pore space; check normals or offsets")
+    s1, s2 = offsets_in_cells
+    et2_wall = samples[0] + (samples[0] - samples[1]) * s1 / (s2 - s1)
+
+    fields = cell_fields(result, conductivity_s_m, grid)
+    energy = (np.abs(fields[0]) ** 2 + np.abs(fields[1]) ** 2) * grid.cell_area_m2
+    pore = result.active_mask
+    regions = np.zeros(len(pts), dtype=int) if wall_regions is None else np.asarray(wall_regions)
+    labels = [0] + ([] if region_map is None else sorted(int(v) for v in np.unique(regions) if v > 0))
+    out: dict[int, DynamicPoreSize2D] = {}
+    for label in labels:
+        region = pore if label == 0 else pore & (np.asarray(region_map) == label)
+        on_wall = np.ones(len(pts), dtype=bool) if label == 0 else regions == label
+        area_integral = float(energy[region].sum())
+        wall_integral = float(np.sum(et2_wall[on_wall] * dl[on_wall]))
+        wall_length = float(dl[on_wall].sum())
+        pore_area = float(grid.cell_area_m2[region].sum())
+        out[label] = DynamicPoreSize2D(
+            area_integral_v2=area_integral,
+            wall_integral_v2_per_m=wall_integral,
+            dynamic_pore_size_m=2.0 * area_integral / wall_integral,
+            wall_length_m=wall_length,
+            pore_area_m2=pore_area,
+            geometric_size_m=2.0 * pore_area / wall_length,
+        )
+    return out
 
 
 def graded_axis(
@@ -179,6 +274,41 @@ class TwoPoreChain2D:
         labels[in_big] = self.BIG
         labels[in_small] = self.SMALL
         return labels
+
+    def wall_curves(self, spacing_m: float) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        """Points on the true pore walls for ``dynamic_pore_size_2d_curve``.
+
+        Returns ``(points, inward_normals, lengths, region_labels)``: circle arcs
+        of both pore bodies without the throat mouths, and the two straight walls
+        of each throat (throat S->B' wraps across the periodic x boundary).
+        """
+
+        h = 0.5 * self.throat_width_m
+        yc = 0.5 * self.height_m
+        points, normals, lengths, regions = [], [], [], []
+        for label, (xo, yo), radius in ((self.BIG, self.big_center_m, self.big_radius_m),
+                                        (self.SMALL, self.small_center_m, self.small_radius_m)):
+            mouth = np.arcsin(h / radius)
+            for lo, hi in ((mouth, np.pi - mouth), (np.pi + mouth, 2.0 * np.pi - mouth)):
+                n = max(8, int(np.ceil((hi - lo) * radius / spacing_m)))
+                theta = lo + (np.arange(n) + 0.5) * (hi - lo) / n
+                points.append(np.c_[xo + radius * np.cos(theta), yo + radius * np.sin(theta)])
+                normals.append(-np.c_[np.cos(theta), np.sin(theta)])
+                lengths.append(np.full(n, (hi - lo) * radius / n))
+                regions.append(np.full(n, label))
+        xb_end = self.big_center_m[0] + np.sqrt(self.big_radius_m**2 - h**2)
+        xs_start = self.small_center_m[0] - np.sqrt(self.small_radius_m**2 - h**2)
+        xs_end = self.small_center_m[0] + np.sqrt(self.small_radius_m**2 - h**2)
+        xb_start = self.big_center_m[0] - np.sqrt(self.big_radius_m**2 - h**2) + self.period_m
+        for label, x0, x1 in ((self.THROAT_BS, xb_end, xs_start), (self.THROAT_SB, xs_end, xb_start)):
+            n = max(8, int(np.ceil((x1 - x0) / spacing_m)))
+            x = np.mod(x0 + (np.arange(n) + 0.5) * (x1 - x0) / n, self.period_m)
+            for side in (1.0, -1.0):
+                points.append(np.c_[x, np.full(n, yc + side * h)])
+                normals.append(np.tile([0.0, -side], (n, 1)))
+                lengths.append(np.full(n, (x1 - x0) / n))
+                regions.append(np.full(n, label))
+        return np.vstack(points), np.vstack(normals), np.concatenate(lengths), np.concatenate(regions)
 
     def analytic_properties(self) -> dict[int, dict[str, float]]:
         """Exact areas, wall lengths, 2A/P and inscribed (local-thickness) radii."""

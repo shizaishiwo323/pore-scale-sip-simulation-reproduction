@@ -143,8 +143,14 @@ def pore_increments(
     pore_mode: PoreMode,
     region_areas_m2: Mapping[int, float] | None = None,
     global_dynamic_pore_size_m: float | None = None,
+    psd_kinds: tuple[str, ...] | None = None,
 ) -> dict[int, np.ndarray]:
-    """Eq. 12 water-phase increments for every region, shape ``(n_frequency,)``."""
+    """Eq. 12 water-phase increments for every region, shape ``(n_frequency,)``.
+
+    In uniform mode the size distribution (Eq. 9) is area weighted over the
+    Stern-polarized regions; ``psd_kinds=("pore_body",)`` restricts it to pore
+    bodies, as Niu et al. (2020) used the pore-node size distribution only.
+    """
 
     freq = np.atleast_1d(np.asarray(frequency_hz, dtype=float))
     if pore_mode == "regional":
@@ -160,7 +166,11 @@ def pore_increments(
         raise ValueError("pore_mode must be 'regional' or 'uniform'")
     if region_areas_m2 is None or global_dynamic_pore_size_m is None:
         raise ValueError("uniform mode needs region areas and the global dynamic pore size")
-    polarized = [label for label, spec in regions.items() if spec.stern_polarization]
+    polarized = [
+        label
+        for label, spec in regions.items()
+        if spec.stern_polarization and (psd_kinds is None or spec.kind in psd_kinds)
+    ]
     total_area = sum(region_areas_m2[label] for label in polarized)
     conductance = sum(
         region_areas_m2[label] / total_area * stern_conductance(freq, regions[label].relaxation_radius_m, params)
